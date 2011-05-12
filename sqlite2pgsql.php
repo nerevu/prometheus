@@ -92,7 +92,7 @@ try {
 	// execute program
 	if(!$source_schema_file) {
 		$connection = new class_mdb2($source_db_name, $source_db_type, $verbose, $source_db_user, $source_db_pwd, $source_db_host, $source_db_port);
-		if($connection->mdb2) $arr_definition = $connection->db_to_def_arr();
+		if($connection->mdb2) $arr_definition = $connection->db_to_def_arr($source_db_name);
 		else $errors = TRUE;
 	} else {
 		$connection = new class_mdb2($dest_db_name, $dest_db_type, $verbose, $dest_db_user, $dest_db_pwd, $dest_db_host, $dest_db_port); // using destination database details so we have something to connect to and can access the xml_to_def_arr() function
@@ -106,8 +106,9 @@ try {
 				$array2xml = new class_array2xml();
 				$xml = $array2xml->createNode($arr_definition);
 				$xml_file = $schema_path.$dest_db_name.'.xml';
-				$check = $general->write2file($xml, $xml_file);
-				if(!$check) $errors = TRUE;
+				print_r($xml);
+				//$check = $general->write2file($xml, $xml_file);
+				//if(!$check) $errors = TRUE;
 			} else {
 				if(!$source_schema_file) $connection = new class_mdb2($dest_db_name, $dest_db_type, $verbose, $dest_db_user, $dest_db_pwd, $dest_db_host, $dest_db_port);
 				if($connection->mdb2) {

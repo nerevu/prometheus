@@ -8,14 +8,13 @@
  
 //<-- begin class -->
 class array2xml extends DomDocument {
-	public $nodeName;
-	private $xpath;
-	private $root;		// The name of the root node
-	private $node_name; // The name numeric keys are called
+	var $xpath;
+	var $root;		// The name of the root node
+	var $node_name; // The name numeric keys are called
 	
 	//************* class constructor *************
-	public function __construct($root = 'root', $node_name = 'node') {
-		parent::__construct();		
+	function array2xml($root = 'root', $node_name = 'node') {
+		//parent::__construct();		
 		$this->encoding = "ISO-8859-1"; // set the encoding
 		$this->formatOutput = true; 	// format the output
 		$this->node_name = $node_name; 	// set the node names
@@ -24,7 +23,7 @@ class array2xml extends DomDocument {
 	}
 
 	//************* creates the XML representation of the array *************
-	public function createNode($arr_data, $node = null) {
+	function createNode($arr_data, $node = null) {
 		if (is_null($node)) $node = $this->root;
 		
 		foreach($arr_data as $element => $value) {
@@ -36,9 +35,13 @@ class array2xml extends DomDocument {
 	}
 
 	//************* returns the generated XML as a string *************
-	public function __toString() return $this->saveXML();
-
+	function __toString() {
+		return $this->saveXML();
+	}
+	
 	//************* perform an XPath query on the generated XML *************
-	public function query($query) return $this->xpath->evaluate($query);
+	function query($query) {
+		return $this->xpath->evaluate($query);
+	}
 } //<-- end class -->
 ?>
