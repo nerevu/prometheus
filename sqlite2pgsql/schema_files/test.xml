@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<>
+	<database>/Users/reubano/Databases/test.sqlite</database>
+	<tables>
+		<anotherone>
+			<schema>
+				<testing>
+					<autoincrement />
+					<default />
+					<fixed>0</fixed>
+					<flags />
+					<length />
+					<notnull>0</notnull>
+					<type>clob</type>
+					<unsigned />
+				</testing>
+			</schema>
+			<data>
+				<numeric>
+					<testing>whatup</testing>
+				</numeric>
+				<numeric>
+					<testing>notmuch</testing>
+				</numeric>
+				<numeric>
+					<testing>asdcvfgbhhu</testing>
+				</numeric>
+				<numeric>
+					<testing>watson</testing>
+				</numeric>
+				<numeric>
+					<testing>maerttytddfgvfxghgvikgbij</testing>
+				</numeric>
+			</data>
+		</anotherone>
+		<thistable>
+			<data>
+				<numeric>
+					<age>27</age>
+					<name>sqlite</name>
+				</numeric>
+				<numeric>
+					<age>14</age>
+					<name>somone</name>
+				</numeric>
+			</data>
+		</thistable>
+	</tables>
+</>

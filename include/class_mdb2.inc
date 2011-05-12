@@ -30,7 +30,8 @@ class class_mdb2 {
 			$database_name					= '/'.$database_name;
 		}
 		
-		$dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$database_name;
+		if($database_type == 'sqlite') $dsn = 'pdoSqlite:///'.$this->database_name.'?mode=0666'; 
+		else $dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$database_name;
 		if($this->verbose) fwrite(STDOUT, "connecting to $dsn...\n");
 		$this->mdb2 =& MDB2::factory($dsn);
 		
@@ -138,24 +139,60 @@ class class_mdb2 {
 	function get_table_names() {
 		$this->arr_tables = $this->mdb2->listTables();
 		$max = count($this->arr_tables);
-		if($this->verbose) fwrite(STDOUT, "$max table names retrieved!\n");
-		return $this->arr_tables;
+		
+		if(!PEAR::isError($this->arr_tables)) {
+			if($this->verbose) fwrite(STDOUT, "$max table names retrieved!\n");
+			//print_r($this->arr_tables);
+			return $this->arr_tables;
+		} else {
+			$message = $this->arr_tables->getMessage()."\n".$this->arr_tables->getUserInfo();
+			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+		} //<-- end if -->
 	} //<-- end function -->
 	
 	//************* creates a definition array from an existing database *************
 	function db_to_def_arr($database_name) {
-		if (empty($this->arr_tables)) $this->get_table_names();
-		$this->arr_definition['database'] = $database_name;
-		foreach($this->arr_tables as $table) $this->arr_definition[] = $this->mdb2->tableInfo($table, MDB2_TABLEINFO_ORDERTABLE);
-		$this->arr_definition = $this->convert_def_arr($this->arr_definition); 
-		
-		if(!PEAR::isError($this->arr_definition)) {
-			if($this->verbose) fwrite(STDOUT, "MDB2 definition array $database_name created!\n");
-			return $this->arr_definition;
-		} else {
-			$message = $this->arr_definition->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
-		} //<-- end if -->
+		$check = TRUE;
+		if(!$this->arr_tables) $check = $this->get_table_names();
+		if($check) {
+			$this->arr_definition['database'] = $database_name;
+			foreach($this->arr_tables as $table) $this->arr_definition[] = $this->mdb2->tableInfo($table, MDB2_TABLEINFO_ORDERTABLE);
+			
+			foreach($this->arr_definition as $definition) {
+				if(PEAR::isError($definition)) {
+					$check = FALSE;
+					continue;
+				} //<-- end if -->
+			} //<-- end foreach -->
+				
+			if($check) {
+				print_r($this->arr_definition);				
+				$this->arr_definition = $this->convert_def_arr($this->arr_definition); 
+				
+				foreach($this->arr_tables as $table) {
+					$this->mdb2->setFetchMode(MDB2_FETCHMODE_ASSOC);
+					$res = $this->mdb2->queryALL("SELECT * FROM $table");
+					
+					if(PEAR::isError($res)) {
+						$check = FALSE;
+						continue;
+					} //<-- end if -->
+
+					$this->arr_definition['tables'][$table]['data'] = $res;
+				} //<-- end foreach -->
+			
+				if($check) {
+					if($this->verbose) fwrite(STDOUT, "MDB2 definition array $database_name created!\n");
+					return $this->arr_definition;
+				} else {
+					$message = $this->arr_definition->getMessage()."\n".$this->arr_definition->getUserInfo();
+					return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+				} //<-- end if -->
+			} else {
+				$message = $definition->getMessage()."\n".$definition->getUserInfo();
+				return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			} //<-- end if -->
+		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 6, 1);
 	} //<-- end function -->
 
 	//************* creates a database from a definition array *************
@@ -163,7 +200,8 @@ class class_mdb2 {
 		if(!empty($arr_definition)) {
 			if(!$database_name) $database_name = $arr_definition['database'];
 			$check = $this->create_db($database_name);
-			if($check) {			
+			
+			if($check) {
 				$arr_tables = array_keys($arr_definition['tables']);
 				$i = 0;
 				
@@ -175,6 +213,7 @@ class class_mdb2 {
 				} //<-- end foreach -->
 				
 				if($check) {
+					//if($new_definition['tables'][$table]['schema'][$field]['autoincrement'] == 1);
 					//$check = $this->create_sequence($field_name, $start_value);
 					//$check = $this->create_constraint($table_name, $constraint_name, $constraint_definition);
 					
@@ -187,25 +226,31 @@ class class_mdb2 {
 	
 	//************* converts a definition array to a usable format *************				
 	function convert_def_arr($old_definition) {
-		if(!empty($old_definition)) {
-			$new_definition = array('database' => $old_definition['database']);
-			
-			foreach($old_definition[0][ordertable] as $key => $val) {
-				$new_definition['tables'][$key] = 'data';
-				/*
-				foreach($table as $field) {
-					$new_definition['tables'][$table['was']][$field['was']]['type'] = $field['type'];
-					$new_definition['tables'][$table['was']][$field['was']]['unsigned'] = $field['unsigned'];
-					$new_definition['tables'][$table['was']][$field['was']]['notnull'] = $field['notnull'];
-					$new_definition['tables'][$table['was']][$field['was']]['default'] = $field['default'];
-					$new_definition['tables'][$table['was']][$field['was']]['length'] = $field['length'];
-					if($field['autoincrement'] == 1) $new_definition['sequences'][$table['was']][] = $field['was'];
+		if($old_definition) {
+			$check = TRUE;
+			if(!$this->arr_tables) $check = $this->get_table_names();
+			if($check) {
+				$new_definition['database'] = $old_definition['database'];
+				$database = $new_definition['database'];
+				$arr_allkeys = array('autoincrement', 'default', 'fixed', 'flags', 'length', 'mdb2type', 'name', 'notnull', 'table', 'type', 'unsigned');
+				foreach($this->arr_tables as $table) {
+					foreach($old_definition[0]['ordertable'][$table] as $field => $val) {
+						$new_definition['tables'][$table]['schema'][$field] = $old_definition[0][$val];
+						$new_definition['tables'][$table]['schema'][$field]['type'] = $new_definition['tables'][$table]['schema'][$field]['mdb2type'];
+						
+						// add missing keys so arrays all the same length
+						$arr_keys = array_keys($new_definition['tables'][$table]['schema'][$field]);
+						$array_missing = array_diff($arr_allkeys, $arr_keys);
+						foreach($array_missing as $missing_key) $new_definition['tables'][$table]['schema'][$field][$missing_key] = NULL;
+						ksort($new_definition['tables'][$table]['schema'][$field]);
+						array_splice($new_definition['tables'][$table]['schema'][$field],5,3);
+						array_splice($new_definition['tables'][$table]['schema'][$field],6,1);
+					} //<-- end foreach -->
 				} //<-- end foreach -->
-				*/
-			} //<-- end foreach -->
-
-			//if($this->verbose) fwrite(STDOUT, "$old_definition['name'] database definition created!\n");
-			return $new_definition;
+	
+				if($this->verbose) fwrite(STDOUT, "MDB2 definition array $database converted!\n");
+				return $new_definition;
+			} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 6, 1);
 		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 	} //<-- end function -->
 	
