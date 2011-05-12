@@ -23,9 +23,8 @@ $errors 			= false;
 require_once 'Console/CommandLine.php';
 require_once $projects_dir.'/library/error2.inc';
 require_once $projects_dir.'/library/class_general.inc';
-require_once $thisproject_dir.'/include/class_mdb2_schema.inc';
-require_once $thisproject_dir.'/include/class_mdb2.inc';
 require_once $thisproject_dir.'/include/class_array2xml.inc';
+require_once $thisproject_dir.'/include/class_mdb2.inc';
 
 // create the parser from xml file
 $xmlfile = $thisproject_dir.'/sqlite2pgsql.xml';
@@ -95,7 +94,8 @@ try {
 		if($connection->mdb2) $arr_definition = $connection->db_to_def_arr($source_db_name);
 		else $errors = TRUE;
 	} else {
-		$connection = new class_mdb2($dest_db_name, $dest_db_type, $verbose, $dest_db_user, $dest_db_pwd, $dest_db_host, $dest_db_port); // using destination database details so we have something to connect to and can access the xml_to_def_arr() function
+		// using destination database details so we have something to connect to and can access the xml_to_def_arr() function
+		$connection = new class_mdb2($dest_db_name, $dest_db_type, $verbose, $dest_db_user, $dest_db_pwd, $dest_db_host, $dest_db_port);
 		if($connection->mdb2) $arr_definition = $connection->xml_to_def_arr($source_schema_file);
 		else $errors = TRUE;
 	} //<-- end if -->
@@ -103,10 +103,11 @@ try {
 	if(!$errors) {
 		if($arr_definition) {
 			if($output_schema_file) {
-				$array2xml = new class_array2xml();
-				$xml = $array2xml->createNode($arr_definition);
+				$xml = new class_array2xml($verbose);
+				print_r($arr_definition);
+				$xml_data = $xml->XMLserialize($arr_definition);
+				//print($xml_data);
 				$xml_file = $schema_path.$dest_db_name.'.xml';
-				print_r($xml);
 				//$check = $general->write2file($xml, $xml_file);
 				//if(!$check) $errors = TRUE;
 			} else {

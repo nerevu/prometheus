@@ -21,13 +21,13 @@ class class_mdb2 {
 	var $class_name = __CLASS__;	// class name
 			
 	//************* class constructor *************
-	function class_mdb2($database_name, $database_type = '', $verbose = FALSE, $database_user = '', $database_password = '', $database_host = '', $database_port = '') {
+	function __construct($database_name, $database_type = '', $verbose = FALSE, $database_user = '', $database_password = '', $database_host = '', $database_port = '') {
 		$this->verbose						= $verbose;
 		if($database_user) $database_user 	= $database_user.':';
 		if($database_port) $database_port 	= ':'.$database_port;
 		if($database_name) {
-			$this->database_name	= $database_name;
-			$database_name			= '/'.$database_name;
+			$this->database_name			= $database_name;
+			$database_name					= '/'.$database_name;
 		}
 		
 		$dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$database_name;
@@ -142,11 +142,12 @@ class class_mdb2 {
 		return $this->arr_tables;
 	} //<-- end function -->
 	
-	//************* creates an definition array from an existing database *************
+	//************* creates a definition array from an existing database *************
 	function db_to_def_arr($database_name) {
 		if (empty($this->arr_tables)) $this->get_table_names();
 		$this->arr_definition['database'] = $database_name;
-		foreach($this->arr_tables as $table) $this->arr_definition[] = $this->mdb2->tableInfo($table, NULL);
+		foreach($this->arr_tables as $table) $this->arr_definition[] = $this->mdb2->tableInfo($table, MDB2_TABLEINFO_ORDERTABLE);
+		$this->arr_definition = $this->convert_def_arr($this->arr_definition); 
 		
 		if(!PEAR::isError($this->arr_definition)) {
 			if($this->verbose) fwrite(STDOUT, "MDB2 definition array $database_name created!\n");
@@ -156,7 +157,7 @@ class class_mdb2 {
 			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
-	
+
 	//************* creates a database from a definition array *************
 	function def_arr_to_db($arr_definition, $database_name = NULL) {
 		if(!empty($arr_definition)) {
@@ -184,13 +185,15 @@ class class_mdb2 {
 		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 	} //<-- end function -->
 	
-	//************* converts a definition array created by MDB2_Schema *************				
+	//************* converts a definition array to a usable format *************				
 	function convert_def_arr($old_definition) {
 		if(!empty($old_definition)) {
-			$new_definition = array('database' => $old_definition['name']);
+			$new_definition = array('database' => $old_definition['database']);
 			
-			foreach($old_definition['tables'] as $table) {
-				foreach($table['fields'] as $field) {
+			foreach($old_definition[0][ordertable] as $key => $val) {
+				$new_definition['tables'][$key] = 'data';
+				/*
+				foreach($table as $field) {
 					$new_definition['tables'][$table['was']][$field['was']]['type'] = $field['type'];
 					$new_definition['tables'][$table['was']][$field['was']]['unsigned'] = $field['unsigned'];
 					$new_definition['tables'][$table['was']][$field['was']]['notnull'] = $field['notnull'];
@@ -198,6 +201,7 @@ class class_mdb2 {
 					$new_definition['tables'][$table['was']][$field['was']]['length'] = $field['length'];
 					if($field['autoincrement'] == 1) $new_definition['sequences'][$table['was']][] = $field['was'];
 				} //<-- end foreach -->
+				*/
 			} //<-- end foreach -->
 
 			//if($this->verbose) fwrite(STDOUT, "$old_definition['name'] database definition created!\n");
