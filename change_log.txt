@@ -1,0 +1,268 @@
+/allocreator/
+
+v0.1
++ framework
+	+ R skeleton
+	+ SQL skeleton
+	+ database entity relationship skeleton
+	+ database entities
+	+ query skeleton
+
++ import new transactions
+	+ update [security]
+	+ implement -f option in insert-csv
+	+ update [transaction_real]
+
++ import new x-rays
+- update 		update [security] for given ticker(s)
+- backpopulate	update [market_price] for given ticker(s)
+
+v0.2
+- find datasources for: expense_ratio, front_load, back_load, turnover, and nav
+- set contraints on [transaction_real]
+- add timestamp
+- add action_id foreign keys
+- quote	 		show quote for given stock/account/portfolio
+	
+	quote -s IBM
+	Stock Quote: IBM as of 2:30 PM 12/03/2008
+	=============================================
+	Name:                       INTL BUSINESS MAC
+	Type:						     		Stock
+	Exchange:                                NYSE
+	Price:    								72.31
+	Change:                                  0.49
+	% Change:             		           +0.63%
+	---------------------------------------------
+	Proxy:			  MSCI Emerging Markets Index
+	Asset Class:		  Emerging Country Stocks
+	Asset Level:								3
+	---------------------------------------------
+	Open:                                   76.78
+	High:                                   78.28
+	Low:                                    75.31
+	Previous Close:                         77.44
+	---------------------------------------------
+	Volume:                               5195121
+	Average Volume:                      11828800
+	52-week high:                          130.93
+	52-week low:                            69.50
+	---------------------------------------------
+	Dividend yield:                          2.45
+	EPS:			                        8.483
+	P/E:	                                 9.13
+	Market Cap:             	           104700
+	=============================================
+	
+	quote -s EEM
+	ETF Quote: EEM as of 2:30 PM 12/03/2008
+	=============================================
+	Name:                       iShares E Markets
+	Type:						     		  ETF
+	Exchange:                                NYSE
+	Price:    								72.31
+	Change:                                  0.49
+	% Change:              		           +0.63%
+	---------------------------------------------
+	Proxy:			  MSCI Emerging Markets Index
+	Asset Class:		  Emerging Country Stocks
+	Asset Level:								3
+	Fund Family:						  iShares
+	Expense Ratio:							 0.02
+	---------------------------------------------
+	Open:                                   76.78
+	High:                                   78.28
+	Low:                                    75.31
+	Previous Close:                         77.44
+	NAV:									 21.8
+	---------------------------------------------
+	Volume:                               5195121
+	Average Volume:                      11828800
+	52-week high:                          130.93
+	52-week low:                            69.50
+	---------------------------------------------
+	Yield:		                             2.45
+	EPS:			                        8.483
+	P/E:	                                 9.13
+	=============================================
+	
+	quote -s VALIX
+	Mutual Fund Quote: VALIX as of 2:30 PM 12/03/2008
+	=============================================
+	Name:                       Value Line Income
+	Type:						      Mutual Fund
+	Price:    								72.31
+	Close:	   	    						  N/A
+	Change:                                   N/A
+	% Change:          		                  N/A
+	---------------------------------------------
+	Proxy:			  MSCI Emerging Markets Index
+	Asset Class:		  Emerging Country Stocks
+	Asset Level:								3
+	Fund Family:					   Value Line
+	Expense Ratio:							 0.02
+	Front Load:									0
+	Back Load: 									0
+	Turnover:								  0.2
+	---------------------------------------------
+	Previous Close:                         77.44
+	NAV:									 21.8
+	52-week high:                          130.93
+	52-week low:                            69.50
+	Yield:		                             2.45
+	=============================================
+	
+	quote -a Retirement
+	Account Quote: Retirement as of 2:30 PM 12/03/2008
+	========================================================
+	Security	Ave Cost	Last Price	% Change
+	--------------------------------------------------------
+	VALIX		$8.56		$6.09		unch	
+	========================================================
+	
+	quote -p reubano
+	Portfolio Quote: reubano as of 2:30 PM 12/03/2008
+	========================================================
+	Security	Ave Cost	Last Price	% Change
+	--------------------------------------------------------
+	VALIX		$8.56		$6.09		unch
+	EEM			$47.2		$30.1		5.05
+	========================================================
+		
+- list	show listing for given account/portfolio 
+	
+	list -a Retirement
+	Account Listing
+	===============================================================================
+	Name		Type		Broker 			Securities		Commission	Portfolio
+	-------------------------------------------------------------------------------
+	Retirement	Roth IRA	Ameriprise		1				5			reubano
+	Personal	Personal	Scottrade		5				5			reubano
+	Personal	Personal	Scottrade		5				5			play
+	===============================================================================
+	
+	list -p reubano
+	Portfolio listing
+	====================
+	Name		Accounts	
+	--------------------
+	reubano		       2	
+	play		       1
+	====================
+	
+- report	show report for given account/portfolio
+	
+	report -a Retirement
+	Account Report: Retirement Roth IRA held at Ameriprise as of 2:30 PM 12/03/2008
+	===============================================================================
+	Security	Shares	Value		Cost 		Unrealized	Realized	% Day	% Annual
+									Basis		Gain/Loss	Gain/Loss	Return	 Return
+	-------------------------------------------------------------------------------
+	VALIX		200		$7,500.00	$10,500.00	$50.00		-$2,500		3.3		-15.2
+	FALIX		200		$7,500.00	$10,500.00	$50.00		$2,500		3.3		-15.2
+	-------------------------------------------------------------------------------
+	Total				$4,000.00	$6,000.00	$100.00		$0.00		3.3		-15.2
+	===============================================================================
+	
+	report -p reubano
+	Portfolio Report: reubano as of 2:30 PM 12/03/2008
+	===============================================================================
+	Security	Shares	Value		Cost 		Unrealized	Realized	% Day	% Annual
+									Basis		Gain/Loss	Gain/Loss	Return	 Return
+	-------------------------------------------------------------------------------
+	VALIX		200		$7,500.00	$10,500.00	$50.00		-$2,500		3.3		-15.2
+	FALIX		200		$7,500.00	$10,500.00	$50.00		-$2,500		3.3		-15.2
+	EEM			200		$7,500.00	$10,500.00	$50.00		-$2,500		3.3		-15.2
+	-------------------------------------------------------------------------------
+	Total				$4,000.00	$6,000.00	$100.00		$0.00		3.3		-15.2
+	===============================================================================
+	
+	report -pc reubano
+	Portfolio Collasped Report: reubano as of 2:30 PM 12/03/2008
+	===============================================================================
+	Account		Value		Cost 		Unrealized	Realized	% Day	% Annual
+							Basis		Gain/Loss	Gain/Loss	Return	 Return
+	-------------------------------------------------------------------------------
+	Retirement	$2,100.00	$1,100.00	$50.00		-$2,500		2.8		2.3
+	Personal	$2,100.00	$1,100.00	$50.00		-$2,500		2.8		2.3
+	-------------------------------------------------------------------------------
+	Total		$4,100.00	$2,100.00	$100.00		-$4,500		2.8		2.3
+	===============================================================================
+
+v0.3
+- plreport	show p/l report for given account/portfolio
+	date:date including natural language dates e.g. '1 month ago', 'yesterday', 'last year'
+	keyword	YTD, MTD, TM, TY, LM, LY for this month, this year, last month, last year
+	
+	plreport -a Retirement 12012008:'yesterday'
+	Account P/L Report: Retirement from 12/01/2008 to 12/04/2008
+	===============================================================================
+	Security	Value on	Value on	Cost	Realized	Total	% Total	% Ann.
+				12/01/2008	12/05/2008	Basis	Gain/Loss	Return	Return	Return
+	-------------------------------------------------------------------------------
+	IBM         $740.00     $756.00		$300.00	$0.00		$16.00	2.1		3.1
+	EEM         $740.00     $756.00		$300.00	$0.00		$16.00  2.3		0.1
+	RJI         $740.00     $756.00		$300.00	$0.00		$16.00  2.2		1.1
+	-------------------------------------------------------------------------------
+	Grand Total	$32,678.75	$32,050.20	$-628.55$0.00		$50.00	4.3		2.3
+	===============================================================================
+
+	plreport -p reubano MTD
+	Portfolio P/L Report: Retirement from 12/01/2008 to 12/05/2008
+	===============================================================================
+	Security	Value on	Value on	Cost	Realized	Total	% Total	% Ann.
+				12/01/2008	12/05/2008	Basis	Gain/Loss	Return	Return	Return
+	-------------------------------------------------------------------------------
+	IBM         $740.00     $756.00		$300.00	$0.00		$16.00	2.1		3.1
+	EEM         $740.00     $756.00		$300.00	$0.00		$16.00  2.3		0.1
+	RJI         $740.00     $756.00		$300.00	$0.00		$16.00  2.2		1.1
+	-------------------------------------------------------------------------------
+	Grand Total	$32,678.75	$32,050.20	$-628.55$0.00		$50.00	4.3		2.3
+	===============================================================================
+	
+	plreport -pc reubano '6 months ago':'today'
+	Portfolio P/L Collasped Report: Retirement from 06/05/2007 to 12/05/2008
+	===============================================================================
+	Account		Value on	Value on	Cost	Realized	Total	% Total	% Ann.
+				12/01/2008	12/05/2008	Basis	Gain/Loss	Return	Return	Return
+	-------------------------------------------------------------------------------
+	Retirement  $740.00     $756.00		$300.00	$0.00		$16.00	2.1		3.1
+	Personal    $740.00     $756.00		$300.00	$0.00		$16.00  2.3		0.1
+	-------------------------------------------------------------------------------
+	Grand Total	$32,678.75	$32,050.20	$-628.55$0.00		$50.00	4.3		2.3
+	===============================================================================
+	
+v1.0
+- perform maintenance
+- transaction	add/delete new transaction
+- portfolio 	add/delete portfolio name:owner
+- stock ticker	add/delete	stock(s) to/from [security] 
+
+v1.1
+- evaluate portfolio (discrete)
+- performance (discrete) reports e.g. sharpe, omega, kappa, VAR...
+
+v2.0
+- generate options
+- reduce options
+- rank options
+- display options
+- pick options
+
+v2.1
+- take commissions into account
+- evaluate benchmark portfolio (discrete)
+- calculate benchmark performance (discrete): sharpe, omega, kappa, VAR...
+- generate summary comparison stats and visuals
+
+v2.2
+- evaluate portfolio (continuous)
+- calculate performance (continuous): sortino, omega, kappa 
+
+v2.3
+- evaluate options (continuous)
+- calculate performance (continuous): sortino, omega, kappa
+- market conditions/indicators: black-litterman, SMA/EMA, stochastics, RSI
+
+v2.4
+- take taxes into account 
