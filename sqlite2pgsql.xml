@@ -3,40 +3,30 @@
 	<name>sqlite2pgsql</name>
 	<description>converts sqlite databases to postgres.</description>
 	<version>1.0.0</version>
-	<option name="source_db_type">
-		<short_name>-s</short_name>
-		<long_name>--source-type</long_name>
-		<description>source database type, defaults to 'sqlite'</description>
-		<action>StoreString</action>
-		<help_name>type</help_name>
-	</option>
 	<option name="dest_db_type">
 		<short_name>-d</short_name>
 		<long_name>--dest-type</long_name>
-		<description>destination database type, defaults to 'pgsql'</description>
+		<description>destination database type, defaults to 'psql'</description>
 		<action>StoreString</action>
 		<help_name>type</help_name>
 	</option>
-	<option name="dest_db_name">
-		<short_name>-n</short_name>
-		<long_name>--dest-name</long_name>
-		<description>destination database name, defaults to source database name</description>
-		<action>StoreString</action>
-		<help_name>type</help_name>
+	<option name="debug">
+		<short_name>-D</short_name>
+		<long_name>--debug</long_name>
+		<description>enables debug mode, displays the options and arguments passed to the parser</description>
+		<action>StoreTrue</action>
 	</option>
-	<option name="source_db_user">
-		<short_name>-u</short_name>
-		<long_name>--source-user</long_name>
-		<description>source database user, defaults to your username</description>
-		<action>StoreString</action>
-		<help_name>user name</help_name>
+	<option name="output_schema_file">
+		<short_name>-f</short_name>
+		<long_name>--out-file</long_name>
+		<description>set this option if you want to output to a schema file instead of a database</description>
+		<action>StoreTrue</action>
 	</option>
-	<option name="source_db_pwd">
-		<short_name>-p</short_name>
-		<long_name>--source-pwd</long_name>
-		<description>source database password, defaults to ''</description>
-		<action>StoreString</action>
-		<help_name>password</help_name>
+	<option name="source_schema_file">
+		<short_name>-F</short_name>
+		<long_name>--source-file</long_name>
+		<description>set this option if you are using a source schema file instead of a database</description>
+		<action>StoreTrue</action>
 	</option>
 	<option name="source_db_host">
 		<short_name>-h</short_name>
@@ -45,19 +35,26 @@
 		<action>StoreString</action>
 		<help_name>host</help_name>
 	</option>
-	<option name="source_db_port">
-		<short_name>-r</short_name>
-		<long_name>--source-port</long_name>
-		<description>source database port, defaults to ''</description>
+	<option name="dest_db_host">
+		<short_name>-H</short_name>
+		<long_name>--dest-host</long_name>
+		<description>destination database host, defaults source database host</description>
 		<action>StoreString</action>
-		<help_name>port #</help_name>
+		<help_name>host</help_name>
 	</option>
-	<option name="dest_db_user">
-		<short_name>-U</short_name>
-		<long_name>--dest-user</long_name>
-		<description>destination database user, defaults to source database username</description>
+	<option name="dest_db_name">
+		<short_name>-n</short_name>
+		<long_name>--dest-name</long_name>
+		<description>destination database (or schema file) name, if you want to output a schema file make sure to set the -f option, defaults to source database name</description>
 		<action>StoreString</action>
-		<help_name>user name</help_name>
+		<help_name>name</help_name>
+	</option>
+	<option name="source_db_pwd">
+		<short_name>-p</short_name>
+		<long_name>--source-pwd</long_name>
+		<description>source database password, defaults to ''</description>
+		<action>StoreString</action>
+		<help_name>password</help_name>
 	</option>
 	<option name="dest_db_pwd">
 		<short_name>-P</short_name>
@@ -66,12 +63,12 @@
 		<action>StoreString</action>
 		<help_name>password</help_name>
 	</option>
-	<option name="dest_db_host">
-		<short_name>-H</short_name>
-		<long_name>--dest-host</long_name>
-		<description>destination database host, defaults source database host</description>
+	<option name="source_db_port">
+		<short_name>-r</short_name>
+		<long_name>--source-port</long_name>
+		<description>source database port, defaults to ''</description>
 		<action>StoreString</action>
-		<help_name>host</help_name>
+		<help_name>port #</help_name>
 	</option>
 	<option name="dest_db_port">
 		<short_name>-R</short_name>
@@ -80,10 +77,31 @@
 		<action>StoreString</action>
 		<help_name>port #</help_name>
 	</option>
-	<option name="debug">
-		<short_name>-D</short_name>
-		<long_name>--debug</long_name>
-		<description>enables debug mode, displays the options and arguments passed to the parser</description>
+	<option name="source_db_type">
+		<short_name>-s</short_name>
+		<long_name>--source-type</long_name>
+		<description>source database type, defaults to 'sqlite'</description>
+		<action>StoreString</action>
+		<help_name>type</help_name>
+	</option>
+	<option name="source_db_user">
+		<short_name>-u</short_name>
+		<long_name>--source-user</long_name>
+		<description>source database user, defaults to your username</description>
+		<action>StoreString</action>
+		<help_name>username</help_name>
+	</option>
+	<option name="dest_db_user">
+		<short_name>-U</short_name>
+		<long_name>--dest-user</long_name>
+		<description>destination database user, defaults to source database username</description>
+		<action>StoreString</action>
+		<help_name>username</help_name>
+	</option>
+	<option name="verbose">
+		<short_name>-v</short_name>
+		<long_name>--verbose</long_name>
+		<description>verbose output</description>
 		<action>StoreTrue</action>
 	</option>
 	<option name="variables">
@@ -92,13 +110,7 @@
 		<description>enables variable mode, displays the value of all program variables</description>
 		<action>StoreTrue</action>
 	</option>
-	<option name="verbose">
-		<short_name>-v</short_name>
-		<long_name>--verbose</long_name>
-		<description>verbose output</description>
-		<action>StoreTrue</action>
-	</option>
 	<argument name="source_db_name">
-		<description>source database name</description>
+		<description>source database name (or /path/to/schema_file), if you are using a schema file make sure to set the -F option</description>
 	</argument>
 </command>

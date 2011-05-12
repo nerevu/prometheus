@@ -34,21 +34,20 @@ class class_mdb2_schema {
 			if($database_user) $database_user 	= $database_user.':';
 			if($database_port) $database_port 	= ':'.$database_port;
 			if($database_name) $database_name	= '/'.$database_name;
-			
+
 			$dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$database_name;
-			if($this->verbose) fwrite(STDOUT, "connecting to $dsn\n");
+			if($this->verbose) fwrite(STDOUT, "connecting to $dsn...\n");
 			
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else $this->schema = class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 		
 		$this->schema =& MDB2_Schema::factory($dsn, $this->arr_options);
 		
 		// error check
 		if(!PEAR::isError($this->schema)) {
 			if($this->verbose) fwrite(STDOUT, "$this->class_name class constructor set.\n");
-			return TRUE;
 		} else {
 			$message = $this->schema->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			$this->schema = class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 	
@@ -115,15 +114,15 @@ class class_mdb2_schema {
 				return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 4, 2);
 		} //<-- end switch -->
 
-	    $check = $this->db_to_def_arr();
+		if(!$this->definition) $this->db_to_def_arr();
 
-	    if($check) {
+	    if($this->definition) {
 	    	$res = $this->schema->dumpDatabase($this->definition, $arr_options, $dump_type);
 	    	if(PEAR::isError($res)) $errors = TRUE;
 	    } else $errors = TRUE;	
 	    
 	    if(!$errors) {
-			if($this->verbose) fwrite(STDOUT, "schema file $schema_file_name created!\n");
+			if($this->verbose) fwrite(STDOUT, "schema file $schema_file created!\n");
 			return $res;
 		} else {
 			if($res) {

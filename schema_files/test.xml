@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <database>
 
- <name>bookstore</name>
+ <name>test</name>
  <create>true</create>
  <overwrite>false</overwrite>
 
- <charset></charset>
+ <charset>utf8</charset>
 
  <table>
 
-  <name>books</name>
+  <name>mytable</name>
 
   <declaration>
 
@@ -23,39 +23,22 @@
    </field>
 
    <field>
-    <name>title</name>
+    <name>user</name>
+    <type>text</type>
+    <default></default>
+    <notnull>true</notnull>
+    <length>11</length>
+   </field>
+
+   <field>
+    <name>address</name>
     <type>text</type>
     <default></default>
     <notnull>false</notnull>
-    <length>50</length>
    </field>
 
    <field>
-    <name>author</name>
-    <type>text</type>
-    <default></default>
-    <notnull>false</notnull>
-    <length>50</length>
-   </field>
-
-   <field>
-    <name>yearofpublication</name>
-    <type>integer</type>
-    <default></default>
-    <notnull>false</notnull>
-    <length>4</length>
-   </field>
-
-   <field>
-    <name>publisher</name>
-    <type>text</type>
-    <default></default>
-    <notnull>false</notnull>
-    <length>50</length>
-   </field>
-
-   <field>
-    <name>price</name>
+    <name>age</name>
     <type>integer</type>
     <default></default>
     <notnull>false</notnull>
@@ -74,27 +57,17 @@
     </field>
 
     <field>
-     <name>title</name>
-     <value>Annabel Lee</value>
+     <name>user</name>
+     <value>reubano</value>
     </field>
 
     <field>
-     <name>author</name>
-     <value>Edgar Allan Poe</value>
+     <name>address</name>
+     <value></value>
     </field>
 
     <field>
-     <name>yearofpublication</name>
-     <value>1849</value>
-    </field>
-
-    <field>
-     <name>publisher</name>
-     <value>The Literature Page</value>
-    </field>
-
-    <field>
-     <name>price</name>
+     <name>age</name>
      <value>20</value>
     </field>
 
@@ -108,62 +81,18 @@
     </field>
 
     <field>
-     <name>title</name>
-     <value>The Ballad of Reading Gaol</value>
+     <name>user</name>
+     <value>toddr</value>
     </field>
 
     <field>
-     <name>author</name>
-     <value>Oscar Wilde</value>
+     <name>address</name>
+     <value>45 acre st.</value>
     </field>
 
     <field>
-     <name>yearofpublication</name>
-     <value>1898</value>
-    </field>
-
-    <field>
-     <name>publisher</name>
-     <value>The Literature Page</value>
-    </field>
-
-    <field>
-     <name>price</name>
-     <value>45</value>
-    </field>
-
-   </insert>
-
-   <insert>
-
-    <field>
-     <name>id</name>
-     <value>3</value>
-    </field>
-
-    <field>
-     <name>title</name>
-     <value>The Sonnets</value>
-    </field>
-
-    <field>
-     <name>author</name>
-     <value>Edgar Allan Poe</value>
-    </field>
-
-    <field>
-     <name>yearofpublication</name>
-     <value>1602</value>
-    </field>
-
-    <field>
-     <name>publisher</name>
-     <value>The Literature Page</value>
-    </field>
-
-    <field>
-     <name>price</name>
-     <value>34</value>
+     <name>age</name>
+     <value>17</value>
     </field>
 
    </insert>

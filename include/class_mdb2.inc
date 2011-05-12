@@ -14,9 +14,10 @@ require_once 'MDB2.php';
 class class_mdb2 {
 	var $arr_tables = array();		// array of table names
 	var $arr_databases = array();	// array of database names
-	var $definition;				// MDB2 definition array
+	var $arr_definition = array();	// MDB2 definition array
 	var $mdb2;						// MDB2 object
 	var $verbose;					// verbose output
+	var $database_name;
 	var $class_name = __CLASS__;	// class name
 			
 	//************* class constructor *************
@@ -24,20 +25,20 @@ class class_mdb2 {
 		$this->verbose						= $verbose;
 		if($database_user) $database_user 	= $database_user.':';
 		if($database_port) $database_port 	= ':'.$database_port;
-		if($database_name) $database_name	= '/'.$database_name;
+		if($database_name) $this->database_name	= '/'.$database_name;
 		
-		$dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$database_name;
-		if($this->verbose) fwrite(STDOUT, "connecting to $dsn\n");
+		$dsn = $database_type.'://'.$database_user.$database_password.'@'.$database_host.$database_port.$this->database_name;
+		if($this->verbose) fwrite(STDOUT, "connecting to $dsn...\n");
 		$this->mdb2 =& MDB2::factory($dsn);
 		
 		// error check
 		if(!PEAR::isError($this->mdb2)) {
 			if($this->verbose) fwrite(STDOUT, "$this->class_name class constructor set.\n");
 			$this->mdb2->loadModule('Manager');
-			return TRUE;
+			$this->mdb2->loadModule('Reverse', NULL, TRUE);
 		} else {
 			$message = $this->mdb2->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			$this->mdb2 = $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 	
@@ -45,7 +46,7 @@ class class_mdb2 {
 	function create_db($database_name) {
 		if(!empty($database_name)) {
 			$res = $this->mdb2->createDatabase($database_name); 
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 		
    	 	if(!PEAR::isError($res)) {
 			if($this->verbose) fwrite(STDOUT, "database $database_name created!\n");			
@@ -53,12 +54,12 @@ class class_mdb2 {
 			return $res;
 		} else {
 			$message = $res->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 	
 	//************* creates a table *************
-	// $definition = array( 
+	// $arr_definition = array( 
 	// 	'id' => array('type' => 'integer', 'unsigned' => 1, 'notnull' => 1, 'default' => 0), 
 	// 	'name' => array('type' => 'text', 'length' => 255), 
 	// 	'datetime' => array('type' => 'timestamp') 
@@ -67,26 +68,26 @@ class class_mdb2 {
 	function create_table($table_name, $tbl_definition, $table_options = NULL) {
 		if(!empty($table_name)) {
 			$res = $this->mdb2->createTable($table_name, $tbl_definition, $table_options);
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 		
    	 	if(!PEAR::isError($res)) {
 			if($this->verbose) fwrite(STDOUT, "table $table_name created!\n");			
 			return $res;
 		} else {
 			$message = $res->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 
 	//************* creates a constraint *************
 	// primary key
-	// $definition = array('primary' => true, 'fields' => array('id' => array()));
+	// $arr_definition = array('primary' => true, 'fields' => array('id' => array()));
 	
 	// unique constraint
-	// $definition = array('unique' => true, 'fields' => array('fieldname' => array()));
+	// $arr_definition = array('unique' => true, 'fields' => array('fieldname' => array()));
 	 
 	// foreign constraint
-	// $definition = array(
+	// $arr_definition = array(
 	// 	'primary' => false, 
 	// 	'unique' => false, 
 	// 	'foreign' => true, 
@@ -104,14 +105,14 @@ class class_mdb2 {
 	function create_constraint($table_name, $constraint_name, $constraint_definition) {
 		if(!empty($table_name)) {
 			$res = $this->mdb2->createConstraint($table_name, $constraint_name, $constraint_definition);
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 		
    	 	if(!PEAR::isError($res)) {
 			if($this->verbose) fwrite(STDOUT, "constraint $constraint_name created!\n");			
 			return $res;
 		} else {
 			$message = $res->getMessage();
-			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+			return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 	
@@ -119,37 +120,65 @@ class class_mdb2 {
 	function create_sequence($field_name, $start_value = 1) {
 		if(!empty($field_name)) {
 			$res = $this->mdb2->createSequence($field_name, $start_value); 
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 		
    	 	if(!PEAR::isError($res)) {
 			if($this->verbose) fwrite(STDOUT, "sequence created for $field_name!\n");			
 			return $res;
 		} else {
 			$message = $res->getMessage();
+			return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
+		} //<-- end if -->
+	} //<-- end function -->
+
+	//************* gets array of table names *************
+	function get_table_names($database_name = $this->database_name) {
+		$this->arr_tables = $mdb2->listTables($database_name);
+		$max = count($this->arr_tables);
+		fwrite(STDOUT, "$max table names retrieved!\n");
+		return $this->arr_tables;
+	} //<-- end function -->
+	
+	//************* creates an definition array from an existing database *************
+	function db_to_def_arr($database_name = $this->database_name) {
+		if (empty($this->arr_tables)) $this->get_table_names($database_name);
+		$this->arr_definition['database'] = $database_name;
+		foreach($this->arr_tables as $table) $this->arr_definition[] = $mdb2->tableInfo($table, NULL);
+		
+		if(!PEAR::isError($this->arr_definition)) {
+			if($this->verbose) fwrite(STDOUT, "MDB2 definition array $database_name created!\n");
+			return $this->arr_definition;
+		} else {
+			$message = $this->arr_definition->getMessage();
 			return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 0, 1, $message);
 		} //<-- end if -->
 	} //<-- end function -->
 	
-	//************* creates a database from a converted definition array *************
-	function def_arr_to_db($new_definition, $database_name = NULL) {
-		if(!empty($new_definition)) {
-			if(!$database_name) $database_name = $new_definition['database'];
-			$res = $this->create_db($database_name);
-			$arr_tables = array_keys($new_definition['tables']);
-			$i = 0;
-			
-			foreach($new_definition['tables'] as $tbl_definition) {
-				$table_name = $arr_tables[$i];
-				$res = $this->create_table($table_name, $tbl_definition);
-				$i++;
-			} //<-- end foreach -->
-			
-			//$res = $this->create_sequence($field_name, $start_value);
-			//$res = $this->create_constraint($table_name, $constraint_name, $constraint_definition);
-			
-			if($this->verbose) fwrite(STDOUT, "$database_name definition array converted to database!\n");			
-			return $new_definition;
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+	//************* creates a database from a definition array *************
+	function def_arr_to_db($arr_definition = $this->arr_definition, $database_name = NULL) {
+		if(!empty($arr_definition)) {
+			if(!$database_name) $database_name = $arr_definition['database'];
+			$check = $this->create_db($database_name);
+			if($check) {			
+				$arr_tables = array_keys($arr_definition['tables']);
+				$i = 0;
+				
+				foreach($arr_definition['tables'] as $tbl_definition) {
+					$table_name = $arr_tables[$i];
+					$check = $this->create_table($table_name, $tbl_definition);
+					if(!$check) continue; 
+					$i++;
+				} //<-- end foreach -->
+				
+				if($check) {
+					//$check = $this->create_sequence($field_name, $start_value);
+					//$check = $this->create_constraint($table_name, $constraint_name, $constraint_definition);
+					
+					if($this->verbose) fwrite(STDOUT, "$database_name definition array converted to database!\n");			
+					return $new_definition;
+				} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 6, 1);
+			} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 6, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 	} //<-- end function -->
 	
 	//************* converts a definition array created by MDB2_Schema *************				
@@ -170,7 +199,7 @@ class class_mdb2 {
 
 			//if($this->verbose) fwrite(STDOUT, "$old_definition['name'] database definition created!\n");
 			return $new_definition;
-		} else return class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
+		} else return $this->class_general::return_error(__CLASS__, __FUNCTION__, __LINE__, 1, 1);
 	} //<-- end function -->
 	
 	//************* checks for table existance *************
@@ -189,6 +218,6 @@ class class_mdb2 {
 			if($this->verbose) fwrite(STDOUT, "Database $database exists!\n");
 			return TRUE;
 		} else return FALSE;
-	} //<-- end function -->
+	} //<-- end function -->	
 } //<-- end class -->
 ?>
