@@ -20,6 +20,7 @@ $check 				= false;
 require_once 'Console/CommandLine.php';
 require_once $projects_dir.'/library/error2.inc';
 require_once $projects_dir.'/library/class_general.inc';
+require_once $thisproject_dir.'/include/class_mdb2_schema.inc';
 require_once $thisproject_dir.'/include/class_mdb2.inc';
 
 // create the parser from xml file
@@ -86,8 +87,7 @@ try {
 	} //<-- end if -->
 
 	// execute program
-
-	$connection = new class_mdb2($source_db_name, $source_db_type, $verbose, $source_db_user, $source_db_pwd, $source_db_host, $source_db_port);
+	$connection = new class_mdb2_schema($source_db_name, $source_db_type, $verbose, $source_db_user, $source_db_pwd, $source_db_host, $source_db_port);
 	
 	if($connection) {
 		//$check = $connection->db_to_xml($schema_file);
@@ -95,7 +95,13 @@ try {
 		if($check) {
 			//$connection = new class_mdb2($dest_db_name, $dest_db_type, $verbose, $dest_db_user, $dest_db_pwd, $dest_db_host, $dest_db_port);
 			if($connection) {
-				$check = $connection->xml_to_db($schema_file);
+				//$old_definition = $connection->db_to_def_arr();
+				$old_definition = $connection->xml_to_def_arr($schema_file);
+				$connection = new class_mdb2($source_db_name, $source_db_type, $verbose, $source_db_user, $source_db_pwd, $source_db_host, $source_db_port);
+				$new_definition = $connection->convert_def_arr($old_definition);
+				//print_r($new_definition);
+				$connection->def_arr_to_db($new_definition);
+				
 				if(!$check) $errors = TRUE;
 			} else $errors = TRUE;	
 		} else $errors = TRUE;
