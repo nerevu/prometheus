@@ -24,24 +24,26 @@ Scenario (see The Upside of Downside Risk)
 beating the benchmark --> risk of active return
 beating a set MAR --> risk of portfolio
 
-Steps
-generate list of desired asset classes
-triage list into minimum investable amount required
-test asset class inclusion by calculating rolling covariance matrices
-download monthly historical data for all asset classes
-set constraints and upper/lower limits for each asset class
-use DOX to set up a testing scenarios
-bootstrap data to generate a continuous distribution function
-calculate pdf and use this equation to calculate downside deviation
-calculate sortino ratio, U-P, information ratio, and other risk measures
-follow DOX protocol to find refined allocation model 
-repeate for each triage
-automate caculation to require least effort for regenerating allocation model
+Portfolio Grader Steps
+Calculate XIRR
+bootstrap data to generate a continuous distribution function for each portfolio
+calculate pdf and use this equation to calculate downside deviation of portfolio
+calculate sortino ratio, U-P, information ratio, and other risk measures of portfolio
 Calculate VaR
-Utilize Hedging strategy
 Calculate my Omega Excess return on Stocks vs. Dow
 Figure out a way to measure and compare the return of my entire portfolio
 use this to predict if my stock strategy is working
+random portfolios
+differentiate passive (buy and hold) vs active (transactions match personal portfolio) benchmarks
+
+Allocreator Steps
+calculate max number of asset classes budget can handle
+update historical data for all asset classes
+generate list of asset classes to include by calculating rolling covariance matrices
+set constraints and upper/lower limits for each asset class
+use DOX to set up testing scenarios (fake portfolios)
+follow DOX protocol to find refined allocation model 
+automate calculation to require least effort for regenerating allocation model
 
 Hedging 
 set VaR triggers to identify when further analysis needs to take place
