@@ -1,0 +1,26 @@
+{% extends "bootstrap_responsive.html" %}
+{% block body_content %}
+<div class="container">
+	<div class="masthead">
+		<h3 class="muted">{% block title %}Prometheus{% endblock %}</h3>
+	</div>
+	<hr>
+	<div class="jumbotron">
+		<h1>Add events to the database</h1>
+		<p class="lead">With this app, you can add events to the database and see them instantly updated in the event list.</p>
+	</div>
+	<hr>
+	{% for category, message in get_flashed_messages(with_categories=true) %}
+	<div class="row-fluid"><div class="span12"><div class="{{ category }}">
+		{{ message }}
+	</div></div></div>
+	{% endfor %}
+	{% block form %}{% endblock %}
+	<hr>
+	{% block events %}{% endblock %}
+	<hr>
+	<div class="footer pagination-centered">
+		<p>&copy; Company 2012</p>
+	</div>
+</div> <!-- /container -->
+{% endblock %}
