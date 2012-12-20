@@ -60,7 +60,7 @@ def create_app(config_mode=None, config_file=None):
 	# [[], ['Event', 'Type']]
 	nested_classes = map(_get_app_classes, models)
 
-	# provides a list of tuples (module, list of class names)
+	# provides a list of tuples (module, [list of class names])
 	# in the form [(<module>,[]),(<module>,[])]
 	# [(<module 'app.hermes.models' from '/path/to/models.pyc'>, ['Event', 'Type'])]
 	sets = map(lambda x, y:(x, y), models, nested_classes)
