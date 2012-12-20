@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block form %}
+<div class="row-fluid"><div class="span12">
+	<form action="{{ url_for('hermes.add_event') }}" class="form-inline" method="post">
+		{{ form.hidden_tag() }}
+
+		{{ wtf.inline_field(form.symbol) }}
+		{{ wtf.inline_field(form.type_id) }}
+		{{ wtf.inline_field(form.value) }}
+		{{ wtf.inline_field(form.date) }}
+
+		<button type="submit" class="btn">Submit Entry</button>
+	</form>
+</div></div>
+{% endblock %}
+{% block events %}
+<div class="row-fluid"><div class="span12">
+	{% if events %}
+	<table class="table table-striped">
+		<caption>Event List</caption>
+		<thead><tr>
+			<th>Symbol</th><th>Type</th><th>Unit</th><th>Value</th><th>Date</th>
+		</tr></thead>
+		<tbody>
+		{% for event in events %}
+		<tr>
+			<td>{{ event[0].symbol }}</td>
+			<td>{{ event[1].name }}</td>
+			<td>{{ event[1].unit }}</td>
+			<td class="USD">{{ event[0].value }}</td>
+			<td>{{ event[0].date }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	{% else %}
+	<div class="well well-small">
+		Unbelievable. No events found.
+	</div>
+	{% endif %}
+</div></div>
+{% endblock %}
+
