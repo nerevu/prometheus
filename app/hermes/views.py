@@ -32,6 +32,7 @@ def api():
 def events():
 	id = 'events'
 	title = 'Events'
+	legend = 'Event entry form'
 	heading = 'Add events to the database'
 	text = 'On this page you can add events to the database and see them instantly updated in the lists below.'
 
@@ -41,7 +42,7 @@ def events():
 	form.type_id.choices = choices
 	form.type_id.validators = validators
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form}
+		'events': events, 'types': types, 'form': form, 'legend': legend}
 
 	return render_template('hermes/events.html', **kwargs)
 
@@ -67,13 +68,14 @@ def add_event():
 def types():
 	id = 'types'
 	title = 'Types'
+	legend = 'Type entry form'
 	heading = 'Add event types to the database'
 	text = 'On this page you can add event types to the database and see them instantly updated in the lists below.'
 
 	types = db.session.query(Type).order_by(Type.name)
 	form = TypeForm()
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form}
+		'events': events, 'types': types, 'form': form, 'legend': legend}
 
 	return render_template('hermes/types.html', **kwargs)
 

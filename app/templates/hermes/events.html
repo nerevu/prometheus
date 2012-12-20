@@ -4,21 +4,26 @@
 {% block heading %}{{ heading }}{% endblock %}
 {% block text %}{{ text }}{% endblock %}
 {% block main_content %}
-<div class="row-fluid"><div class="span12">
-	<form action="{{ url_for('hermes.add_event') }}" class="form form-inline" method="post">
+<div class="row-fluid">
+	<div class="span3">
+		<div></div>
+		<form action="{{ url_for('hermes.add_event') }}" class="form" method="post">
+			<legend>{{ legend }}</legend>
 
-		{{ form.hidden_tag() }}
-		{{ wtf.form_errors(form, True) }}
+			{{ form.hidden_tag() }}
+			{{ wtf.form_errors(form, True) }}
 
-		{{ wtf.inline_field(form.symbol) }}
-		{{ wtf.inline_field(form.type_id) }}
-		{{ wtf.inline_field(form.value) }}
-		{{ wtf.inline_field(form.date) }}
+			{{ wtf.inline_field(form.symbol) }}
+			{{ wtf.inline_field(form.type_id) }}
+			{{ wtf.inline_field(form.value) }}
+			{{ wtf.inline_field(form.date) }}
 
-		<button type="submit" class="btn">Submit Entry</button>
-	</form>
-</div></div>
-<div class="row-fluid"><div class="span6 offset2">
+			<div class="controls">
+				<button type="submit" class="btn">Submit Entry</button>
+			</div>
+		</form>
+	</div>
+	<div class="span7 offset2">
 	{% if events %}
 	<table class="table table-striped">
 		<caption>Event List</caption>
@@ -40,6 +45,6 @@
 	{% else %}
 	<div class="well well-small"> Unbelievable. No events found. </div>
 	{% endif %}
-</div></div>
+</div>
 {% endblock main_content %}
 

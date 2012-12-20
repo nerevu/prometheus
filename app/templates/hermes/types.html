@@ -4,19 +4,25 @@
 {% block heading %}{{ heading }}{% endblock %}
 {% block text %}{{ text }}{% endblock %}
 {% block main_content %}
-<div class="row-fluid"><div class="span12">
-	<form action="{{ url_for('hermes.add_type') }}" class="form form-inline" method="post">
-		{{ form.hidden_tag() }}
-		{{ wtf.form_errors(form, True) }}
+<div class="row-fluid">
+	<div class="span3">
+		<div></div>
+		<form action="{{ url_for('hermes.add_type') }}" class="form" method="post">
+			<legend>{{ legend }}</legend>
 
-		{{ wtf.inline_field(form.name) }}
-		{{ wtf.inline_field(form.unit) }}
+			{{ form.hidden_tag() }}
+			{{ wtf.form_errors(form, True) }}
 
-		<button type="submit" class="btn">Submit Entry</button>
-	</form>
-</div></div>
-<div class="row-fluid"><div class="span6 offset2">
-	{% if types %}
+			{{ wtf.inline_field(form.name) }}
+			{{ wtf.inline_field(form.unit) }}
+
+			<div class="controls">
+				<button type="submit" class="btn">Submit Entry</button>
+			</div>
+		</form>
+	</div>
+	<div class="span7 offset2">
+	{% if events %}
 	<table class="table table-striped">
 		<caption>Type List</caption>
 		<thead><tr><th>Type Name</th><th>Unit</th></tr></thead>
@@ -29,6 +35,6 @@
 	{% else %}
 	<div class="well well-small"> Unbelievable. No types found.</div>
 	{% endif %}
-</div></div>
+</div>
 {% endblock main_content %}
 
