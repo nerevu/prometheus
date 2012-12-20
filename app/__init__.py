@@ -22,6 +22,7 @@ model_alias = 'model'
 
 topnav = [
 	{'id': 'events', 'caption': 'Events', 'location': 'hermes.events'},
+	{'id': 'types', 'caption': 'Types', 'location': 'hermes.types'},
 	{'id': 'prices', 'caption': 'Prices', 'location': 'hermes.prices'},
 	{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'},
 	{'id': 'api', 'caption': 'API', 'location': 'hermes.api'}]
@@ -31,8 +32,7 @@ hero = {'heading': 'Prometheus: a global asset allocation tool', 'text': 'Promet
 sub_units = [
 	{'heading': 'Events', 'text': 'See all your stocks events in one convenient location. Track stock splits, dividend payments, mergers and more!', 'location': 'hermes.events'},
 	{'heading': 'Prices', 'text': 'Update your stock prices with the click of a button! Automatically grap the latest pricing information from Yahoo or Google.', 'location': 'hermes.prices'},
-	{'heading': 'Net Worth', 'text': 'See how the value of your portfolio over time with these sleek interactive charts! Instantly see how the effects of dividends impacts your return.', 'location': 'hermes.worth'},
-	{'heading': 'API', 'text': 'Use this app as web service to integrate into your own site through the RESTful API. Supports queries, additions, deletions, modifications, and filters.', 'location': 'hermes.api'}]
+	{'heading': 'Net Worth', 'text': 'See how the value of your portfolio over time with these sleek interactive charts! Instantly see how the effects of dividends impacts your return.', 'location': 'hermes.worth'}]
 
 site = {'id': 'prometheus', 'caption': 'Prometheus', 'date': d.today().strftime("%Y"),
 	'author': 'Reuben Cummings', 'author_url': 'http://reubano.github.com',

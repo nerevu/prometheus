@@ -7,13 +7,13 @@
 <div class="row-fluid"><div class="span12">
 	<form action="{{ url_for('hermes.add_event') }}" class="form form-inline" method="post">
 
-		{{ form1.hidden_tag() }}
-		{{ wtf.form_errors(form1, True) }}
+		{{ form.hidden_tag() }}
+		{{ wtf.form_errors(form, True) }}
 
-		{{ wtf.inline_field(form1.symbol) }}
-		{{ wtf.inline_field(form1.type_id) }}
-		{{ wtf.inline_field(form1.value) }}
-		{{ wtf.inline_field(form1.date) }}
+		{{ wtf.inline_field(form.symbol) }}
+		{{ wtf.inline_field(form.type_id) }}
+		{{ wtf.inline_field(form.value) }}
+		{{ wtf.inline_field(form.date) }}
 
 		<button type="submit" class="btn">Submit Entry</button>
 	</form>
@@ -39,33 +39,6 @@
 	</table>
 	{% else %}
 	<div class="well well-small"> Unbelievable. No events found. </div>
-	{% endif %}
-</div></div>
-<hr>
-<div class="row-fluid"><div class="span12">
-	<form action="{{ url_for('hermes.add_type') }}" class="form form-inline" method="post">
-		{{ form2.hidden_tag() }}
-		{{ wtf.form_errors(form2, True) }}
-
-		{{ wtf.inline_field(form2.name) }}
-		{{ wtf.inline_field(form2.unit) }}
-
-		<button type="submit" class="btn">Submit Entry</button>
-	</form>
-</div></div>
-<div class="row-fluid"><div class="span6 offset2">
-	{% if types %}
-	<table class="table table-striped">
-		<caption>Type List</caption>
-		<thead><tr><th>Type Name</th><th>Unit</th></tr></thead>
-		<tbody>
-			{% for type in types %}
-			<tr><td>{{ type.name }}</td><td>{{ type.unit }}</td></tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% else %}
-	<div class="well well-small"> Unbelievable. No types found.</div>
 	{% endif %}
 </div></div>
 {% endblock main_content %}

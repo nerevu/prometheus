@@ -30,20 +30,18 @@ def api():
 
 @hermes.route('/events/', methods=['GET', 'POST'])
 def events():
-	title = 'Events & Types'
-	heading = 'Add events and types to the database'
-	text = 'On this page you can add events and event types to the database and see them instantly updated in the lists below.'
+	id = 'events'
+	title = 'Events'
+	heading = 'Add events to the database'
+	text = 'On this page you can add events to the database and see them instantly updated in the lists below.'
 
 	events = db.session.query(Event, Type).join(Type).order_by(Event.date)
-	types = db.session.query(Type).order_by(Type.name)
 	choices, validators = _get_form_data()
-	form1 = EventForm()
-	form1.type_id.choices = choices
-	form1.type_id.validators = validators
-	form2 = TypeForm()
-	kwargs = {'id': 'events', 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form1': form1, 'form1_title': 'Events',
-		'form2': form2, 'form2_title': 'Types'}
+	form = EventForm()
+	form.type_id.choices = choices
+	form.type_id.validators = validators
+	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
+		'events': events, 'types': types, 'form': form}
 
 	return render_template('hermes/events.html', **kwargs)
 
@@ -51,12 +49,13 @@ def events():
 def add_event():
 	choices, validators = _get_form_data()
 	form = EventForm()
-	print('Event form set!')
 	form.type_id.choices = choices
 	form.type_id.validators = validators
 	if form.validate_on_submit():
 		event = Event()
 		form.populate_obj(event)
+		print('Submitted!')
+		print(form.type_id.data)
  		db.session.add(event)
 		db.session.commit()
 		flash('Success! A new event was posted.', 'alert alert-success')
@@ -64,12 +63,24 @@ def add_event():
 		for k, v in form.errors.iteritems()]
 	return redirect(url_for('hermes.events'))
 
+@hermes.route('/types/', methods=['GET', 'POST'])
+def types():
+	id = 'types'
+	title = 'Types'
+	heading = 'Add event types to the database'
+	text = 'On this page you can add event types to the database and see them instantly updated in the lists below.'
+
+	types = db.session.query(Type).order_by(Type.name)
+	form = TypeForm()
+	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
+		'events': events, 'types': types, 'form': form}
+
+	return render_template('hermes/types.html', **kwargs)
+
 @hermes.route('/add_type/', methods=['GET', 'POST'])
 def add_type():
 	form = TypeForm()
-	print('Type form set!')
-	if form.is_submitted():
-		print('Submitted!')
+	if form.validate_on_submit():
 		type = Type()
 		form.populate_obj(type)
  		db.session.add(type)
@@ -77,4 +88,4 @@ def add_type():
 		flash('Success! A new event type was posted.', 'alert alert-success')
 	else: [flash('%s: %s' % (k.title(), v[0]), 'alert alert-error')
 		for k, v in form.errors.iteritems()]
-	return redirect(url_for('hermes.events'))
+	return redirect(url_for('hermes.types'))
