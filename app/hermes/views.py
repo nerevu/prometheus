@@ -12,7 +12,8 @@ def _get_form_data():
 	result = Type.query.order_by('name').all()
 	choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
 	values = [x.id for x in result]
-	validators = [Required(), AnyOf(choices, message=u'Invalid value, must be one of: %(values)s')]
+	values = sorted(values)
+	validators = [Required(), AnyOf(values, message=u'Invalid value, must be one of: %(values)s')]
 	return choices, validators
 
 @hermes.route('/prices/', methods=['GET', 'POST'])
