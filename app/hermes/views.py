@@ -9,7 +9,6 @@ from .models import *
 hermes = Blueprint('hermes', __name__, url_prefix='/hermes')
 
 def _get_form_data():
-# 	with app.test_request_context():
 	result = Type.query.order_by('name').all()
 	choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
 	values = [x.id for x in result]
