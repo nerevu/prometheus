@@ -1,37 +1,40 @@
-from app import app, db
-from flask.ext.bootstrap import Bootstrap
-from flask.ext.script import Manager, Server
+from os.path import abspath
 
-manager = Manager(app)
-manager.add_command('runserver', Server())
+from flask import current_app as app
+from app import create_app
+# from app.model import init_db
+from flask.ext.script import Manager
+
+manager = Manager(create_app)
+manager.add_option('-m', '--cfgmode', dest='config_mode', default='Development')
+manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
 
 @manager.command
 def createdb():
-	"""Creates database"""
-	db.create_all()
-	print 'Database created'
+	with app.app_context():
+
+		"""Creates database"""
+		db.create_all()
+		print 'Database created'
 
 @manager.command
 def cleardb():
-	"""Clears database"""
-	db.drop_all()
-	print 'Database dropped'
+	with app.app_context():
+
+		"""Clears database"""
+		db.drop_all()
+		print 'Database cleared'
 
 @manager.command
 def initdb():
-	"""Initializes database with test data"""
-	if prompt_bool('Are you sure you want to replace all data?'):
-		try:
-			from app import testing
-		except ImportError:
-			print "Unable to load 'testing' module"
-			return 1
+	with app.app_context():
 
-		testing.populate_test_db()
-		print 'Database initialized'
-	else:
-		print 'Database initializatio aborted'
+		"""Initializes database with test data"""
+		if prompt_bool('Are you sure you want to replace all data?'):
+			init_db()
+			print 'Database initialized'
+		else:
+			print 'Database initialization aborted'
 
 if __name__ == '__main__':
-	Bootstrap(app)
 	manager.run()

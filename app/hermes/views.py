@@ -1,24 +1,20 @@
 from __future__ import print_function
 from pprint import pprint
+from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
 from flask.ext.wtf import AnyOf
-from app import app, db
 from .forms import *
 from .models import *
 
-hermes = Blueprint('hermes', __name__)
+hermes = Blueprint('hermes', __name__, url_prefix='/hermes')
 
 def _get_form_data():
-	with app.test_request_context():
-		result = Type.query.order_by('name').all()
-		choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
-		values = [x.id for x in result]
-		validators = [Required(), AnyOf((1,2,3), message=u'Invalid value, must be one of: %(values)s')]
-		return choices, validators
-
-events = db.session.query(Event, Type).join(Type).all()
-events = Event.query.all()
-print(events)
+# 	with app.test_request_context():
+	result = Type.query.order_by('name').all()
+	choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
+	values = [x.id for x in result]
+	validators = [Required(), AnyOf(choices, message=u'Invalid value, must be one of: %(values)s')]
+	return choices, validators
 
 @hermes.route('/', methods=['GET', 'POST'])
 def events():

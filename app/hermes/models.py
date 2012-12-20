@@ -1,14 +1,10 @@
 # from __future__ import print_function
 import savalidation.validators as val
 
-from inspect import isclass, getmembers
-from sys import modules
 from datetime import datetime as dt, date as d
 
-from app import app, db
-from sqlalchemy.exc import IntegrityError, OperationalError
-from savalidation import ValidationMixin, ValidationError
-from flask.ext.restless import APIManager
+from app import db
+from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 # from sqlalchemy.schema import UniqueConstraint
 
@@ -63,19 +59,3 @@ class Event(db.Model, ValidationMixin):
 	def __repr__(self):
 		return ('<Type(%r, %r, %r, %r)>'
 			% (self.symbol, self.value, self.type_id, self.date))
-
-# Create the Flask-Restless API manager.
-mgr = APIManager(app, flask_sqlalchemy_db=db)
-
-# Create API endpoints (available at /api/<tablename>)
-API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError, IntegrityError, OperationalError]
-
-kwargs = {
-	'methods': app.config['API_METHODS'],
-	'validation_exceptions': API_EXCEPTIONS,
-	'allow_functions': app.config['API_ALLOW_FUNCTIONS'],
-	'allow_patch_many': app.config['API_ALLOW_PATCH_MANY']}
-
-classes = getmembers(modules[__name__], isclass)
-api_classes = filter(lambda x: str(x[1]).startswith("<class 'app"), classes)
-[mgr.create_api(eval(tuple[0]), **kwargs) for tuple in api_classes]
