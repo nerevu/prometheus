@@ -2,10 +2,11 @@ from __future__ import print_function
 from inspect import isclass, getmembers
 from importlib import import_module
 from itertools import imap, starmap, repeat
+from datetime import date as d
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
@@ -18,6 +19,24 @@ module_names = ['main', 'hermes']
 model_names = ['app.%s.models' % x for x in module_names]
 bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
+
+topnav = [
+	{'id': 'events', 'caption': 'Events', 'location': 'hermes.events'},
+	{'id': 'prices', 'caption': 'Prices', 'location': 'hermes.prices'},
+	{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'},
+	{'id': 'api', 'caption': 'API', 'location': 'hermes.api'}]
+
+hero = {'heading': 'Prometheus: a global asset allocation tool', 'text': 'Prometheus is a full featured web app that tells you how your stock portfolio has performed over time and gives insight into how to optimize your asset allocation. Additionally, Prometheus monitors your portfolio to alert you when you need to rebalance or if you are consistently underpeforming the market on a risk adjusted basis.', 'location': 'main.about'}
+
+sub_units = [
+	{'heading': 'Events', 'text': 'See all your stocks events in one convenient location. Track stock splits, dividend payments, mergers and more!', 'location': 'hermes.events'},
+	{'heading': 'Prices', 'text': 'Update your stock prices with the click of a button! Automatically grap the latest pricing information from Yahoo or Google.', 'location': 'hermes.prices'},
+	{'heading': 'Net Worth', 'text': 'See how the value of your portfolio over time with these sleek interactive charts! Instantly see how the effects of dividends impacts your return.', 'location': 'hermes.worth'},
+	{'heading': 'API', 'text': 'Use this app as web service to integrate into your own site through the RESTful API. Supports queries, additions, deletions, modifications, and filters.', 'location': 'hermes.api'}]
+
+site = {'id': 'prometheus', 'caption': 'Prometheus', 'date': d.today().strftime("%Y"),
+	'author': 'Reuben Cummings', 'author_url': 'http://reubano.github.com',
+	'sub_span': 12/len(sub_units), 'location': 'main.home'}
 
 def _get_app_classes(module):
 	classes = getmembers(module, isclass)
@@ -33,6 +52,14 @@ def create_app(config_mode=None, config_file=None):
 	if config_mode: app.config.from_object('config.%s' % config_mode)
 	if config_file: app.config.from_pyfile(config_file)
 	[app.register_blueprint(bp) for bp in blueprints]
+
+	# set g variables
+	@app.before_request
+	def before_request():
+		g.site = site
+		g.topnav = topnav
+		g.hero = hero
+		g.sub_units = sub_units
 
 	@app.errorhandler(404)
 	def not_found(error):

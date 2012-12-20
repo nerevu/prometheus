@@ -1,44 +1,88 @@
-{% extends "base.html" %}
+{% extends "page.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
-{% block form %}
-<div class="row-fluid"><div class="span12">
-	<form action="{{ url_for('hermes.add_event') }}" class="form-inline" method="post">
-		{{ form.hidden_tag() }}
+{% block title %}{{ title }}{% endblock %}
+{% block heading %}{{ heading }}{% endblock %}
+{% block text %}{{ text }}{% endblock %}
+{% block main_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<form class="form form-inline" method="post">
+		{{ form1.hidden_tag() }}
+		{{ wtf.form_errors(form1, True) }}
 
-		{{ wtf.inline_field(form.symbol) }}
-		{{ wtf.inline_field(form.type_id) }}
-		{{ wtf.inline_field(form.value) }}
-		{{ wtf.inline_field(form.date) }}
+		{{ wtf.inline_field(form1.symbol) }}
+		{{ wtf.inline_field(form1.type_id) }}
+		{{ wtf.inline_field(form1.value) }}
+		{{ wtf.inline_field(form1.date) }}
 
-		<button type="submit" class="btn">Submit Entry</button>
-	</form>
-</div></div>
-{% endblock %}
-{% block events %}
-<div class="row-fluid"><div class="span12">
-	{% if events %}
-	<table class="table table-striped">
-		<caption>Event List</caption>
-		<thead><tr>
-			<th>Symbol</th><th>Type</th><th>Unit</th><th>Value</th><th>Date</th>
-		</tr></thead>
-		<tbody>
-		{% for event in events %}
-		<tr>
-			<td>{{ event[0].symbol }}</td>
-			<td>{{ event[1].name }}</td>
-			<td>{{ event[1].unit }}</td>
-			<td class="USD">{{ event[0].value }}</td>
-			<td>{{ event[0].date }}</td>
-		</tr>
-		{% endfor %}
-		</tbody>
-	</table>
-	{% else %}
-	<div class="well well-small">
-		Unbelievable. No events found.
+		<button name="{{ url_for('hermes.add_event') }}" type="submit" class="btn">Submit Entry</button>
+		</form>
 	</div>
-	{% endif %}
-</div></div>
-{% endblock %}
+</div>
+<div class="row-fluid">
+	<div class="span6 offset2">
+		{% if events %}
+		<table class="table table-striped">
+			<caption>Event List</caption>
+			<thead><tr>
+				<th>Symbol</th><th>Type</th><th>Unit</th><th>Value</th><th>Date</th>
+			</tr></thead>
+			<tbody>
+			{% for event in events %}
+			<tr>
+				<td>{{ event[0].symbol }}</td>
+				<td>{{ event[1].name }}</td>
+				<td>{{ event[1].unit }}</td>
+				<td class="USD">{{ event[0].value|round(2) }}</td>
+				<td>{{ event[0].date }}</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<div class="well well-small">
+			Unbelievable. No events found.
+		</div>
+		{% endif %}
+	</div>
+</div>
+<hr>
+<div class="row-fluid">
+	<div class="span12">
+		<form class="form form-inline" method="post">
+		{{ form2.hidden_tag() }}
+		{{ wtf.form_errors(form2, True) }}
+
+		{{ wtf.inline_field(form2.name) }}
+		{{ wtf.inline_field(form2.unit) }}
+
+		<button name="{{ url_for('hermes.add_type') }}" type="submit" class="btn">Submit Entry</button>
+		</form>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span6 offset2">
+		{% if types %}
+		<table class="table table-striped">
+			<caption>Type List</caption>
+			<thead><tr>
+				<th>Type Name</th><th>Unit</th>
+			</tr></thead>
+			<tbody>
+			{% for type in types %}
+			<tr>
+				<td>{{ type.name }}</td>
+				<td>{{ type.unit }}</td>
+			</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<div class="well well-small">
+			Unbelievable. No types found.
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock main_content %}
 

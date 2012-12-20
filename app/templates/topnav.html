@@ -1,0 +1,19 @@
+<div class="navbar navbar-inverse navbar-fixed-top"><div class="navbar-inner">
+	<div class="container">
+		<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+			{% for link in g.topnav %}
+			<span class="icon-bar"></span>
+			{% endfor %}
+		</a>
+		<a class="brand" href="{{ url_for('%s' % g.site.location) }}">{{ g.site.caption }}</a>
+		<div class="nav-collapse collapse">
+			<ul class="nav">
+				{% for link in g.topnav %}
+				<li{% if id == active_page %} class="active"{% endif %}><a href="{{ url_for('%s' % link.location) }}">
+				{{ link.caption|e }}</a></li>
+				{% endfor %}
+			</ul>
+		</div><!--/.nav-collapse -->
+	</div>
+</div></div>
+
