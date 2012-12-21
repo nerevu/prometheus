@@ -8,7 +8,7 @@ class EventTypeForm(Form):
 class EventForm(Form):
     symbol = TextField('Symbol', description='Stock ticker symbol',
     	validators=[Required()])
-    type_id = SelectField('Type', description='Type of event', coerce=int,
+    event_type_id = SelectField('Event Type', description='Type of event', coerce=int,
     	validators=[Required()])
     value = FloatField('Value', description='Amount the event was worth',
     	validators=[Required()])
