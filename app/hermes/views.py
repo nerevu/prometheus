@@ -9,7 +9,7 @@ from .models import *
 hermes = Blueprint('hermes', __name__)
 
 def _get_form_data():
-	result = Type.query.order_by('name').all()
+	result = EventType.query.order_by('name').all()
 	choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
 	values = [x.id for x in result]
 	values = sorted(values)
@@ -37,7 +37,7 @@ def events():
 	heading = 'Add events to the database'
 	text = 'On this page you can add events to the database and see them instantly updated in the lists below.'
 
-	events = db.session.query(Event, Type).join(Type).order_by(Event.date)
+	events = db.session.query(Event, EventType).join(EventType).order_by(Event.date)
 	choices, validators = _get_form_data()
 	form = EventForm()
 	form.type_id.choices = choices
@@ -75,19 +75,19 @@ def types():
 	heading = 'Add event types to the database'
 	text = 'On this page you can add event types to the database and see them instantly updated in the lists below.'
 
-	types = db.session.query(Type).order_by(Type.name)
-	form = TypeForm()
+	types = db.session.query(EventType).order_by(EventType.name)
+	form = EventTypeForm()
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
 		'events': events, 'types': types, 'form': form, 'legend': legend,
 		'post_url': post_url}
 
 	return render_template('hermes/event_type.html', **kwargs)
 
-	form = TypeForm()
 @hermes.route('/add_event_type/', methods=['GET', 'POST'])
 def add_event_type():
+	form = EventTypeForm()
 	if form.validate_on_submit():
-		type = Type()
+		type = EventType()
 		form.populate_obj(type)
  		db.session.add(type)
 		db.session.commit()

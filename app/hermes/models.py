@@ -8,9 +8,9 @@ from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 # from sqlalchemy.schema import UniqueConstraint
 
-class Type(db.Model, ValidationMixin):
 	# schema
 	__tablename__ = 'hermes_type'
+class EventType(db.Model, ValidationMixin):
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
@@ -41,21 +41,23 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(10), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	type_id = db.Column(db.Integer, db.ForeignKey('hermes_type.id'))
-	type = db.relationship('Type', backref='events', lazy='joined')
+	event_type_id = db.Column(db.String(32), db.ForeignKey('event_type.id'))
+	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
 	# validation
 	# UniqueConstraint('symbol', 'date', 'type_id', 'value')
 	val.validates_constraints()
 
-	def __init__(self, symbol=None, value=None, type=None, type_id=None, date=None):
+	def __init__(self, symbol=None, value=None, type=None, event_type_id=None,
+		date=None):
+
 		self.symbol = symbol
 		self.value = value
-		self.type_id = type_id
+		self.event_type_id = event_type_id
 		self.type = type
 		self.date = (date or d.today())
 
 	def __repr__(self):
-		return ('<Type(%r, %r, %r, %r)>'
-			% (self.symbol, self.value, self.type_id, self.date))
+		return ('<Event(%r, %r, %r, %r)>'
+			% (self.symbol, self.value, self.event_type_id, self.date))

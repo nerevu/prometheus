@@ -1,7 +1,7 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from wtforms.ext.dateutil.fields import DateField
 
-class TypeForm(Form):
+class EventTypeForm(Form):
     name = TextField('Type Name', description='Type of event', validators=[Required()])
     unit = TextField('Unit', description='Unit of measurement', validators=[Required()])
 
