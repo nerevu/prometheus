@@ -8,9 +8,9 @@ from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 # from sqlalchemy.schema import UniqueConstraint
 
+class EventType(db.Model, ValidationMixin):
 	# schema
 	__tablename__ = 'hermes_type'
-class EventType(db.Model, ValidationMixin):
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
