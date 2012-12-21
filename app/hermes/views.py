@@ -46,7 +46,7 @@ def events():
 		'events': events, 'types': types, 'form': form, 'legend': legend,
 		'post_url': post_url}
 
-	return render_template('hermes/events.html', **kwargs)
+	return render_template('hermes/event.html', **kwargs)
 
 @hermes.route('/add_event/', methods=['GET', 'POST'])
 def add_event():
@@ -81,7 +81,7 @@ def types():
 		'events': events, 'types': types, 'form': form, 'legend': legend,
 		'post_url': post_url}
 
-	return render_template('hermes/types.html', **kwargs)
+	return render_template('hermes/event_type.html', **kwargs)
 
 	form = TypeForm()
 @hermes.route('/add_event_type/', methods=['GET', 'POST'])
