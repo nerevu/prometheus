@@ -9,15 +9,14 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # from sqlalchemy.schema import UniqueConstraint
 
 class EventType(db.Model, ValidationMixin):
-	# schema
-	__tablename__ = 'hermes_type'
+	__table_args__ = (db.UniqueConstraint('name', 'unit'), {})
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	name = db.Column(db.String(50), nullable=False, unique=True)
-	unit = db.Column(db.String(25), nullable=False, default='USD')
+	name = db.Column(db.String(64), nullable=False, unique=True)
+	unit = db.Column(db.String(32), nullable=False, default='USD')
 
 	# validation
 	val.validates_constraints()
@@ -33,19 +32,21 @@ class EventType(db.Model, ValidationMixin):
 		return '<Type(%r, %r)>' % (self.name, self.unit)
 
 class Event(db.Model, ValidationMixin):
+	__table_args__ = (db.UniqueConstraint('symbol', 'date', 'event_type_id',
+		'value'), {})
+
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	symbol = db.Column(db.String(10), nullable=False)
+	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
 	event_type_id = db.Column(db.String(32), db.ForeignKey('event_type.id'))
 	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
 	# validation
-	# UniqueConstraint('symbol', 'date', 'type_id', 'value')
 	val.validates_constraints()
 
 	def __init__(self, symbol=None, value=None, type=None, event_type_id=None,
