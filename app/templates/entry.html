@@ -1,0 +1,51 @@
+{% extends "page.html" %}
+{% import "bootstrap_wtf.html" as wtf %}
+{% block title %}{{ title }}{% endblock %}
+{% block heading %}{{ heading }}{% endblock %}
+{% block text %}{{ text }}{% endblock %}
+{% block main_content %}
+<div class="row-fluid">
+	<div class="span3">
+		<form action="{{ url_for('%s' % post_url) }}" class="form" method="post">
+			<legend>{{ form_caption }}</legend>
+
+			{{ form.hidden_tag() }}
+			{{ wtf.form_errors(form, True) }}
+
+			{% for f in form_fields %}
+			{{ wtf.inline_field(form['%s' % f]) }}
+			{% endfor %}
+
+			<div class="controls">
+				<button type="submit" class="btn">Submit Entry</button>
+			</div>
+		</form>
+	</div>
+	<div class="span7 offset2">
+		{% if rows %}
+		<table class="table table-striped">
+			<caption>{{ table_caption }}</caption>
+			<thead><tr>
+				{% for h in table_headers %}<th>{{ h }}</th>{% endfor %}
+			</tr></thead>
+			<tbody>
+				{% for d in rows %}
+				<tr>
+					{% for f in data_fields %}
+						{% if f[0] is string %}
+						<td>{{ d['%s' % f] }}</td>
+						{% else %}
+						<td>{{ d[f[0]]['%s' % f[1]] }}</td>
+						{% endif %}
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<div class="well well-small"> Unbelievable! No data found.</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock main_content %}
+
