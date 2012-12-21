@@ -22,7 +22,7 @@ model_alias = 'model'
 
 topnav = [
 	{'id': 'events', 'caption': 'Events', 'location': 'hermes.events'},
-	{'id': 'types', 'caption': 'Types', 'location': 'hermes.types'},
+	{'id': 'types', 'caption': 'Types', 'location': 'hermes.event_types'},
 	{'id': 'prices', 'caption': 'Prices', 'location': 'hermes.prices'},
 	{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'},
 	{'id': 'api', 'caption': 'API', 'location': 'hermes.api'}]
