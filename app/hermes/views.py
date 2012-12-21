@@ -31,6 +31,7 @@ def api():
 @hermes.route('/events/', methods=['GET', 'POST'])
 def events():
 	id = 'events'
+	post_url = 'hermes.add_event'
 	title = 'Events'
 	legend = 'Event entry form'
 	heading = 'Add events to the database'
@@ -42,7 +43,8 @@ def events():
 	form.type_id.choices = choices
 	form.type_id.validators = validators
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form, 'legend': legend}
+		'events': events, 'types': types, 'form': form, 'legend': legend,
+		'post_url': post_url}
 
 	return render_template('hermes/events.html', **kwargs)
 
@@ -67,6 +69,7 @@ def add_event():
 @hermes.route('/types/', methods=['GET', 'POST'])
 def types():
 	id = 'types'
+	post_url = 'hermes.add_event_type'
 	title = 'Types'
 	legend = 'Type entry form'
 	heading = 'Add event types to the database'
@@ -75,13 +78,14 @@ def types():
 	types = db.session.query(Type).order_by(Type.name)
 	form = TypeForm()
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form, 'legend': legend}
+		'events': events, 'types': types, 'form': form, 'legend': legend,
+		'post_url': post_url}
 
 	return render_template('hermes/types.html', **kwargs)
 
-@hermes.route('/add_type/', methods=['GET', 'POST'])
-def add_type():
 	form = TypeForm()
+@hermes.route('/add_event_type/', methods=['GET', 'POST'])
+def add_event_type():
 	if form.validate_on_submit():
 		type = Type()
 		form.populate_obj(type)

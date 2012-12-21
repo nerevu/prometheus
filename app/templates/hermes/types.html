@@ -7,7 +7,7 @@
 <div class="row-fluid">
 	<div class="span3">
 		<div></div>
-		<form action="{{ url_for('hermes.add_type') }}" class="form" method="post">
+		<form action="{{ url_for('%s' % post_url) }}" class="form" method="post">
 			<legend>{{ legend }}</legend>
 
 			{{ form.hidden_tag() }}
