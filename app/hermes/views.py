@@ -66,9 +66,9 @@ def add_event():
 		for k, v in form.errors.iteritems()]
 	return redirect(url_for('hermes.events'))
 
-@hermes.route('/types/', methods=['GET', 'POST'])
+@hermes.route('/event_types/', methods=['GET', 'POST'])
 def types():
-	id = 'types'
+	id = 'event_types'
 	post_url = 'hermes.add_event_type'
 	title = 'Types'
 	legend = 'Type entry form'
