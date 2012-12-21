@@ -1,7 +1,7 @@
 from os.path import abspath
 
 from flask import current_app as app
-from app import create_app
+from app import create_app, db
 # from app.model import init_db
 from flask.ext.script import Manager
 
@@ -24,6 +24,15 @@ def cleardb():
 		"""Clears database"""
 		db.drop_all()
 		print 'Database cleared'
+
+@manager.command
+def resetdb():
+	with app.app_context():
+
+		"""Resets database"""
+		db.drop_all()
+		db.create_all()
+		print 'Database reset'
 
 @manager.command
 def initdb():
