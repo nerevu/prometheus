@@ -33,7 +33,6 @@ class EventType(db.Model, ValidationMixin):
 		return '<Type(%r, %r)>' % (self.name, self.unit)
 
 class Event(db.Model, ValidationMixin):
-	__tablename__ = 'hermes_event'
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
