@@ -25,9 +25,6 @@ class EventType(db.Model, ValidationMixin):
 		self.name = name
 		self.unit = unit
 
-	def getUnit(self):
-		return self.unit
-
 	def __repr__(self):
 		return '<Type(%r, %r)>' % (self.name, self.unit)
 
@@ -42,7 +39,7 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	event_type_id = db.Column(db.String(32), db.ForeignKey('event_type.id'))
+	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'))
 	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
