@@ -33,32 +33,37 @@ def events():
 	id = 'events'
 	post_url = 'hermes.add_event'
 	title = 'Events'
-	legend = 'Event entry form'
+	form_caption = 'Event Entry Form'
+	form_fields = ['symbol', 'event_type_id', 'value', 'date']
+	table_caption = 'Event Type List'
+	table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
+	data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'), (0, 'date')]
+
 	heading = 'Add events to the database'
 	text = 'On this page you can add events to the database and see them instantly updated in the lists below.'
 
-	events = db.session.query(Event, EventType).join(EventType).order_by(Event.date)
+	events = db.session.query(Event, EventType).join(EventType).order_by(Event.date).all()
 	choices, validators = _get_form_data()
 	form = EventForm()
-	form.type_id.choices = choices
-	form.type_id.validators = validators
+	form.event_type_id.choices = choices
+	form.event_type_id.validators = validators
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form, 'legend': legend,
+		'rows': events, 'form': form, 'form_caption': form_caption,
+		'table_caption': table_caption, 'table_headers': table_headers,
+		'data_fields': data_fields, 'form_fields': form_fields,
 		'post_url': post_url}
 
-	return render_template('hermes/event.html', **kwargs)
+	return render_template('entry.html', **kwargs)
 
 @hermes.route('/add_event/', methods=['GET', 'POST'])
 def add_event():
 	choices, validators = _get_form_data()
 	form = EventForm()
-	form.type_id.choices = choices
-	form.type_id.validators = validators
+	form.event_type_id.choices = choices
+	form.event_type_id.validators = validators
 	if form.validate_on_submit():
 		event = Event()
 		form.populate_obj(event)
-		print('Submitted!')
-		print(form.type_id.data)
  		db.session.add(event)
 		db.session.commit()
 		flash('Success! A new event was posted.', 'alert alert-success')
@@ -67,21 +72,27 @@ def add_event():
 	return redirect(url_for('hermes.events'))
 
 @hermes.route('/event_types/', methods=['GET', 'POST'])
-def types():
+def event_types():
 	id = 'event_types'
 	post_url = 'hermes.add_event_type'
 	title = 'Types'
-	legend = 'Type entry form'
+	form_caption = 'Event Type Entry Form'
+	form_fields = ['name', 'unit']
+	table_caption = 'Event Type List'
+	table_headers = ['Type Name', 'Unit']
+	data_fields = ['name', 'unit']
 	heading = 'Add event types to the database'
 	text = 'On this page you can add event types to the database and see them instantly updated in the lists below.'
 
-	types = db.session.query(EventType).order_by(EventType.name)
+	event_types = db.session.query(EventType).order_by(EventType.name).all()
 	form = EventTypeForm()
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'events': events, 'types': types, 'form': form, 'legend': legend,
+		'rows': event_types, 'form': form, 'form_caption': form_caption,
+		'table_caption': table_caption, 'table_headers': table_headers,
+		'data_fields': data_fields, 'form_fields': form_fields,
 		'post_url': post_url}
 
-	return render_template('hermes/event_type.html', **kwargs)
+	return render_template('entry.html', **kwargs)
 
 @hermes.route('/add_event_type/', methods=['GET', 'POST'])
 def add_event_type():
@@ -94,4 +105,4 @@ def add_event_type():
 		flash('Success! A new event type was posted.', 'alert alert-success')
 	else: [flash('%s: %s' % (k.title(), v[0]), 'alert alert-error')
 		for k, v in form.errors.iteritems()]
-	return redirect(url_for('hermes.types'))
+	return redirect(url_for('hermes.event_types'))
