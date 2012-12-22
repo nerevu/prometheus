@@ -1,7 +1,7 @@
 from __future__ import print_function
 from inspect import isclass, getmembers
 from importlib import import_module
-from itertools import imap, starmap, repeat
+from itertools import imap, repeat
 from datetime import date as d
 
 from sqlalchemy.exc import IntegrityError, OperationalError
