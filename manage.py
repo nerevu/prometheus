@@ -21,7 +21,7 @@ def createdb():
 def cleardb():
 	with app.app_context():
 
-		"""Deletes all database tables"""
+		"""Removes all content from database"""
 		db.drop_all()
 		print 'Database cleared'
 
@@ -29,7 +29,7 @@ def cleardb():
 def resetdb():
 	with app.app_context():
 
-		"""Removes all content from database"""
+		"""Removes all content from database and creates new tables"""
 		db.drop_all()
 		db.create_all()
 		print 'Database reset'
