@@ -40,7 +40,8 @@ for LINE in $(git diff-index --cached --full-index $against); do
 		COMMANDS='php -l'
 	elif [ $FILEEXT == 'py' ]; then
 		PROGRAMS=$'pep8\npylint'
-		COMMANDS=$'pep8 --ignore=W191\npylint --rcfile=tests/standard.rc -ry -fparseable'
+# 		COMMANDS=$'pep8 --ignore=W191,E128\npylint --rcfile=app/tests/standard.rc -ry -fparseable'
+		COMMANDS=$'pep8 --ignore=W191,E128'
 	else
 		continue
 	fi
@@ -67,6 +68,7 @@ for LINE in $(git diff-index --cached --full-index $against); do
 		fi
 	done
 done
+
 unset IFS
 rm tmp.txt
 
