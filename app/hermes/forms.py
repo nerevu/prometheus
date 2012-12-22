@@ -12,6 +12,11 @@ def _get_validators(a_class, value_field):
 	values = sorted(values)
 	return [Required(), AnyOf(values, message=u'Invalid value, must be one of: %(values)s')]
 
+class CommodityForm(Form):
+	cusip = TextField('CUSIP', description='Stock CUSIP', validators=[Required()])
+	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters', validators=[Required()])
+	name = TextField('Stock Name', description='Stock Name', validators=[Required()])
+
 class EventTypeForm(Form):
 	name = TextField('Type Name', description='Type of event', validators=[Required()])
 	unit = TextField('Unit', description='Unit of measurement', validators=[Required()])
@@ -33,4 +38,22 @@ class EventForm(Form):
 			EventType, 'id', 'name', 'unit')
 
 		form.event_type_id.validators = _get_validators(EventType, 'id')
+		return form
+
+class PriceForm(Form):
+	commodity_id = SelectField('Stock', description='Stock', coerce=int)
+	currency_id = SelectField('Currency', description='Currency the price is in'
+		, coerce=int)
+	close = FloatField('Close', description='End of day closing price',
+		validators=[Required()])
+	date = DateField('Date', description='Closing date',
+		validators=[Required()])
+
+	@classmethod
+	def new(cls):
+		form = cls()
+		form.commodity_id.choices = _get_choices(Commodity, 'id', 'Symbol')
+		form.commodity_id.validators = _get_validators(Commodity, 'id')
+		form.currency_id.choices = _get_choices(Commodity, 'id', 'Symbol')
+		form.currency_id.validators = _get_validators(Commodity, 'id')
 		return form
