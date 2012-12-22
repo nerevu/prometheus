@@ -1,53 +1,67 @@
-from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField, AnyOf
+from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
+from flask.ext.wtf import AnyOf
 from wtforms.ext.dateutil.fields import DateField
 from .models import EventType
 
+univals = [Required()]
+
+
 def _get_choices(a_class, value_field, *args):
 	result = a_class.query.order_by('name').all()
-	return [(getattr(x, value_field), '%s' % ', '.join(args).title()) for x in result]
+	return [(getattr(x, value_field), '%s' % ', '.join(args).title())
+		for x in result]
+
 
 def _get_validators(a_class, value_field):
 	result = a_class.query.order_by('name').all()
 	values = [getattr(x, value_field) for x in result]
 	values = sorted(values)
-	return [Required(), AnyOf(values, message=u'Invalid value, must be one of: %(values)s')]
+	return [Required(), AnyOf(values, message=u'Invalid value, must be one of:'
+		'%(values)s')]
+
 
 class CommodityForm(Form):
-	cusip = TextField('CUSIP', description='Stock CUSIP', validators=[Required()])
-	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters', validators=[Required()])
-	name = TextField('Stock Name', description='Stock Name', validators=[Required()])
+	cusip = TextField('CUSIP', description='Stock CUSIP', validators=univals)
+	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters',
+		validators=univals)
+	name = TextField('Stock Name', description='Stock Name', validators=univals)
+
 
 class EventTypeForm(Form):
-	name = TextField('Type Name', description='Type of event', validators=[Required()])
-	unit = TextField('Unit', description='Unit of measurement', validators=[Required()])
+	name = TextField('Type Name', description='Type of event',
+		validators=univals)
+	unit = TextField('Unit', description='Unit of measurement',
+		validators=univals)
+
 
 class EventForm(Form):
 	symbol = TextField('Symbol', description='Stock ticker symbol',
-		validators=[Required()])
+		validators=univals)
 	event_type_id = SelectField('Event Type', description='Type of event',
 		coerce=int)
 	value = FloatField('Value', description='Amount the event was worth',
-		validators=[Required()])
+		validators=univals)
 	date = DateField('Date', description='Date the event happened',
-		validators=[Required()])
+		validators=univals)
 
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.event_type_id.choices = _get_choices(
-			EventType, 'id', 'name', 'unit')
+		form.event_type_id.choices = _get_choices(EventType, 'id', 'name',
+			'unit')
 
 		form.event_type_id.validators = _get_validators(EventType, 'id')
 		return form
 
+
 class PriceForm(Form):
 	commodity_id = SelectField('Stock', description='Stock', coerce=int)
-	currency_id = SelectField('Currency', description='Currency the price is in'
-		, coerce=int)
+	currency_id = SelectField('Currency',
+		description='Currency the price is in', coerce=int)
 	close = FloatField('Close', description='End of day closing price',
-		validators=[Required()])
+		validators=univals)
 	date = DateField('Date', description='Closing date',
-		validators=[Required()])
+		validators=univals)
 
 	@classmethod
 	def new(cls):
