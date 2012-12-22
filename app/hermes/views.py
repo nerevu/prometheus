@@ -3,34 +3,44 @@
 from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
 from .forms import EventForm, EventTypeForm
-from .models import Event, EventType
+from .models import Event, EventType, Price, Commodity
 
 hermes = Blueprint('hermes', __name__)
 
 def _get_table_info(table):
-	def get_entry():
+	def get_event():
 		form_fields = ['symbol', 'event_type_id', 'value', 'date']
 		table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
-		data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'), (0, 'date')]
 		query = db.session.query(Event, EventType).join(EventType).order_by(Event.date)
-		return form_fields, table_headers, data_fields, query
+		data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'), (0, 'date')]
+		return form_fields, table_headers, query, data_fields
 
-	def get_entry_type():
+	def get_event_type():
 		form_fields = ['name', 'unit']
 		table_headers = ['Type Name', 'Unit']
-		data_fields = ['name', 'unit']
 		query = db.session.query(EventType).order_by(EventType.name)
-		return form_fields, table_headers, data_fields, query
+		data_fields = form_fields
+		return form_fields, table_headers, query, data_fields
 
 	def get_price():
-		pass
+		form_fields = ['commodity_id', 'currency_id', 'date', 'close']
+		table_headers = ['Stock', 'Currency', 'Price', 'Date']
+		Currency = aliased(Commodity)
+# 		query = db.session.query(Price, Commodity, Currency).join(Price.commodity).join(Currency, Price.currency).order_by(Price.date)
+# 		query = db.session.query(Price).order_by(Price.name)
+		data_fields = [(1, 'symbol'), (2, 'symbol'), (0, 'date'), (0, 'close')]
+		return form_fields, table_headers, data_fields
 
 	def get_commodity():
-		pass
+		form_fields = ['cusip', 'symbol', 'name']
+		table_headers = ['CUSIP', 'Symbol', 'Name']
+		query = db.session.query(Commodity).order_by(Commodity.name)
+		data_fields = form_fields
+		return form_fields, table_headers, query, data_fields
 
 	switch = {
-		'event': get_entry(),
-		'event_type': get_entry_type(),
+		'event': get_event(),
+		'event_type': get_event_type(),
 		'price': get_price(),
 		'commodity': get_commodity()}
 
