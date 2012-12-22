@@ -51,20 +51,29 @@ def _get_table_info(table):
 	return switch.get(table)
 
 
+def _get_plural(word):
+	if word[-1] == 'y':
+		return word[:-1] + 'ies'
+	else:
+		return word + 's'
+
+
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
+	plural_table = _get_plural(table).replace('_', ' ')
 	table_as_class = table.title().replace('_', '')
-	table_as_words = table.title().replace('_', ' ')
+	table_title = table.title().replace('_', ' ')
+	plural_table_title = plural_table.title()
 	form_fields, table_headers, query, data_fields = _get_table_info(table)
 	id = table
 	post_location = 'hermes.add'
 	post_table = table
-	title = '%ss' % table.title()
-	table_caption = '%s List' % table_as_words
-	form_caption = '%s Entry Form' % table_as_words
-	heading = 'Add %ss to the database' % table.replace('_', ' ')
-	text = 'On this page you can add %ss to the database and see them ' \
-		'instantly updated in the lists below.' % table.replace('_', ' ')
+	title = '%s' % plural_table_title
+	table_caption = '%s List' % table_title
+	form_caption = '%s Entry Form' % table_title
+	heading = 'Add %s to the database' % plural_table
+	text = 'On this page you can add %s to the database and see them ' \
+		'instantly updated in the lists below.' % plural_table
 	results = query.all()
 
 	try:
