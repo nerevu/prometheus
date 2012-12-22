@@ -1,15 +1,17 @@
+from itertools import imap, repeat
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import AnyOf
 from wtforms.ext.dateutil.fields import DateField
-from .models import EventType
+from .models import EventType, Commodity
 
 univals = [Required()]
 
 
 def _get_choices(a_class, value_field, *args):
-	result = a_class.query.order_by('name').all()
-	return [(getattr(x, value_field), '%s' % ', '.join(args).title())
-		for x in result]
+	result = a_class.query.order_by(args[0]).all()
+	choices = [(getattr(x, value_field),
+		'%s' % ', '.join(imap(getattr, repeat(x), args))) for x in result]
+	return choices
 
 
 def _get_validators(a_class, value_field):
@@ -66,8 +68,8 @@ class PriceForm(Form):
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.commodity_id.choices = _get_choices(Commodity, 'id', 'Symbol')
+		form.commodity_id.choices = _get_choices(Commodity, 'id', 'symbol')
 		form.commodity_id.validators = _get_validators(Commodity, 'id')
-		form.currency_id.choices = _get_choices(Commodity, 'id', 'Symbol')
+		form.currency_id.choices = _get_choices(Commodity, 'id', 'symbol')
 		form.currency_id.validators = _get_validators(Commodity, 'id')
 		return form
