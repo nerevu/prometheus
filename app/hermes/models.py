@@ -69,9 +69,9 @@ class Price(db.Model, ValidationMixin):
 		onupdate=dt.utcnow())
 
 	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'), nullable=False)
-	commodity = db.relationship('Commodity', backref='commodity_prices', lazy='joined')
+	commodity = db.relationship('Commodity', primaryjoin='Commodity.id==Price.commodity_id', backref='commodity_prices', lazy='joined')
 	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id'), nullable=False)
-	currency = db.relationship('Commodity', backref='currency_prices', lazy='joined')
+	currency = db.relationship('Commodity', primaryjoin='Commodity.id==Price.currency_id', backref='currency_prices', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 	close = db.Column(db.Float, nullable=False)
 
