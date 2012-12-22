@@ -15,7 +15,13 @@
 	<div class="span{{ g.site.sub_span }}">
 		<h2>{{ row.heading }}</h2>
 		<p>{{ row.text }}</p>
-		<p><a class="btn" href="{{ url_for('%s' % row.location) }}">View details &raquo;</a></p>
+		<p>
+			{% if row.table %}
+				<a class="btn" href="{{  url_for('%s' % row.location, table=row.table) }}">View details &raquo;</a>
+			{% else %}
+				<a class="btn" href="{{ url_for('%s' % row.location) }}">View details &raquo;</a>
+			{% endif %}
+		</p>
 	</div>
 	{% endfor %}
 </div>

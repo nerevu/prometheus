@@ -2,6 +2,7 @@ from os import path as p
 
 _basedir = p.abspath(p.dirname(__file__))
 
+
 # configuration
 class Config(object):
 	DEBUG = False
@@ -14,7 +15,7 @@ class Config(object):
 	BOOTSTRAP_HTML5_SHIM = True
 	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT = ''
 	CSRF_ENABLED = True
-	CSRF_SESSION_KEY='csrf_session_key2'
+	CSRF_SESSION_KEY = 'csrf_session_key2'
 	RECAPTCHA_USE_SSL = False
 	RECAPTCHA_PUBLIC_KEY = 'recaptcha_public_key'
 	RECAPTCHA_PRIVATE_KEY = 'recaptcha_private_key'
@@ -22,17 +23,20 @@ class Config(object):
 	API_METHODS = ['GET', 'POST', 'DELETE', 'PATCH', 'PUT']
 	API_ALLOW_FUNCTIONS = True
 	API_ALLOW_PATCH_MANY = True
+
+
 class Production(Config):
 	SQLALCHEMY_DATABASE_URI = 'mysql://user@localhost/foo'
-	HOST='0.0.0.0'
+	HOST = '0.0.0.0'
 	BOOTSTRAP_USE_CDN = True
 	BOOTSTRAP_FONTAWESOME = True
+
 
 class Development(Config):
 	SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % p.join(_basedir, 'app.db')
 	DEBUG = True
 
+
 class Testing(Config):
 	SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:'
 	TESTING = True
-
