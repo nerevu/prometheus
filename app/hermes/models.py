@@ -39,7 +39,7 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'))
+	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'), nullable=False)
 	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
