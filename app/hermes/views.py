@@ -1,108 +1,90 @@
-from __future__ import print_function
-from pprint import pprint
+# from __future__ import print_function
+# from pprint import pprint
 from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
-from flask.ext.wtf import AnyOf
-from .forms import *
-from .models import *
+from .forms import EventForm, EventTypeForm
+from .models import Event, EventType
 
 hermes = Blueprint('hermes', __name__)
 
-def _get_form_data():
-	result = EventType.query.order_by('name').all()
-	choices = [(x.id, '%s (%s)' % (x.name, x.unit)) for x in result]
-	values = [x.id for x in result]
-	values = sorted(values)
-	validators = [Required(), AnyOf(values, message=u'Invalid value, must be one of: %(values)s')]
-	return choices, validators
+def _get_table_info(table):
+	def get_entry():
+		form_fields = ['symbol', 'event_type_id', 'value', 'date']
+		table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
+		data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'), (0, 'date')]
+		query = db.session.query(Event, EventType).join(EventType).order_by(Event.date)
+		return form_fields, table_headers, data_fields, query
 
-@hermes.route('/prices/', methods=['GET', 'POST'])
-def prices():
-	return render_template('hermes/events.html')
+	def get_entry_type():
+		form_fields = ['name', 'unit']
+		table_headers = ['Type Name', 'Unit']
+		data_fields = ['name', 'unit']
+		query = db.session.query(EventType).order_by(EventType.name)
+		return form_fields, table_headers, data_fields, query
 
-@hermes.route('/worth/', methods=['GET', 'POST'])
-def worth():
-	return render_template('hermes/events.html')
+	def get_price():
+		pass
 
-@hermes.route('/api/', methods=['GET', 'POST'])
-def api():
-	return render_template('hermes/events.html')
+	def get_commodity():
+		pass
 
-@hermes.route('/events/', methods=['GET', 'POST'])
-def events():
-	id = 'events'
-	post_url = 'hermes.add_event'
-	title = 'Events'
-	form_caption = 'Event Entry Form'
-	form_fields = ['symbol', 'event_type_id', 'value', 'date']
-	table_caption = 'Event Type List'
-	table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
-	data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'), (0, 'date')]
+	switch = {
+		'event': get_entry(),
+		'event_type': get_entry_type(),
+		'price': get_price(),
+		'commodity': get_commodity()}
 
-	heading = 'Add events to the database'
-	text = 'On this page you can add events to the database and see them instantly updated in the lists below.'
+	return switch.get(table)
 
-	events = db.session.query(Event, EventType).join(EventType).order_by(Event.date).all()
-	choices, validators = _get_form_data()
-	form = EventForm()
-	form.event_type_id.choices = choices
-	form.event_type_id.validators = validators
-	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'rows': events, 'form': form, 'form_caption': form_caption,
-		'table_caption': table_caption, 'table_headers': table_headers,
-		'data_fields': data_fields, 'form_fields': form_fields,
-		'post_url': post_url}
+@hermes.route('/<table>/', methods=['GET', 'POST'])
+def get(table):
+	form_fields, table_headers, data_fields, query = _get_table_info(table)
+	id = table
+	post_location = 'hermes.add'
+	post_table = table
+	title = '%ss' % table.title()
+	table_caption = '%s List' % table.replace('_', ' ').title()
+	form_caption = '%s Entry Form' % table.replace('_', ' ').title()
+	heading = 'Add %ss to the database' % table.replace('_', ' ')
+	text = 'On this page you can add %ss to the database and see them instantly updated in the lists below.' % table.replace('_', ' ')
+	event_types = query.all()
 
-	return render_template('entry.html', **kwargs)
+	try:
+		form = eval('%sForm.new()' % table.title().replace('_', ''))
+ 	except AttributeError:
+		form = eval('%sForm()' % table.title().replace('_', ''))
 
-@hermes.route('/add_event/', methods=['GET', 'POST'])
-def add_event():
-	choices, validators = _get_form_data()
-	form = EventForm()
-	form.event_type_id.choices = choices
-	form.event_type_id.validators = validators
-	if form.validate_on_submit():
-		event = Event()
-		form.populate_obj(event)
- 		db.session.add(event)
-		db.session.commit()
-		flash('Success! A new event was posted.', 'alert alert-success')
-	else: [flash('%s: %s' % (k.title(), v[0]), 'alert alert-error')
-		for k, v in form.errors.iteritems()]
-	return redirect(url_for('hermes.events'))
-
-@hermes.route('/event_types/', methods=['GET', 'POST'])
-def event_types():
-	id = 'event_types'
-	post_url = 'hermes.add_event_type'
-	title = 'Types'
-	form_caption = 'Event Type Entry Form'
-	form_fields = ['name', 'unit']
-	table_caption = 'Event Type List'
-	table_headers = ['Type Name', 'Unit']
-	data_fields = ['name', 'unit']
-	heading = 'Add event types to the database'
-	text = 'On this page you can add event types to the database and see them instantly updated in the lists below.'
-
-	event_types = db.session.query(EventType).order_by(EventType.name).all()
-	form = EventTypeForm()
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
 		'rows': event_types, 'form': form, 'form_caption': form_caption,
 		'table_caption': table_caption, 'table_headers': table_headers,
 		'data_fields': data_fields, 'form_fields': form_fields,
-		'post_url': post_url}
+		'post_location': post_location, 'post_table': post_table}
 
 	return render_template('entry.html', **kwargs)
 
-@hermes.route('/add_event_type/', methods=['GET', 'POST'])
-def add_event_type():
-	form = EventTypeForm()
+@hermes.route('/add/<table>/', methods=['GET', 'POST'])
+def add(table):
+	try:
+		form = eval('%sForm.new()' % table.title().replace('_', ''))
+ 	except AttributeError:
+		form = eval('%sForm()' % table.title().replace('_', ''))
+
 	if form.validate_on_submit():
-		type = EventType()
-		form.populate_obj(type)
- 		db.session.add(type)
+		entry = eval('%s()' % table.title().replace('_', ''))
+		form.populate_obj(entry)
+ 		db.session.add(entry)
 		db.session.commit()
-		flash('Success! A new event type was posted.', 'alert alert-success')
+		flash('Success! A new %s was posted.' % table.replace('_', ' '), 'alert alert-success')
+
 	else: [flash('%s: %s' % (k.title(), v[0]), 'alert alert-error')
 		for k, v in form.errors.iteritems()]
-	return redirect(url_for('hermes.event_types'))
+	return redirect(url_for('hermes.get', table=table))
+
+@hermes.route('/worth/', methods=['GET', 'POST'])
+def worth():
+	pass
+
+@hermes.route('/api/', methods=['GET', 'POST'])
+def api():
+	pass
+

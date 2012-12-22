@@ -9,7 +9,12 @@
 		<div class="nav-collapse collapse">
 			<ul class="nav">
 				{% for link in g.topnav %}
-				<li{% if id == active_page %} class="active"{% endif %}><a href="{{ url_for('%s' % link.location) }}">
+				<li{% if id == active_page %} class="active"{% endif %}>
+					{% if link.table %}
+						<a href="{{ url_for('%s' % link.location, table=link.table) }}">
+					{% else %}
+						<a href="{{ url_for('%s' % link.location) }}">
+					{% endif %}
 				{{ link.caption|e }}</a></li>
 				{% endfor %}
 			</ul>

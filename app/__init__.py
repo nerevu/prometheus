@@ -21,17 +21,18 @@ bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
 
 topnav = [
-	{'id': 'events', 'caption': 'Events', 'location': 'hermes.events'},
-	{'id': 'types', 'caption': 'Types', 'location': 'hermes.event_types'},
-	{'id': 'prices', 'caption': 'Prices', 'location': 'hermes.prices'},
+	{'id': 'events', 'caption': 'Events', 'location': 'hermes.get', 'table': 'event'},
+	{'id': 'types', 'caption': 'Types', 'location': 'hermes.get', 'table': 'event_type'},
+	{'id': 'prices', 'caption': 'Prices', 'location': 'hermes.get', 'table': 'price'},
+	{'id': 'commodities', 'caption': 'Commodities', 'location': 'hermes.get', 'table': 'commodity'},
 	{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'},
 	{'id': 'api', 'caption': 'API', 'location': 'hermes.api'}]
 
 hero = {'heading': 'Prometheus: a global asset allocation tool', 'text': 'Prometheus is a full featured web app that tells you how your stock portfolio has performed over time and gives insight into how to optimize your asset allocation. Additionally, Prometheus monitors your portfolio to alert you when you need to rebalance or if you are consistently underpeforming the market on a risk adjusted basis.', 'location': 'main.about'}
 
 sub_units = [
-	{'heading': 'Events', 'text': 'See all your stocks events in one convenient location. Track stock splits, dividend payments, mergers and more!', 'location': 'hermes.events'},
-	{'heading': 'Prices', 'text': 'Update your stock prices with the click of a button! Automatically grap the latest pricing information from Yahoo or Google.', 'location': 'hermes.prices'},
+	{'heading': 'Events', 'text': 'See all your stocks events in one convenient location. Track stock splits, dividend payments, mergers and more!', 'location': 'hermes.get', 'table': 'event'},
+	{'heading': 'Prices', 'text': 'Update your stock prices with the click of a button! Automatically grap the latest pricing information from Yahoo or Google.', 'location': 'hermes.get', 'table': 'price'},
 	{'heading': 'Net Worth', 'text': 'See how the value of your portfolio over time with these sleek interactive charts! Instantly see how the effects of dividends impacts your return.', 'location': 'hermes.worth'}]
 
 site = {'id': 'prometheus', 'caption': 'Prometheus', 'date': d.today().strftime("%Y"),
