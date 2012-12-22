@@ -12,9 +12,9 @@ from flask import json
 from tests import TestCase
 
 ENTRY = {
-    'amount':  '42.00',
-    'date':    str(date.today()),
-    'note':    'foobar',
+    'amount': '42.00',
+    'date': str(date.today()),
+    'note': 'foobar',
 }
 
 URL = '/api/entries'

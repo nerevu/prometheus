@@ -12,9 +12,9 @@ from flask import json
 from tests import TestCase
 
 ENTRY = {
-    'amount':  '42.00',
-    'date':    str(date.today()),
-    'note':    'foobar',
+    'amount': '42.00',
+    'date': str(date.today()),
+    'note': 'foobar',
 }
 
 URL = '/api/charts'
@@ -42,8 +42,8 @@ class ChartsTestCase(TestCase):
 
     def test_chart_invalid_month(self):
         resp = self.client.get(URL, query_string={
-            'month':  '2011',
-            'type':   'date',
+            'month': '2011',
+            'type': 'date',
         })
         assert resp.status_code == 400
 

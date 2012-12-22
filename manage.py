@@ -6,8 +6,10 @@ from app import create_app, db
 from flask.ext.script import Manager
 
 manager = Manager(create_app)
-manager.add_option('-m', '--cfgmode', dest='config_mode', default='Development')
+manager.add_option('-m', '--cfgmode', dest='config_mode',
+	default='Development')
 manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
+
 
 @manager.command
 def createdb():
@@ -17,6 +19,7 @@ def createdb():
 		db.create_all()
 		print 'Database created'
 
+
 @manager.command
 def cleardb():
 	with app.app_context():
@@ -24,6 +27,7 @@ def cleardb():
 		"""Removes all content from database"""
 		db.drop_all()
 		print 'Database cleared'
+
 
 @manager.command
 def resetdb():
@@ -34,6 +38,7 @@ def resetdb():
 		db.create_all()
 		print 'Database reset'
 
+
 @manager.command
 def initdb():
 	with app.app_context():
@@ -43,6 +48,7 @@ def initdb():
 		db.create_all()
 		init_db()
 		print 'Database initialized'
+
 
 @manager.command
 def popdb():
