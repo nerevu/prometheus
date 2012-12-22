@@ -2,7 +2,8 @@
 # from pprint import pprint
 from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
-from .forms import EventForm, EventTypeForm
+from sqlalchemy.orm import aliased
+from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity
 
 hermes = Blueprint('hermes', __name__)
@@ -29,12 +30,11 @@ def _get_table_info(table):
 		form_fields = ['commodity_id', 'currency_id', 'date', 'close']
 		table_headers = ['Stock', 'Currency', 'Price', 'Date']
 		Currency = aliased(Commodity)
-# 		query = db.session.query(Price, Commodity, Currency) \
-# 			.join(Price.commodity).join(Currency, Price.currency) \
-# 			.order_by(Price.date)
-# 		query = db.session.query(Price).order_by(Price.name)
+		query = db.session.query(Price, Commodity, Currency) \
+			.join(Price.commodity).join(Currency, Price.currency) \
+			.order_by(Price.date)
 		data_fields = [(1, 'symbol'), (2, 'symbol'), (0, 'date'), (0, 'close')]
-		return form_fields, table_headers, data_fields
+		return form_fields, table_headers, query, data_fields
 
 	def get_commodity():
 		form_fields = ['cusip', 'symbol', 'name']
