@@ -38,24 +38,26 @@ def _get_table_info(table):
 
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
-	form_fields, table_headers, data_fields, query = _get_table_info(table)
+	table_as_class = table.title().replace('_', '')
+	table_as_words = table.title().replace('_', ' ')
+	form_fields, table_headers, query, data_fields = _get_table_info(table)
 	id = table
 	post_location = 'hermes.add'
 	post_table = table
 	title = '%ss' % table.title()
-	table_caption = '%s List' % table.replace('_', ' ').title()
-	form_caption = '%s Entry Form' % table.replace('_', ' ').title()
+	table_caption = '%s List' % table_as_words
+	form_caption = '%s Entry Form' % table_as_words
 	heading = 'Add %ss to the database' % table.replace('_', ' ')
 	text = 'On this page you can add %ss to the database and see them instantly updated in the lists below.' % table.replace('_', ' ')
-	event_types = query.all()
+	results = query.all()
 
 	try:
-		form = eval('%sForm.new()' % table.title().replace('_', ''))
+		form = eval('%sForm.new()' % table_as_class)
  	except AttributeError:
-		form = eval('%sForm()' % table.title().replace('_', ''))
+		form = eval('%sForm()' % table_as_class)
 
 	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'rows': event_types, 'form': form, 'form_caption': form_caption,
+		'rows': results, 'form': form, 'form_caption': form_caption,
 		'table_caption': table_caption, 'table_headers': table_headers,
 		'data_fields': data_fields, 'form_fields': form_fields,
 		'post_location': post_location, 'post_table': post_table}
@@ -64,13 +66,14 @@ def get(table):
 
 @hermes.route('/add/<table>/', methods=['GET', 'POST'])
 def add(table):
+	table_as_class = table.title().replace('_', '')
 	try:
-		form = eval('%sForm.new()' % table.title().replace('_', ''))
+		form = eval('%sForm.new()' % table_as_class)
  	except AttributeError:
-		form = eval('%sForm()' % table.title().replace('_', ''))
+		form = eval('%sForm()' % table_as_class)
 
 	if form.validate_on_submit():
-		entry = eval('%s()' % table.title().replace('_', ''))
+		entry = eval('%s()' % table_as_class)
 		form.populate_obj(entry)
  		db.session.add(entry)
 		db.session.commit()
