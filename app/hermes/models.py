@@ -16,7 +16,7 @@ class EventType(db.Model, ValidationMixin):
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	name = db.Column(db.String(64), nullable=False, unique=True)
+	name = db.Column(db.String(64), nullable=False)
 	unit = db.Column(db.String(32), nullable=False, default='USD')
 
 	# validation

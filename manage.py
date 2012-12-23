@@ -1,8 +1,7 @@
 from os.path import abspath
-
 from flask import current_app as app
 from app import create_app, db
-# from app.model import init_db, populate_db()
+# from app.model import init_db, populate_db
 from flask.ext.script import Manager
 
 manager = Manager(create_app)
@@ -44,8 +43,6 @@ def initdb():
 	with app.app_context():
 
 		"""Initializes database with default values"""
-		db.drop_all()
-		db.create_all()
 		init_db()
 		print 'Database initialized'
 
@@ -55,9 +52,6 @@ def popdb():
 	with app.app_context():
 
 		"""Populates database with sample data"""
-		db.drop_all()
-		db.create_all()
-		init_db()
 		populate_db()
 		print 'Database populated'
 

@@ -31,10 +31,9 @@ topnav = [{'id': 'events', 'caption': 'Events', 'location': 'hermes.get',
 
 hero = {'heading': 'Prometheus: a global asset allocation tool',
 	'text': 'Prometheus is a full featured web app that tells you how your '
-	'stock portfolio has performed over time and gives insight into how to '
-	'optimize your asset allocation. Additionally, Prometheus monitors your '
-	'portfolio to alert you when you need to rebalance or if you are '
-	'consistently underpeforming the market on a risk adjusted basis.',
+	'stock portfolio has performed over time, gives insight into how to '
+	'optimize your asset allocation, and monitors your portfolio for '
+	'rebalancing or performing enhancing opportunities.',
 	'location': 'main.about'}
 
 sub_units = [{'heading': 'Events', 'text': 'See all your stocks events in one '
