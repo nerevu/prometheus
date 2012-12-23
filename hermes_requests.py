@@ -1,9 +1,12 @@
 import json
 import requests
+site = 'http://127.0.0.1:5000'
 
+r = requests.get(site, headers=headers)
+
+site = 'http://127.0.0.1:5000/api'
 patch = {'type': {'add': {'name': 'Dividend', 'unit': 'USD'}}}
 headers = {'content-type': 'application/json'}
-site = 'http://127.0.0.1:5000/api'
 
 patch = {'type': {'add': {'id': 2}}}
 r = requests.put('%s/hermes_event/2' % site, data=json.dumps(patch),
