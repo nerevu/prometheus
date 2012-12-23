@@ -44,8 +44,6 @@ def initdb():
 	with app.app_context():
 
 		"""Initializes database with default values"""
-		db.drop_all()
-		db.create_all()
 		init_db()
 		print 'Database initialized'
 
@@ -55,9 +53,6 @@ def popdb():
 	with app.app_context():
 
 		"""Populates database with sample data"""
-		db.drop_all()
-		db.create_all()
-		init_db()
 		populate_db()
 		print 'Database populated'
 
