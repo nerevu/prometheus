@@ -1,8 +1,8 @@
 from os.path import abspath
-
 from flask import current_app as app
+import tests
 from app import create_app, db
-# from app.model import init_db, populate_db()
+# from app.model import init_db, populate_db
 from flask.ext.script import Manager
 
 manager = Manager(create_app)
