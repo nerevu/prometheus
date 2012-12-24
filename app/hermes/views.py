@@ -37,8 +37,8 @@ def _get_table_info(table):
 		return form_fields, table_headers, query, data_fields
 
 	def get_commodity():
-		form_fields = ['cusip', 'symbol', 'name']
-		table_headers = ['CUSIP', 'Symbol', 'Name']
+		form_fields = ['symbol', 'name']
+		table_headers = ['Symbol', 'Name']
 		query = db.session.query(Commodity).order_by(Commodity.name)
 		data_fields = form_fields
 		return form_fields, table_headers, query, data_fields

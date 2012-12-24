@@ -23,7 +23,7 @@ def _get_validators(a_class, value_field):
 
 
 class CommodityForm(Form):
-	cusip = TextField('CUSIP', description='Stock CUSIP', validators=univals)
+# 	cusip = TextField('CUSIP', description='CUSIP')
 	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters',
 		validators=univals)
 	name = TextField('Stock Name', description='Stock Name', validators=univals)
