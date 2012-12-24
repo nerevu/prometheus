@@ -102,14 +102,20 @@ class APITestCase(APIHelperCase):
 	def setUp(self):
 		super(APITestCase, self).setUp()
 		"""Setup database"""
-		# create an event type
-		data = {'name': 'Dividend', 'unit': 'USD'}
+		# create an event type with new commodity
+		data = {'name': 'Dividend', 'unit': {'name': 'US Dollars', 'symbol': 'USD'}}
 		r = self.post_data(data, 'event_type')
 		self.assertEqual(r.status_code, 201)
 
-		# create another event type
-		data = {'name': 'Dividend', 'unit': 'TZS'}
+		# create another event type with new commodity
+		data = {'name': 'Dividend', 'unit': {'name': 'TZ Shillings',
+			'symbol': 'TZS'}}
 		r = self.post_data(data, 'event_type')
+		self.assertEqual(r.status_code, 201)
+
+		# create another commodity
+		data = {'name': 'Euro', 'symbol': 'EUR'}
+		r = self.post_data(data, 'commodity')
 		self.assertEqual(r.status_code, 201)
 
 		# create an event
@@ -129,7 +135,7 @@ class APITestCase(APIHelperCase):
 	def test_post_event_with_new_type(self):
 		"""Test for posting an event using :http:method:`post`."""
 		data = {'symbol': 'ISIS', 'date': '1/22/12',
-			'type': {'name': 'Split', 'unit': 'Multiplier'}, 'value': 100}
+			'type': {'name': 'Dividend', 'commodity_id': 3}, 'value': 100}
 		r = self.post_data(data, 'event')
 		self.assertEqual(r.status_code, 201)
 
@@ -144,7 +150,7 @@ class APITestCase(APIHelperCase):
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
 		self.assertEqual(loaded['num_results'], 3)
-		self.assertEqual(loaded['objects'][2]['name'], 'Split')
+		self.assertEqual(loaded['objects'][2]['name'], data['type']['name'])
 
 	def test_patch_event_exisiting_type(self):
 		"""Test for patching an event with an existing type using
@@ -162,11 +168,12 @@ class APITestCase(APIHelperCase):
 		self.assertEqual(loaded['type']['id'], 2)
 
 	def test_patch_event_new_type(self):
-		"""Test for patching an event with an existing type using
+		"""Test for patching an event with a new type using
 		:http:method:`patch`.
 		"""
 		# patch the event with a new event type
-		patch = {'type': {'add': {'name': 'Split', 'unit': 'Divisor'}}}
+		patch = {'type': {'add': {'name': 'Special Dividend',
+			'commodity_id': 2}}}
 		r = self.patch_data(patch, 'event', 1)
 		self.assertEqual(r.status_code, 200)
 
@@ -181,7 +188,8 @@ class APITestCase(APIHelperCase):
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
 		self.assertEqual(loaded['num_results'], 3)
-		self.assertEqual(loaded['objects'][2]['name'], 'Split')
+		self.assertEqual(loaded['objects'][2]['name'],
+			patch['type']['add']['name'])
 
 
 def load_tests(loader, standard_tests, pattern):
