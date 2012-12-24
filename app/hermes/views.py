@@ -28,7 +28,7 @@ def _get_table_info(table):
 
 	def get_price():
 		form_fields = ['commodity_id', 'currency_id', 'date', 'close']
-		table_headers = ['Stock', 'Currency', 'Price', 'Date']
+		table_headers = ['Stock', 'Currency', 'Date', 'Price']
 		Currency = aliased(Commodity)
 		query = db.session.query(Price, Commodity, Currency) \
 			.join(Price.commodity).join(Currency, Price.currency) \
