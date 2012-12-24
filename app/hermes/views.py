@@ -13,17 +13,18 @@ def _get_table_info(table):
 	def get_event():
 		form_fields = ['symbol', 'event_type_id', 'value', 'date']
 		table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
-		query = db.session.query(Event, EventType).join(EventType) \
-			.order_by(Event.date)
-		data_fields = [(0, 'symbol'), (1, 'name'), (1, 'unit'), (0, 'value'),
+		query = db.session.query(Event, EventType, Commodity).join(EventType) \
+			.join(Commodity, EventType.unit).order_by(Event.date)
+		data_fields = [(0, 'symbol'), (1, 'name'), (2, 'symbol'), (0, 'value'),
 			(0, 'date')]
 		return form_fields, table_headers, query, data_fields
 
 	def get_event_type():
-		form_fields = ['name', 'unit']
+		form_fields = ['name', 'commodity_id']
 		table_headers = ['Type Name', 'Unit']
-		query = db.session.query(EventType).order_by(EventType.name)
-		data_fields = form_fields
+		query = db.session.query(EventType, Commodity).join(Commodity) \
+			.order_by(EventType.name)
+		data_fields = [(0, 'name'), (1, 'symbol')]
 		return form_fields, table_headers, query, data_fields
 
 	def get_price():
