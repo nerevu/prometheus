@@ -2,11 +2,66 @@
 import savalidation.validators as val
 
 from datetime import datetime as dt, date as d
-
+from json import dumps as dmp
+from requests import post
 from app import db
 from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 # from sqlalchemy.schema import UniqueConstraint
+
+
+def init_db(site):
+	hdr = {'content-type': 'application/json'}
+
+	content = [{'table': 'exchange',
+	'data': [{'symbol': 'NYSE', 'name': 'New York Stock Exchange'},
+		{'symbol': 'NASDAQ', 'name': 'NASDAQ'},
+		{'symbol': 'OTC', 'name': 'Over the counter'},
+		{'symbol': 'N/A', 'name': 'Currency'}]},
+
+	{'table': 'data_source',
+	'data': [{'name': 'Yahoo'}, {'name': 'Google'}, {'name': 'XE'}]},
+
+	{'table': 'commodity_group',
+	'data': [{'name': 'Security'}, {'name': 'Currency'}, {'name': 'Other'}]},
+
+	{'table': 'commodity_type',
+	'data': [{'name': 'Stock', 'commodity_group_id': 1},
+		{'name': 'Bond', 'commodity_group_id': 1},
+		{'name': 'Mutual Fund', 'commodity_group_id': 1},
+		{'name': 'ETF', 'commodity_group_id': 1},
+		{'name': 'Currency', 'commodity_group_id': 2},
+		{'name': 'Descriptor', 'commodity_group_id': 3}]},
+
+	{'table': 'commodity',
+	'data': [{'symbol': 'USD', 'name': 'US Dollar',
+			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'EUR', 'name': 'Euro',
+			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'GBP', 'name': 'Pound Sterling',
+			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'TZS', 'name': 'Tanzanian Shilling',
+			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'Multiple', 'name': 'Multiple',
+			'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'Text', 'name': 'Text',
+			'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4}]},
+
+	{'table': 'event_type',
+	'data': [{'name': 'Dividend', 'commodity_id': '1'},
+		{'name': 'Special Dividend', 'commodity_id': '1'},
+		{'name': 'Stock Split', 'commodity_id': '5'},
+		{'name': 'Name Change', 'commodity_id': '6'},
+		{'name': 'Ticker Change', 'commodity_id': '6'}]}]
+
+	for dict in content:
+		table = dict['table']
+		data = dict['data']
+		[post('%s/%s' % (site, table), data=dmp(d), headers=hdr) for d in data]
+
+
+def pop_db(site):
+	pass
 
 
 class Exchange(db.Model, ValidationMixin):
