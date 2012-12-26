@@ -119,7 +119,7 @@ def create_app(config_mode=None, config_file=None):
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
 
-# import app.hermes.models
+# import app models
 models = [import_module(x) for x in model_names]
 views = [import_module(x) for x in bp_names]
 blueprints = map(getattr, views, module_names)
