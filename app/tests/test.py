@@ -100,42 +100,77 @@ class WebTestCase(InitialCase):
 class APITestCase(APIHelperCase):
 	"""Unit tests for the API endpoints"""
 	def setUp(self):
-		super(APITestCase, self).setUp()
 		"""Setup database"""
-		# create an event type with new commodity
-		data = {'name': 'Dividend', 'unit': {'name': 'US Dollars', 'symbol': 'USD'}}
-		r = self.post_data(data, 'event_type')
-		self.assertEqual(r.status_code, 201)
+		super(APITestCase, self).setUp()
 
-		# create another event type with new commodity
-		data = {'name': 'Dividend', 'unit': {'name': 'TZ Shillings',
-			'symbol': 'TZS'}}
-		r = self.post_data(data, 'event_type')
-		self.assertEqual(r.status_code, 201)
+		content = [{'table': 'exchange',
+		'data': [{'symbol': 'NYSE', 'name': 'New York Stock Exchange'},
+			{'symbol': 'NASDAQ', 'name': 'NASDAQ'},
+			{'symbol': 'OTC', 'name': 'Over the counter'},
+			{'symbol': 'N/A', 'name': 'Currency'}]},
 
-		# create another commodity
-		data = {'name': 'Euro', 'symbol': 'EUR'}
-		r = self.post_data(data, 'commodity')
-		self.assertEqual(r.status_code, 201)
+		{'table': 'data_source',
+		'data': [{'name': 'Yahoo'}, {'name': 'Google'}, {'name': 'XE'}]},
 
-		# create an event
-		data = {'symbol': 'ISIS', 'date': '1/22/12', 'type': {'id': 1},
-			'value': 100}
-		r = self.post_data(data, 'event')
-		self.assertEqual(r.status_code, 201)
+		{'table': 'commodity_group',
+		'data': [{'name': 'Security'}, {'name': 'Currency'},
+			{'name': 'Other'}]},
+
+		{'table': 'commodity_type',
+		'data': [{'name': 'Stock', 'commodity_group_id': 1},
+			{'name': 'Bond', 'commodity_group_id': 1},
+			{'name': 'Mutual Fund', 'commodity_group_id': 1},
+			{'name': 'ETF', 'commodity_group_id': 1},
+			{'name': 'Currency', 'commodity_group_id': 2},
+			{'name': 'Descriptor', 'commodity_group_id': 3}]},
+
+		{'table': 'commodity',
+		'data': [{'symbol': 'USD', 'name': 'US Dollar',
+				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			{'symbol': 'EUR', 'name': 'Euro',
+				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			{'symbol': 'GBP', 'name': 'Pound Sterling',
+				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			{'symbol': 'TZS', 'name': 'Tanzanian Shilling',
+				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			{'symbol': 'Multiple', 'name': 'Multiple',
+				'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+			{'symbol': 'Text', 'name': 'Text',
+				'commodity_type_id': 6, 'data_source_id': 3,
+				'exchange_id': 4}]},
+
+		{'table': 'event_type',
+		'data': [{'name': 'Dividend', 'commodity_id': '1'},
+			{'name': 'Special Dividend', 'commodity_id': '1'},
+			{'name': 'Stock Split', 'commodity_id': '5'},
+			{'name': 'Name Change', 'commodity_id': '6'},
+			{'name': 'Ticker Change', 'commodity_id': '6'}]}]
+
+		for dict in content:
+			table = dict['table']
+			data = dict['data']
+			result = [self.post_data(d, table) for d in data]
+			[self.assertEqual(r.status_code, 201) for r in result]
 
 	def test_get_event_types(self):
 		"""Test for getting event types using :http:method:`get`."""
 		r = self.get_data('event_type')
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['num_results'], 2)
-		self.assertEqual(loaded['objects'][0]['name'], 'Dividend')
+		self.assertGreater(loaded['num_results'], 1)
 
-	def test_post_event_with_new_type(self):
+	def test_post_event_new_type(self):
 		"""Test for posting an event using :http:method:`post`."""
+		# check initial number of event types
+		r = self.get_data('event_type')
+		self.assertEqual(r.status_code, 200)
+		loaded = loads(r.data)
+		old = loaded['num_results']
+		new = old + 1
+
+		# add event
 		data = {'symbol': 'ISIS', 'date': '1/22/12',
-			'type': {'name': 'Dividend', 'commodity_id': 3}, 'value': 100}
+			'type': {'name': 'Brand New', 'commodity_id': 3}, 'value': 100}
 		r = self.post_data(data, 'event')
 		self.assertEqual(r.status_code, 201)
 
@@ -143,53 +178,58 @@ class APITestCase(APIHelperCase):
 		r = self.get_data('event')
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['num_results'], 2)
+		self.assertEqual(loaded['num_results'], 1)
 
 		# test that the new event type was added
 		r = self.get_data('event_type')
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['num_results'], 3)
-		self.assertEqual(loaded['objects'][2]['name'], data['type']['name'])
+		self.assertEqual(loaded['num_results'], new)
 
-	def test_patch_event_exisiting_type(self):
-		"""Test for patching an event with an existing type using
+	def test_patch_commodity_exisiting_type(self):
+		"""Test for patching a commodity with an existing type using
 		:http:method:`patch`.
 		"""
-		# patch the event with an existing event type
-		patch = {'type': {'add': {'id': 2}}}
-		r = self.patch_data(patch, 'event', 1)
-		self.assertEqual(r.status_code, 200)
-
-		# test that the new event type was changed
-		r = self.get_data('event', 1)
+		# check initial commodity type
+		r = self.get_data('commodity', 1)
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['type']['id'], 2)
+		old = loaded['type']['id']
+		new = old + 1
 
-	def test_patch_event_new_type(self):
-		"""Test for patching an event with a new type using
+		# patch the commodity with an existing type
+		patch = {'type': {'add': {'id': new}}}
+		r = self.patch_data(patch, 'commodity', 1)
+		self.assertEqual(r.status_code, 200)
+
+		# test that the new commodity type was changed
+		r = self.get_data('commodity', 1)
+		self.assertEqual(r.status_code, 200)
+		loaded = loads(r.data)
+		self.assertEqual(loaded['type']['id'], new)
+
+	def test_patch_commodity_new_type(self):
+		"""Test for patching a commodity with a new type using
 		:http:method:`patch`.
 		"""
-		# patch the event with a new event type
-		patch = {'type': {'add': {'name': 'Special Dividend',
-			'commodity_id': 2}}}
-		r = self.patch_data(patch, 'event', 1)
-		self.assertEqual(r.status_code, 200)
-
-		# test that the new event type was changed
-		r = self.get_data('event', 1)
+		# check initial num of commodity types
+		r = self.get_data('commodity_type')
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['type']['id'], 3)
+		old = loaded['num_results']
+		new = old + 1
 
-		# test that this new event type was added to the database as well
-		r = self.get_data('event_type')
+		# patch the commodity with a new type
+		patch = {'type': {'add': {'name': 'Brand New',
+			'commodity_group_id': 2}}}
+		r = self.patch_data(patch, 'commodity', 1)
+		self.assertEqual(r.status_code, 200)
+
+		# test that the new commodity type was changed
+		r = self.get_data('commodity', 1)
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
-		self.assertEqual(loaded['num_results'], 3)
-		self.assertEqual(loaded['objects'][2]['name'],
-			patch['type']['add']['name'])
+		self.assertEqual(loaded['type']['id'], new)
 
 
 def load_tests(loader, standard_tests, pattern):
