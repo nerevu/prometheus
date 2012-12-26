@@ -2,7 +2,6 @@ from __future__ import print_function
 from inspect import isclass, getmembers
 from importlib import import_module
 from itertools import imap, repeat
-from datetime import date as d
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
@@ -19,37 +18,6 @@ module_names = ['main', 'hermes']
 model_names = ['app.%s.models' % x for x in module_names]
 bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
-
-topnav = [{'id': 'events', 'caption': 'Events', 'location': 'hermes.get',
-	'table': 'event'}, {'id': 'types', 'caption': 'Types',
-	'location': 'hermes.get', 'table': 'event_type'}, {'id': 'prices',
-	'caption': 'Prices', 'location': 'hermes.get', 'table': 'price'},
-	{'id': 'commodities', 'caption': 'Commodities', 'location': 'hermes.get',
-	'table': 'commodity'}, {'id': 'worth', 'caption': 'Net Worth',
-	'location': 'hermes.worth'}, {'id': 'api', 'caption': 'API',
-	'location': 'hermes.api'}]
-
-hero = {'heading': 'Prometheus: a global asset allocation tool',
-	'text': 'Prometheus is a full featured web app that tells you how your '
-	'stock portfolio has performed over time, gives insight into how to '
-	'optimize your asset allocation, and monitors your portfolio for '
-	'rebalancing or performing enhancing opportunities.',
-	'location': 'main.about'}
-
-sub_units = [{'heading': 'Events', 'text': 'See all your stocks events in one '
-	'convenient location. Track stock splits, dividend payments, mergers '
-	'and more!', 'location': 'hermes.get', 'table': 'event'},
-	{'heading': 'Prices', 'text': 'Update your stock prices with the click '
-	'of a button! Automatically grap the latest pricing information from '
-	'Yahoo or Google.', 'location': 'hermes.get', 'table': 'price'},
-	{'heading': 'Net Worth', 'text': 'See how the value of your portfolio '
-	'over time with these sleek interactive charts! Instantly see how the '
-	'effects of dividends impacts your return.', 'location': 'hermes.worth'}]
-
-site = {'id': 'prometheus', 'caption': 'Prometheus',
-	'date': d.today().strftime("%Y"), 'author': 'Reuben Cummings',
-	'author_url': 'http://reubano.github.com', 'sub_span': 12 / len(sub_units),
-	'location': 'main.home'}
 
 
 def _get_app_classes(module):
@@ -75,10 +43,10 @@ def create_app(config_mode=None, config_file=None):
 	# set g variables
 	@app.before_request
 	def before_request():
-		g.site = site
-		g.topnav = topnav
-		g.hero = hero
-		g.sub_units = sub_units
+		g.site = app.config['SITE']
+		g.topnav = app.config['TOPNAV']
+		g.hero = app.config['HERO']
+		g.sub_units = app.config['SUB_UNITS']
 
 	@app.errorhandler(404)
 	def not_found(error):
