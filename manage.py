@@ -1,13 +1,15 @@
+from app.hermes.models import init_db, pop_db
 from os.path import abspath
 from flask import current_app as app
 from app import create_app, db
-# from app.model import init_db, populate_db
 from flask.ext.script import Manager
 
 manager = Manager(create_app)
 manager.add_option('-m', '--cfgmode', dest='config_mode',
 	default='Development')
 manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
+
+site = 'http://127.0.0.1:5000/api'
 
 
 @manager.command
@@ -42,8 +44,11 @@ def resetdb():
 def initdb():
 	with app.app_context():
 
-		"""Initializes database with default values"""
-		init_db()
+		"""Removes all content from database and Initializes database
+		with default values
+		"""
+		resetdb()
+		init_db(site)
 		print 'Database initialized'
 
 
@@ -51,8 +56,11 @@ def initdb():
 def popdb():
 	with app.app_context():
 
-		"""Populates database with sample data"""
-		populate_db()
+		"""Removes all content from database and Populates database
+		with sample data
+		"""
+		initdb()
+		pop_db(site)
 		print 'Database populated'
 
 if __name__ == '__main__':
