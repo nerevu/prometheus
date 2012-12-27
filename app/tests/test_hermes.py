@@ -1,7 +1,7 @@
 """
-	tests.test_views
+	tests.test_hermes
 	~~~~~~~~~~~~~~~~
-Provides unit tests for the :mod:`app.hermes.views` module.
+Provides unit tests for the :mod:`app.hermes` module.
 
 """
 
