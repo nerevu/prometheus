@@ -124,13 +124,8 @@ def add(table):
 	return redirect(url_for('hermes.get', table=table))
 
 
-@hermes.route('/worth/', methods=['GET', 'POST'])
+@hermes.route('/worth/')
 def worth():
-	pass
-
-
-@hermes.route('/api/', methods=['GET', 'POST'])
-def api():
 	pass
 
 
