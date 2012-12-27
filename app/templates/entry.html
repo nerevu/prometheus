@@ -1,9 +1,7 @@
 {% extends "page.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
-{% block title %}{{ title }}{% endblock %}
-{% block heading %}{{ heading }}{% endblock %}
-{% block text %}{{ text }}{% endblock %}
 {% block main_content %}
+<hr>
 <div class="row-fluid">
 	<div class="span3">
 		<form action="{{ url_for('%s' % post_location, table=post_table) }}" class="form" method="post">
