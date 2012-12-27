@@ -100,7 +100,7 @@ class WebTestCase(InitialCase):
 class APITestCase(APIHelperCase):
 	"""Unit tests for the API endpoints"""
 	def setUp(self):
-		"""Setup database"""
+		"""Initialize database with data"""
 		super(APITestCase, self).setUp()
 
 		content = [{'table': 'exchange',
@@ -230,6 +230,40 @@ class APITestCase(APIHelperCase):
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
 		self.assertEqual(loaded['type']['id'], new)
+
+	def test_post_price(self):
+		"""Test for posting a price using :http:method:`post`."""
+		# add price
+		data = {'commodity_id': 1, 'currency_id': 3, 'close': 30}
+		r = self.post_data(data, 'price')
+		self.assertEqual(r.status_code, 201)
+
+		# test that the new price was added
+		r = self.get_data('price')
+		self.assertEqual(r.status_code, 200)
+		loaded = loads(r.data)
+		self.assertEqual(loaded['num_results'], 1)
+
+	def test_delete_commodity(self):
+		"""Test for deleting a commodity with a query using
+		:http:method:`delete`.
+		"""
+		# check number of commodities
+		r = self.get_data('commodity')
+		self.assertEqual(r.status_code, 200)
+		loaded = loads(r.data)
+		old = loaded['num_results']
+		new = old - 1
+
+		# delete commodity
+		r = self.delete_data('commodity', 2)
+		self.assertEqual(r.status_code, 204)
+
+		# test that the commodity was deleted
+		r = self.get_data('commodity')
+		self.assertEqual(r.status_code, 200)
+		loaded = loads(r.data)
+		self.assertEqual(loaded['num_results'], new)
 
 
 def load_tests(loader, standard_tests, pattern):
