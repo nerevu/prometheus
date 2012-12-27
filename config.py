@@ -13,8 +13,7 @@ class Content(object):
 		'caption': 'Prices', 'location': 'hermes.get', 'table': 'price'},
 		{'id': 'commodities', 'caption': 'Commodities',
 		'location': 'hermes.get', 'table': 'commodity'},
-		{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'},
-		{'id': 'api', 'caption': 'API', 'location': 'hermes.api'}]
+		{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'}]
 
 	HERO = {'heading': 'Prometheus: a global asset allocation tool',
 		'text': 'Prometheus is a full featured web app that tells you how your'
