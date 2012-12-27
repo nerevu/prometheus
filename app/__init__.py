@@ -49,8 +49,12 @@ def create_app(config_mode=None, config_file=None):
 		g.sub_units = app.config['SUB_UNITS']
 
 	@app.errorhandler(404)
+	@app.errorhandler(TypeError)
 	def not_found(error):
-		return render_template('404.html'), 404
+		heading = 'Page not found.'
+		text = "Sorry, your page isn't available!."
+		kwargs = {'id': 404, 'title': '404', 'heading': heading, 'text': text}
+		return render_template('page.html', **kwargs), 404
 
 	@app.template_filter()
 	def currency(x):
