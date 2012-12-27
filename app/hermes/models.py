@@ -112,7 +112,8 @@ class CommodityType(db.Model, ValidationMixin):
 		onupdate=dt.utcnow())
 	name = db.Column(db.String(64), nullable=False, unique=True)
 	commodity_group_id = db.Column(db.Integer,
-		db.ForeignKey('commodity_group.id'), nullable=False)
+		db.ForeignKey('commodity_group.id', onupdate="CASCADE",
+		ondelete="CASCADE"), nullable=False)
 	group = db.relationship('CommodityGroup', backref='commodity_types',
 		lazy='joined')
 
@@ -132,15 +133,17 @@ class Commodity(db.Model, ValidationMixin):
 	symbol = db.Column(db.String(12), unique=True, nullable=False)
 	name = db.Column(db.String(64), nullable=False, unique=True)
 	commodity_type_id = db.Column(db.Integer,
-		db.ForeignKey('commodity_type.id'), nullable=False)
+		db.ForeignKey('commodity_type.id', onupdate="CASCADE",
+		ondelete="CASCADE"), nullable=False)
 	type = db.relationship('CommodityType', backref='commodities',
 		lazy='joined')
 	data_source_id = db.Column(db.Integer,
-		db.ForeignKey('data_source.id'), nullable=False)
+		db.ForeignKey('data_source.id', onupdate="CASCADE",
+		ondelete="CASCADE"), nullable=False)
 	data_source = db.relationship('DataSource', backref='commodities',
 		lazy='joined')
-	exchange_id = db.Column(db.Integer,
-		db.ForeignKey('exchange.id'), nullable=False)
+	exchange_id = db.Column(db.Integer, db.ForeignKey('exchange.id',
+		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	exchange = db.relationship('Exchange', backref='commodities', lazy='joined')
 
 	# validation
@@ -162,8 +165,8 @@ class EventType(db.Model, ValidationMixin):
 		onupdate=dt.utcnow())
 
 	name = db.Column(db.String(64), nullable=False)
-	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
-		nullable=False)
+	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
+		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	unit = db.relationship('Commodity', backref='event_types', lazy='joined')
 
 	# validation
@@ -188,8 +191,8 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'),
-		nullable=False)
+	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id',
+		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
@@ -219,12 +222,12 @@ class Price(db.Model, ValidationMixin):
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
-		nullable=False)
+	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
+		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	commodity = db.relationship('Commodity', backref='commodity_prices',
 		lazy='joined', primaryjoin='Commodity.id==Price.commodity_id')
-	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
-		nullable=False)
+	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
+		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	currency = db.relationship('Commodity', backref='currency_prices',
 		lazy='joined', primaryjoin='Commodity.id==Price.currency_id')
 	date = db.Column(db.Date, nullable=False, default=d.today())
