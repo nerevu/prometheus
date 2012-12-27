@@ -26,26 +26,26 @@ def init_db(site):
 	'data': [{'name': 'Security'}, {'name': 'Currency'}, {'name': 'Other'}]},
 
 	{'table': 'commodity_type',
-	'data': [{'name': 'Stock', 'commodity_group_id': 1},
-		{'name': 'Bond', 'commodity_group_id': 1},
-		{'name': 'Mutual Fund', 'commodity_group_id': 1},
-		{'name': 'ETF', 'commodity_group_id': 1},
-		{'name': 'Currency', 'commodity_group_id': 2},
-		{'name': 'Descriptor', 'commodity_group_id': 3}]},
+	'data': [{'name': 'Stock', 'group_id': 1},
+		{'name': 'Bond', 'group_id': 1},
+		{'name': 'Mutual Fund', 'group_id': 1},
+		{'name': 'ETF', 'group_id': 1},
+		{'name': 'Currency', 'group_id': 2},
+		{'name': 'Descriptor', 'group_id': 3}]},
 
 	{'table': 'commodity',
 	'data': [{'symbol': 'USD', 'name': 'US Dollar',
-			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'EUR', 'name': 'Euro',
-			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'GBP', 'name': 'Pound Sterling',
-			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'TZS', 'name': 'Tanzanian Shilling',
-			'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+			'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'Multiple', 'name': 'Multiple',
-			'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+			'type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'Text', 'name': 'Text',
-			'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4}]},
+			'type_id': 6, 'data_source_id': 3, 'exchange_id': 4}]},
 
 	{'table': 'event_type',
 	'data': [{'name': 'Dividend', 'commodity_id': '1'},
@@ -111,10 +111,10 @@ class CommodityType(db.Model, ValidationMixin):
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 	name = db.Column(db.String(64), nullable=False, unique=True)
-	commodity_group_id = db.Column(db.Integer,
+	group_id = db.Column(db.Integer,
 		db.ForeignKey('commodity_group.id', onupdate="CASCADE",
 		ondelete="CASCADE"), nullable=False)
-	group = db.relationship('CommodityGroup', backref='commodity_types',
+	group = db.relationship('CommodityGroup', backref='types',
 		lazy='joined')
 
 	val.validates_constraints()
@@ -132,7 +132,7 @@ class Commodity(db.Model, ValidationMixin):
 # 	cusip = db.Column(db.String(16), unique=True)
 	symbol = db.Column(db.String(12), unique=True, nullable=False)
 	name = db.Column(db.String(64), nullable=False, unique=True)
-	commodity_type_id = db.Column(db.Integer,
+	type_id = db.Column(db.Integer,
 		db.ForeignKey('commodity_type.id', onupdate="CASCADE",
 		ondelete="CASCADE"), nullable=False)
 	type = db.relationship('CommodityType', backref='commodities',
@@ -148,10 +148,6 @@ class Commodity(db.Model, ValidationMixin):
 
 	# validation
 	val.validates_constraints()
-
-# 	def __init__(self, symbol=None, name=None):
-# 		self.symbol = symbol
-# 		self.name = name
 
 	def __repr__(self):
 		return ('<Commodity(%r, %r)>' % (self.symbol, self.name))
@@ -172,16 +168,12 @@ class EventType(db.Model, ValidationMixin):
 	# validation
 	val.validates_constraints()
 
-# 	def __init__(self, name=None, commodity_id=None):
-# 		self.name = name
-# 		self.commodity_id = commodity_id
-
 	def __repr__(self):
 		return '<Type(%r, %r)>' % (self.name, self.commodity_id)
 
 
 class Event(db.Model, ValidationMixin):
-	__table_args__ = (db.UniqueConstraint('symbol', 'date', 'event_type_id',
+	__table_args__ = (db.UniqueConstraint('symbol', 'date', 'type_id',
 		'value'), {})
 
 	id = db.Column(db.Integer, primary_key=True)
@@ -191,7 +183,7 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	event_type_id = db.Column(db.Integer, db.ForeignKey('event_type.id',
+	type_id = db.Column(db.Integer, db.ForeignKey('event_type.id',
 		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
 	type = db.relationship('EventType', backref='events', lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
@@ -199,18 +191,9 @@ class Event(db.Model, ValidationMixin):
 	# validation
 	val.validates_constraints()
 
-# 	def __init__(self, symbol=None, value=None, type=None, event_type_id=None,
-# 		date=None):
-#
-# 		self.symbol = symbol
-# 		self.value = value
-# 		self.event_type_id = event_type_id
-# 		self.type = type
-# 		self.date = (date or d.today())
-
 	def __repr__(self):
 		return ('<Event(%r, %r, %r, %r)>'
-			% (self.symbol, self.value, self.event_type_id, self.date))
+			% (self.symbol, self.value, self.type_id, self.date))
 
 
 class Price(db.Model, ValidationMixin):

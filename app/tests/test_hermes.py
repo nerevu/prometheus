@@ -117,26 +117,26 @@ class APITestCase(APIHelperCase):
 			{'name': 'Other'}]},
 
 		{'table': 'commodity_type',
-		'data': [{'name': 'Stock', 'commodity_group_id': 1},
-			{'name': 'Bond', 'commodity_group_id': 1},
-			{'name': 'Mutual Fund', 'commodity_group_id': 1},
-			{'name': 'ETF', 'commodity_group_id': 1},
-			{'name': 'Currency', 'commodity_group_id': 2},
-			{'name': 'Descriptor', 'commodity_group_id': 3}]},
+		'data': [{'name': 'Stock', 'group_id': 1},
+			{'name': 'Bond', 'group_id': 1},
+			{'name': 'Mutual Fund', 'group_id': 1},
+			{'name': 'ETF', 'group_id': 1},
+			{'name': 'Currency', 'group_id': 2},
+			{'name': 'Descriptor', 'group_id': 3}]},
 
 		{'table': 'commodity',
 		'data': [{'symbol': 'USD', 'name': 'US Dollar',
-				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 			{'symbol': 'EUR', 'name': 'Euro',
-				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 			{'symbol': 'GBP', 'name': 'Pound Sterling',
-				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 			{'symbol': 'TZS', 'name': 'Tanzanian Shilling',
-				'commodity_type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 			{'symbol': 'Multiple', 'name': 'Multiple',
-				'commodity_type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+				'type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
 			{'symbol': 'Text', 'name': 'Text',
-				'commodity_type_id': 6, 'data_source_id': 3,
+				'type_id': 6, 'data_source_id': 3,
 				'exchange_id': 4}]},
 
 		{'table': 'event_type',
@@ -221,7 +221,7 @@ class APITestCase(APIHelperCase):
 
 		# patch the commodity with a new type
 		patch = {'type': {'add': {'name': 'Brand New',
-			'commodity_group_id': 2}}}
+			'group_id': 2}}}
 		r = self.patch_data(patch, 'commodity', 1)
 		self.assertEqual(r.status_code, 200)
 

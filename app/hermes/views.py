@@ -11,7 +11,7 @@ hermes = Blueprint('hermes', __name__)
 
 def _get_table_info(table):
 	def get_event():
-		form_fields = ['symbol', 'event_type_id', 'value', 'date']
+		form_fields = ['symbol', 'type_id', 'value', 'date']
 		table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
 		query = db.session.query(Event, EventType, Commodity).join(EventType) \
 			.join(Commodity, EventType.unit).order_by(Event.date)
@@ -38,7 +38,7 @@ def _get_table_info(table):
 		return form_fields, table_headers, query, data_fields
 
 	def get_commodity():
-		form_fields = ['symbol', 'name', 'commodity_type_id', 'data_source_id',
+		form_fields = ['symbol', 'name', 'type_id', 'data_source_id',
 			'exchange_id']
 		table_headers = ['Symbol', 'Name', 'Type']
 		query = db.session.query(Commodity, CommodityType).join(CommodityType) \

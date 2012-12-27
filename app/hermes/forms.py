@@ -49,7 +49,7 @@ class CommodityForm(Form):
 	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters',
 		validators=univals)
 	name = TextField('Name', description='Commodity Name', validators=univals)
-	commodity_type_id = SelectField('Type', description='Type of Commodity',
+	type_id = SelectField('Type', description='Type of Commodity',
 		coerce=int)
 	data_source_id = SelectField('Data Source', description='Type of Commodity',
 		coerce=int)
@@ -60,8 +60,8 @@ class CommodityForm(Form):
 	def new(cls):
 		form = cls()
 		a_class = CommodityType
-		form.commodity_type_id.choices = _get_choices(a_class, 'id', 'name')
-		form.commodity_type_id.validators = _get_validators(a_class, 'id')
+		form.type_id.choices = _get_choices(a_class, 'id', 'name')
+		form.type_id.validators = _get_validators(a_class, 'id')
 		form.data_source_id.choices = _get_choices(DataSource, 'id', 'name')
 		form.data_source_id.validators = _get_validators(DataSource, 'id')
 		form.exchange_id.choices = _get_choices(Exchange, 'id', 'symbol')
@@ -80,7 +80,7 @@ class EventTypeForm(Form):
 		form = cls()
 		a_class = Commodity
 		args = 'symbol'
-		kwargs = {'column': 'commodity_type_id', 'value': range(5, 7)}
+		kwargs = {'column': 'type_id', 'value': range(5, 7)}
 		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
 		form.commodity_id.validators = _get_validators(a_class, 'id')
 		return form
@@ -89,7 +89,7 @@ class EventTypeForm(Form):
 class EventForm(Form):
 	symbol = TextField('Symbol', description='Ticker symbol',
 		validators=univals)
-	event_type_id = SelectField('Event Type', description='Type of event',
+	type_id = SelectField('Event Type', description='Type of event',
 		coerce=int)
 	value = FloatField('Value', description='Amount the event was worth',
 		validators=univals)
@@ -99,9 +99,9 @@ class EventForm(Form):
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.event_type_id.choices = _get_choices(EventType, 'id', 'name',
+		form.type_id.choices = _get_choices(EventType, 'id', 'name',
 			['unit', 'symbol'])
-		form.event_type_id.validators = _get_validators(EventType, 'id')
+		form.type_id.validators = _get_validators(EventType, 'id')
 		return form
 
 
@@ -118,10 +118,10 @@ class PriceForm(Form):
 		form = cls()
 		a_class = Commodity
 		args = 'symbol'
-		kwargs = {'column': 'commodity_type_id', 'value': range(5)}
+		kwargs = {'column': 'type_id', 'value': range(5)}
 		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
 		form.commodity_id.validators = _get_validators(a_class, 'id')
-		kwargs = {'column': 'commodity_type_id', 'value': [5]}
+		kwargs = {'column': 'type_id', 'value': [5]}
 		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
 		form.currency_id.validators = _get_validators(a_class, 'id')
 		return form
