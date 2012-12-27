@@ -14,7 +14,7 @@ API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
 	IntegrityError, OperationalError]
 
 db = SQLAlchemy()
-module_names = ['main', 'hermes']
+module_names = ['hermes']
 model_names = ['app.%s.models' % x for x in module_names]
 bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
@@ -49,8 +49,12 @@ def create_app(config_mode=None, config_file=None):
 		g.sub_units = app.config['SUB_UNITS']
 
 	@app.errorhandler(404)
+	@app.errorhandler(TypeError)
 	def not_found(error):
-		return render_template('404.html'), 404
+		heading = 'Page not found.'
+		text = "Sorry, your page isn't available!."
+		kwargs = {'id': 404, 'title': '404', 'heading': heading, 'text': text}
+		return render_template('page.html', **kwargs), 404
 
 	@app.template_filter()
 	def currency(x):
@@ -58,6 +62,10 @@ def create_app(config_mode=None, config_file=None):
 			return '$%.2f' % x
 		except TypeError:
 			return x
+
+	@app.route('/')
+	def home():
+		return render_template('home.html')
 
 	# app.jinja_env.filters['currency']=currency
 

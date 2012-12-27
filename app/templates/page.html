@@ -3,14 +3,13 @@
 
 {% block container_content %}
 <div class="masthead">
-	<h3 class="muted">{% block title %}{% endblock %}</h3>
+	<h3 class="muted">{{ title }}</h3>
 </div>
 <hr>
 <div class="jumbotron">
-	<h1>{% block heading %}{% endblock %}</h1>
-	<p class="lead">{% block text %}{% endblock %}</p>
+	<h1>{{ heading }}</h1>
+	<p class="lead">{{ text }}</p>
 </div>
-<hr>
 {% for category, message in get_flashed_messages(with_categories=true) %}
 <div class="row-fluid"><div class="span12"><div class="{{ category }}">
 	{{ message }}
