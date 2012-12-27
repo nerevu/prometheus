@@ -2,14 +2,20 @@ from itertools import imap, repeat
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import AnyOf
 from wtforms.ext.dateutil.fields import DateField
-from .models import EventType, Commodity
+from .models import EventType, Commodity, CommodityType, Exchange, DataSource
 
 univals = [Required()]
 
 
-def _get_choices(a_class, value_field, *args):
+def _get_choices(a_class, value_field, *args, **kwargs):
 	order = '%s.%s' % (a_class.__table__, args[0])
-	result = a_class.query.order_by(order).all()
+	try:
+		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
+		value = kwargs['value']
+		result = a_class.query.filter(eval(filter).in_(value)).order_by(order).all()
+	except KeyError:
+		result = a_class.query.order_by(order).all()
+
 	values = [getattr(x, value_field) for x in result]
 	combo = []
 
@@ -43,6 +49,24 @@ class CommodityForm(Form):
 	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters',
 		validators=univals)
 	name = TextField('Name', description='Commodity Name', validators=univals)
+	commodity_type_id = SelectField('Type', description='Type of Commodity',
+		coerce=int)
+	data_source_id = SelectField('Data Source', description='Type of Commodity',
+		coerce=int)
+	exchange_id = SelectField('Exchange', description='Type of Commodity',
+		coerce=int)
+
+	@classmethod
+	def new(cls):
+		form = cls()
+		a_class = CommodityType
+		form.commodity_type_id.choices = _get_choices(a_class, 'id', 'name')
+		form.commodity_type_id.validators = _get_validators(a_class, 'id')
+		form.data_source_id.choices = _get_choices(DataSource, 'id', 'name')
+		form.data_source_id.validators = _get_validators(DataSource, 'id')
+		form.exchange_id.choices = _get_choices(Exchange, 'id', 'symbol')
+		form.exchange_id.validators = _get_validators(Exchange, 'id')
+		return form
 
 
 class EventTypeForm(Form):
@@ -54,8 +78,11 @@ class EventTypeForm(Form):
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.commodity_id.choices = _get_choices(Commodity, 'id', 'symbol')
-		form.commodity_id.validators = _get_validators(Commodity, 'id')
+		a_class = Commodity
+		args = 'symbol'
+		kwargs = {'column': 'commodity_type_id', 'value': range(5, 7)}
+		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = _get_validators(a_class, 'id')
 		return form
 
 
@@ -89,8 +116,12 @@ class PriceForm(Form):
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.commodity_id.choices = _get_choices(Commodity, 'id', 'symbol')
-		form.commodity_id.validators = _get_validators(Commodity, 'id')
-		form.currency_id.choices = _get_choices(Commodity, 'id', 'symbol')
-		form.currency_id.validators = _get_validators(Commodity, 'id')
+		a_class = Commodity
+		args = 'symbol'
+		kwargs = {'column': 'commodity_type_id', 'value': range(5)}
+		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = _get_validators(a_class, 'id')
+		kwargs = {'column': 'commodity_type_id', 'value': [5]}
+		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.currency_id.validators = _get_validators(a_class, 'id')
 		return form
