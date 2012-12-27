@@ -19,8 +19,7 @@ class Content(object):
 		'text': 'Prometheus is a full featured web app that tells you how your'
 		' stock portfolio has performed over time, gives insight into how to '
 		'optimize your asset allocation, and monitors your portfolio for '
-		'rebalancing or performing enhancing opportunities.',
-		'location': 'main.about'}
+		'rebalancing or performing enhancing opportunities.'}
 
 	SUB_UNITS = [{'heading': 'Events', 'text': 'See all your stocks events in '
 		'one convenient location. Track stock splits, dividend payments, '
@@ -36,7 +35,7 @@ class Content(object):
 	SITE = {'id': 'prometheus', 'caption': 'Prometheus',
 		'date': d.today().strftime("%Y"), 'author': 'Reuben Cummings',
 		'author_url': 'http://reubano.github.com',
-		'sub_span': 12 / len(SUB_UNITS), 'location': 'main.home'}
+		'sub_span': 12 / len(SUB_UNITS), 'location': 'home'}
 
 
 class Config(Content):
