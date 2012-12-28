@@ -114,11 +114,11 @@ def add(table):
 		db.session.add(entry)
 		_bookmark(table)
 		db.session.commit()
-		flash('Success! A new %s was posted.' % table.replace('_', ' '),
+		flash('Awesome! You just posted a new %s.' % table.replace('_', ' '),
 			'alert alert-success')
 
 	else:
-		[flash('%s: %s' % (k.title(), v[0]), 'alert alert-error')
+		[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
 			for k, v in form.errors.iteritems()]
 
 	return redirect(url_for('hermes.get', table=table))

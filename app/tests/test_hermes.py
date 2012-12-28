@@ -256,7 +256,7 @@ class APITestCase(APIHelperCase):
 		new = old - 1
 
 		# delete commodity
-		r = self.delete_data('commodity', 2)
+		r = self.delete_data('commodity', 1)
 		self.assertEqual(r.status_code, 204)
 
 		# test that the commodity was deleted

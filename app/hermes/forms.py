@@ -1,4 +1,3 @@
-from itertools import imap, repeat
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import AnyOf
 from wtforms.ext.dateutil.fields import DateField

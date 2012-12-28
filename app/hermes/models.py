@@ -1,4 +1,5 @@
 # from __future__ import print_function
+from pprint import pprint
 import savalidation.validators as val
 
 from datetime import datetime as dt, date as d
@@ -7,7 +8,17 @@ from requests import post
 from app import db
 from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
-# from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import backref
+
+
+@event.listens_for(Engine, 'connect')
+def set_sqlite_pragma(dbapi_connection, connection_record):
+	"""Enable foreign key constraints for SQLite."""
+	cursor = dbapi_connection.cursor()
+	cursor.execute("PRAGMA foreign_keys=ON")
+	cursor.close()
 
 
 def init_db(site):
@@ -114,8 +125,8 @@ class CommodityType(db.Model, ValidationMixin):
 	group_id = db.Column(db.Integer,
 		db.ForeignKey('commodity_group.id', onupdate="CASCADE",
 		ondelete="CASCADE"), nullable=False)
-	group = db.relationship('CommodityGroup', backref='types',
-		lazy='joined')
+	group = db.relationship('CommodityGroup', backref=backref('types',
+		cascade='all, delete'), lazy='joined')
 
 	val.validates_constraints()
 
@@ -135,16 +146,17 @@ class Commodity(db.Model, ValidationMixin):
 	type_id = db.Column(db.Integer,
 		db.ForeignKey('commodity_type.id', onupdate="CASCADE",
 		ondelete="CASCADE"), nullable=False)
-	type = db.relationship('CommodityType', backref='commodities',
-		lazy='joined')
+	type = db.relationship('CommodityType', backref=backref('commodities',
+		cascade='all, delete'), lazy='joined')
 	data_source_id = db.Column(db.Integer,
 		db.ForeignKey('data_source.id', onupdate="CASCADE",
 		ondelete="CASCADE"), nullable=False)
-	data_source = db.relationship('DataSource', backref='commodities',
-		lazy='joined')
-	exchange_id = db.Column(db.Integer, db.ForeignKey('exchange.id',
-		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-	exchange = db.relationship('Exchange', backref='commodities', lazy='joined')
+	data_source = db.relationship('DataSource', backref=backref('commodities',
+		cascade='all, delete'), lazy='joined')
+	exchange_id = db.Column(db.Integer, db.ForeignKey('exchange.id'),
+		nullable=False)
+	exchange = db.relationship('Exchange', backref=backref('commodities',
+		cascade='all, delete'), lazy='joined')
 
 	# validation
 	val.validates_constraints()
@@ -161,9 +173,10 @@ class EventType(db.Model, ValidationMixin):
 		onupdate=dt.utcnow())
 
 	name = db.Column(db.String(64), nullable=False)
-	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
-		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-	unit = db.relationship('Commodity', backref='event_types', lazy='joined')
+	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
+		nullable=False)
+	unit = db.relationship('Commodity', backref=backref('event_types',
+		cascade='all, delete'), lazy='joined')
 
 	# validation
 	val.validates_constraints()
@@ -183,9 +196,10 @@ class Event(db.Model, ValidationMixin):
 
 	symbol = db.Column(db.String(12), nullable=False)
 	value = db.Column(db.Float, nullable=False)
-	type_id = db.Column(db.Integer, db.ForeignKey('event_type.id',
-		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-	type = db.relationship('EventType', backref='events', lazy='joined')
+	type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'),
+		nullable=False)
+	type = db.relationship('EventType', backref=backref('events',
+		cascade='all, delete'), lazy='joined')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 
 	# validation
@@ -205,14 +219,16 @@ class Price(db.Model, ValidationMixin):
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
-		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-	commodity = db.relationship('Commodity', backref='commodity_prices',
-		lazy='joined', primaryjoin='Commodity.id==Price.commodity_id')
-	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id',
-		onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-	currency = db.relationship('Commodity', backref='currency_prices',
-		lazy='joined', primaryjoin='Commodity.id==Price.currency_id')
+	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
+		nullable=False)
+	commodity = db.relationship('Commodity', backref=backref('commodity_prices',
+		cascade='all, delete'), lazy='joined',
+		primaryjoin='Commodity.id==Price.commodity_id')
+	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
+		nullable=False)
+	currency = db.relationship('Commodity', backref=backref('currency_prices',
+		cascade='all, delete'), lazy='joined',
+		primaryjoin='Commodity.id==Price.currency_id')
 	date = db.Column(db.Date, nullable=False, default=d.today())
 	close = db.Column(db.Float, nullable=False)
 
