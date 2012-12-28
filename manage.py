@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from app.hermes.models import init_db, pop_db
 from os.path import abspath
 from flask import current_app as app
@@ -16,7 +17,7 @@ site = 'http://127.0.0.1:5000/api'
 def createdb():
 	with app.app_context():
 
-		"""Creates database"""
+		"""Creates database if it doesn't already exist"""
 		db.create_all()
 		print 'Database created'
 
@@ -35,16 +36,15 @@ def resetdb():
 	with app.app_context():
 
 		"""Removes all content from database and creates new tables"""
-		db.drop_all()
-		db.create_all()
-		print 'Database reset'
+		cleardb()
+		createdb()
 
 
 @manager.command
 def initdb():
 	with app.app_context():
 
-		"""Removes all content from database and Initializes database
+		"""Removes all content from database and initializes it
 		with default values
 		"""
 		resetdb()
@@ -56,9 +56,10 @@ def initdb():
 def popdb():
 	with app.app_context():
 
-		"""Removes all content from database and Populates database
+		"""Removes all content from database and populates it
 		with sample data
 		"""
+		resetdb()
 		initdb()
 		pop_db(site)
 		print 'Database populated'
