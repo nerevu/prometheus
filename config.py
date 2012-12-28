@@ -7,11 +7,11 @@ _basedir = p.abspath(p.dirname(__file__))
 # configuration
 class Content(object):
 # 	MODULES = ['main', 'hermes']
-	TOPNAV = [{'id': 'events', 'caption': 'Events', 'location': 'hermes.get',
-		'table': 'event'}, {'id': 'types', 'caption': 'Types',
-		'location': 'hermes.get', 'table': 'event_type'}, {'id': 'prices',
+	TOPNAV = [{'id': 'event', 'caption': 'Events', 'location': 'hermes.get',
+		'table': 'event'}, {'id': 'event_type', 'caption': 'Types',
+		'location': 'hermes.get', 'table': 'event_type'}, {'id': 'price',
 		'caption': 'Prices', 'location': 'hermes.get', 'table': 'price'},
-		{'id': 'commodities', 'caption': 'Commodities',
+		{'id': 'commodity', 'caption': 'Commodities',
 		'location': 'hermes.get', 'table': 'commodity'},
 		{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'}]
 

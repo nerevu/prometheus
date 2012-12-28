@@ -1,8 +1,6 @@
 {% extends "bootstrap_responsive.html" %}
 {% block body_content %}
-
-{% set active_page = active_page|default('events') -%}
-
+{% set active_page = id|default(g.site.id) %}
 {% include 'topnav.html' %}
 
 <div class="container">
