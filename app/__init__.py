@@ -14,7 +14,7 @@ API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
 	IntegrityError, OperationalError]
 
 db = SQLAlchemy()
-module_names = ['hermes']
+module_names = ['hermes', 'apollo']
 model_names = ['app.%s.models' % x for x in module_names]
 bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
@@ -49,7 +49,7 @@ def create_app(config_mode=None, config_file=None):
 		g.sub_units = app.config['SUB_UNITS']
 
 	@app.errorhandler(404)
-	@app.errorhandler(TypeError)
+# 	@app.errorhandler(TypeError)
 	def not_found(error):
 		heading = 'Page not found.'
 		text = "Sorry, your page isn't available!"
