@@ -8,6 +8,7 @@ univals = [Required()]
 
 def _get_choices(a_class, value_field, *args, **kwargs):
 	order = '%s.%s' % (a_class.__table__, args[0])
+
 	try:
 		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
 		value = kwargs['value']
@@ -21,18 +22,18 @@ def _get_choices(a_class, value_field, *args, **kwargs):
 	for arg in args:
 		try:
 			new = [getattr(getattr(x, arg[0]), arg[1]) for x in result]
-		except:
+		except Exception:
 			new = [getattr(x, arg) for x in result]
 
 		combo.append(new)
 
 	try:
-		attr = map(lambda x, y: ', '.join([x, y]), combo[0], combo[1])
+# 		attr = map(lambda x, y: ', '.join([x, y]), combo[0], combo[1])
+		attr = [', '.join(x) for x in zip(combo[0], combo[1])]
 	except IndexError:
 		attr = combo[0]
 
-	choices = map(lambda x, y: (x, y), values, attr)
-	return choices
+	return zip(values, attr)
 
 
 def _get_validators(a_class, value_field):
