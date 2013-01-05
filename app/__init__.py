@@ -85,7 +85,7 @@ def create_app(config_mode=None, config_file=None):
 	# in the form [(<module>,[]),(<module>,[])]
 	# [(<module 'app.hermes.models' from '/path/to/models.pyc'>,
 	# 	['Event', 'Type'])]
-	sets = map(lambda x, y: (x, y), models, nested_classes)
+	sets = zip(models, nested_classes)
 
 	# provides a nested iterator of classes in the expanded form of <class>
 	# <class 'app.hermes.models.Event'>
