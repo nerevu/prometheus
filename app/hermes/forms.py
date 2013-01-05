@@ -69,27 +69,15 @@ class CommodityForm(Form):
 
 
 class EventTypeForm(Form):
-	name = TextField('Name', description='Type of event',
-		validators=univals)
-	commodity_id = SelectField('Unit', description='Unit of measurement',
-		coerce=int)
-
-	@classmethod
-	def new(cls):
-		form = cls()
-		a_class = Commodity
-		args = 'symbol'
-		kwargs = {'column': 'type_id', 'value': range(5, 7)}
-		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.commodity_id.validators = _get_validators(a_class, 'id')
-		return form
+	name = TextField('Name', description='Type of event', validators=univals)
 
 
 class EventForm(Form):
-	symbol = TextField('Symbol', description='Ticker symbol',
-		validators=univals)
+	commodity_id = SelectField('Stock', description='Stock', coerce=int)
 	type_id = SelectField('Event Type', description='Type of event',
 		coerce=int)
+	currency_id = SelectField('Currency',
+		description='Unit the event is measured in', coerce=int)
 	value = FloatField('Value', description='Amount the event was worth',
 		validators=univals)
 	date = DateField('Date', description='Date the event happened',
@@ -98,9 +86,16 @@ class EventForm(Form):
 	@classmethod
 	def new(cls):
 		form = cls()
-		form.type_id.choices = _get_choices(EventType, 'id', 'name',
-			['unit', 'symbol'])
+		a_class = Commodity
+		args = 'symbol'
+		kwargs = {'column': 'type_id', 'value': range(5)}
+		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = _get_validators(a_class, 'id')
+		form.type_id.choices = _get_choices(EventType, 'id', 'name')
 		form.type_id.validators = _get_validators(EventType, 'id')
+		kwargs = {'column': 'type_id', 'value': [5, 6]}
+		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.currency_id.validators = _get_validators(a_class, 'id')
 		return form
 
 
@@ -108,9 +103,9 @@ class PriceForm(Form):
 	commodity_id = SelectField('Stock', description='Stock', coerce=int)
 	currency_id = SelectField('Currency',
 		description='Currency the price is in', coerce=int)
+	date = DateField('Date', description='Closing date', validators=univals)
 	close = FloatField('Closing Price', description='End of day closing price',
 		validators=univals)
-	date = DateField('Date', description='Closing date', validators=univals)
 
 	@classmethod
 	def new(cls):

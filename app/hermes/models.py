@@ -55,15 +55,20 @@ def init_db(site):
 			'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
 		{'symbol': 'Multiple', 'name': 'Multiple',
 			'type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+		{'symbol': 'APL', 'name': 'Apple',
+			'type_id': 1, 'data_source_id': 1, 'exchange_id': 1},
 		{'symbol': 'Text', 'name': 'Text',
 			'type_id': 6, 'data_source_id': 3, 'exchange_id': 4}]},
 
 	{'table': 'event_type',
-	'data': [{'name': 'Dividend', 'commodity_id': '1'},
-		{'name': 'Special Dividend', 'commodity_id': '1'},
-		{'name': 'Stock Split', 'commodity_id': '5'},
-		{'name': 'Name Change', 'commodity_id': '6'},
-		{'name': 'Ticker Change', 'commodity_id': '6'}]}]
+	'data': [{'name': 'Dividend'}, {'name': 'Special Dividend'},
+		{'name': 'Stock Split'}, {'name': 'Name Change'},
+		{'name': 'Ticker Change'}]},
+
+	{'table': 'price',
+	'data': [{'commodity_id': 2, 'currency_id': 1, 'close': 1.2},
+		{'commodity_id': 3, 'currency_id': 1, 'close': 1.8},
+		{'commodity_id': 4, 'currency_id': 1, 'close': 1.0 / 1580.0}]}]
 
 	for dict in content:
 		table = dict['table']
@@ -166,35 +171,39 @@ class Commodity(db.Model, ValidationMixin):
 
 
 class EventType(db.Model, ValidationMixin):
-	__table_args__ = (db.UniqueConstraint('name', 'commodity_id'), {})
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	name = db.Column(db.String(64), nullable=False)
-	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
-		nullable=False)
-	unit = db.relationship('Commodity', backref=backref('event_types',
-		cascade='all, delete'), lazy='joined')
+	name = db.Column(db.String(64), nullable=False, unique=True)
 
 	# validation
 	val.validates_constraints()
 
 	def __repr__(self):
-		return '<Type(%r, %r)>' % (self.name, self.commodity_id)
+		return '<Type(%r, %r)>' % (self.name)
 
 
 class Event(db.Model, ValidationMixin):
-	__table_args__ = (db.UniqueConstraint('symbol', 'date', 'type_id',
-		'value'), {})
+	__table_args__ = (db.UniqueConstraint('commodity_id', 'date', 'type_id',
+		'currency_id'), {})
 
 	id = db.Column(db.Integer, primary_key=True)
 	utc_created = db.Column(db.DateTime, nullable=False, default=dt.utcnow())
 	utc_updated = db.Column(db.DateTime, nullable=False, default=dt.utcnow(),
 		onupdate=dt.utcnow())
 
-	symbol = db.Column(db.String(12), nullable=False)
+	commodity_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
+		nullable=False)
+	commodity = db.relationship('Commodity', backref=backref('commodity_events',
+		cascade='all, delete'), lazy='joined',
+		primaryjoin='Commodity.id==Event.commodity_id')
+	currency_id = db.Column(db.Integer, db.ForeignKey('commodity.id'),
+		nullable=False)
+	currency = db.relationship('Commodity', backref=backref('currency_events',
+		cascade='all, delete'), lazy='joined',
+		primaryjoin='Commodity.id==Event.currency_id')
 	value = db.Column(db.Float, nullable=False)
 	type_id = db.Column(db.Integer, db.ForeignKey('event_type.id'),
 		nullable=False)
@@ -207,7 +216,7 @@ class Event(db.Model, ValidationMixin):
 
 	def __repr__(self):
 		return ('<Event(%r, %r, %r, %r)>'
-			% (self.symbol, self.value, self.type_id, self.date))
+			% (self.commodity_id, self.currency_id, self.value, self.date))
 
 
 class Price(db.Model, ValidationMixin):
