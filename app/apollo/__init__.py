@@ -20,7 +20,7 @@ def get_prices():
 	data = [(0, 'commodity_id'), (0, 'date'), (0, 'close'), (0, 'currency_id')]
 	dtype = [('comm_id', np.int), ('date', np.datetime64),
 		('price', np.float32), ('curr_id', np.int)]
-	index = 'date'
+	index = ['curr_id', 'comm_id', 'date']
 	return query.all(), data, dtype, index
 
 
@@ -30,7 +30,7 @@ def get_dividends():
 	keys = ['commodity_id', 'date', 'value', 'currency_id']
 	dtype = [('comm_id', np.int), ('date', np.datetime64), ('dividend',
 		np.float32), ('curr_id', np.int)]
-	index = 'date'
+	index = ['curr_id', 'comm_id', 'date']
 	return query.all(), keys, dtype, index
 
 
@@ -42,7 +42,7 @@ def get_rates():
 
 	keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close')]
 	dtype = [('comm_id', np.int), ('date', np.datetime64), ('rate', np.float32)]
-	index = 'date'
+	index = ['comm_id', 'date']
 	return query.all(), keys, dtype, index
 
 
@@ -57,4 +57,6 @@ def get_values(result, keys):
 
 def make_df(values, dtype, index):
 	ndarray = np.array(values, dtype)
-	return pd.DataFrame.from_records(ndarray, index=index)
+	df = pd.DataFrame.from_records(ndarray)
+	df.set_index(index, inplace=True)
+	return df
