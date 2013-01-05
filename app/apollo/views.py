@@ -2,6 +2,7 @@
 import numpy as np
 import app.apollo as ap
 import pandas as pd
+
 from pprint import pprint
 from flask import Blueprint, render_template, flash
 
@@ -16,7 +17,7 @@ def worth():
 	for item in list:
 		result, keys, dtype, index = eval('ap.get_%s()' % item)
 		values = ap.get_values(result, keys)
-		df = make_df(values, dtype, index)
+		df = ap.make_df(values, dtype, index)
 		dfs.append(df)
 
 	prices, dividends, rates = dfs[0], dfs[1], dfs[2]
