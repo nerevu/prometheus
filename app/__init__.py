@@ -52,7 +52,7 @@ def create_app(config_mode=None, config_file=None):
 	@app.errorhandler(TypeError)
 	def not_found(error):
 		heading = 'Page not found.'
-		text = "Sorry, your page isn't available!."
+		text = "Sorry, your page isn't available!"
 		kwargs = {'id': 404, 'title': '404', 'heading': heading, 'text': text}
 		return render_template('page.html', **kwargs), 404
 
