@@ -57,8 +57,8 @@ class CommodityForm(Form):
 		coerce=int)
 
 	@classmethod
-	def new(cls):
-		form = cls()
+	def new(self):
+		form = self()
 		a_class = CommodityType
 		form.type_id.choices = _get_choices(a_class, 'id', 'name')
 		form.type_id.validators = _get_validators(a_class, 'id')
@@ -85,8 +85,8 @@ class EventForm(Form):
 		validators=univals)
 
 	@classmethod
-	def new(cls):
-		form = cls()
+	def new(self):
+		form = self()
 		a_class = Commodity
 		args = 'symbol'
 		kwargs = {'column': 'type_id', 'value': range(5)}
@@ -109,8 +109,8 @@ class PriceForm(Form):
 	date = DateField('Date', description='Closing date', validators=univals)
 
 	@classmethod
-	def new(cls):
-		form = cls()
+	def new(self):
+		form = self()
 		a_class = Commodity
 		args = 'symbol'
 		kwargs = {'column': 'type_id', 'value': range(5)}
