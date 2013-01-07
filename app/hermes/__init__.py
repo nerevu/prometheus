@@ -24,7 +24,7 @@ def get_table_info(table):
 		return form_fields, table_headers, query, data_fields
 
 	def get_price():
-		form_fields = ['commodity_id', 'currency_id', 'date', 'close']
+		form_fields = ['commodity_id', 'currency_id', 'close', 'date']
 		table_headers = ['Stock', 'Currency', 'Date', 'Price']
 		Currency = aliased(Commodity)
 		query = (db.session.query(Price, Commodity, Currency)

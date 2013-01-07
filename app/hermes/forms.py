@@ -104,9 +104,9 @@ class PriceForm(Form):
 	commodity_id = SelectField('Stock', description='Stock', coerce=int)
 	currency_id = SelectField('Currency',
 		description='Currency the price is in', coerce=int)
-	date = DateField('Date', description='Closing date', validators=univals)
 	close = FloatField('Closing Price', description='End of day closing price',
 		validators=univals)
+	date = DateField('Date', description='Closing date', validators=univals)
 
 	@classmethod
 	def new(cls):
