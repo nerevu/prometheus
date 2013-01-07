@@ -14,7 +14,7 @@ class Content(object):
 		('event_type', 'Types', 'hermes.get', 'event_type'),
 		('price', 'Prices', 'hermes.get', 'price'),
 		('commodity', 'Commodities', 'hermes.get', 'commodity'),
-		('worth', 'Net Worth', 'apollo.worth', None)]
+		('worth', 'Net Worth', 'apollo.worth', 'USD')]
 
 	hero_values = ('Prometheus: a global asset allocation tool', 'Prometheus is'
 		' a full featured web app that tells you how your stock portfolio has '
@@ -30,7 +30,7 @@ class Content(object):
 		'Google.', 'hermes.get', 'price'),
 		('Net Worth', 'See how the value of your portfolio over time with these'
 		' sleek interactive charts! Instantly see how the effects of dividends '
-		'impacts your return.', 'apollo.worth', None)]
+		'impacts your return.', 'apollo.worth', 'USD')]
 
 	total_site_values = site_values + (d.today().strftime("%Y"),
 		12 / len(sub_unit_values))
