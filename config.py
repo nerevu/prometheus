@@ -6,7 +6,6 @@ _basedir = p.abspath(p.dirname(__file__))
 
 # configuration
 class Content(object):
-# 	MODULES = ['hermes']
 	site_values = ('prometheus', 'Prometheus', 'Reuben Cummings',
 		'http://reubano.github.com', 'home')
 
