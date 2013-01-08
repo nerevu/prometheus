@@ -2,7 +2,7 @@ from __future__ import print_function
 from inspect import isclass, getmembers
 from importlib import import_module
 from itertools import imap, repeat
-
+from os import path as p, listdir
 from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
 from flask import Flask, render_template, g
@@ -14,10 +14,15 @@ API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
 	IntegrityError, OperationalError]
 
 db = SQLAlchemy()
-module_names = ['hermes', 'apollo']
-model_names = ['app.%s.models' % x for x in module_names]
-bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
+
+
+def _get_modules():
+	dir = p.dirname(__file__)
+	dirs = listdir(dir)
+	modules = [d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
+		and d != 'tests']
+	return modules
 
 
 def _get_app_classes(module):
@@ -95,7 +100,10 @@ def create_app(config_mode=None, config_file=None):
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
 
-# import app models
+# import app models and views
+modules = _get_modules()
+model_names = ['app.%s.models' % x for x in modules]
+view_names = ['app.%s.views' % x for x in modules]
 models = [import_module(x) for x in model_names]
-views = [import_module(x) for x in bp_names]
-blueprints = map(getattr, views, module_names)
+views = [import_module(x) for x in view_names]
+blueprints = map(getattr, views, modules)
