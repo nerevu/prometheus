@@ -27,9 +27,9 @@ class Content(object):
 		('Prices', 'Update your stock prices with the click of a button! '
 		'Automatically grap the latest pricing information from Yahoo or '
 		'Google.', 'hermes.get', 'price'),
-		('Net Worth', 'See how the value of your portfolio over time with these'
-		' sleek interactive charts! Instantly see how the effects of dividends '
-		'impacts your return.', 'apollo.worth', 'USD')]
+		('Net Worth', 'See how the value of your portfolio changed over time '
+		'with these sleek interactive charts! Instantly see how dividends '
+		'impact your return.', 'apollo.worth', 'USD')]
 
 	total_site_values = site_values + (d.today().strftime("%Y"),
 		12 / len(sub_unit_values))
