@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
-setup(name='Hermes',
-	version='0.5',
+setup(name='Prometheus',
+	version='0.8',
 	long_description=__doc__,
 	packages=find_packages(),
 	include_package_data=True,
