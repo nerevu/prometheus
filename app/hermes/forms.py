@@ -8,6 +8,7 @@ univals = [Required()]
 
 def _get_choices(a_class, value_field, *args, **kwargs):
 	order = '%s.%s' % (a_class.__table__, args[0])
+
 	try:
 		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
 		value = kwargs['value']
@@ -21,18 +22,18 @@ def _get_choices(a_class, value_field, *args, **kwargs):
 	for arg in args:
 		try:
 			new = [getattr(getattr(x, arg[0]), arg[1]) for x in result]
-		except:
+		except Exception:
 			new = [getattr(x, arg) for x in result]
 
 		combo.append(new)
 
 	try:
-		attr = map(lambda x, y: ', '.join([x, y]), combo[0], combo[1])
+# 		attr = map(lambda x, y: ', '.join([x, y]), combo[0], combo[1])
+		attr = [', '.join(x) for x in zip(combo[0], combo[1])]
 	except IndexError:
 		attr = combo[0]
 
-	choices = map(lambda x, y: (x, y), values, attr)
-	return choices
+	return zip(values, attr)
 
 
 def _get_validators(a_class, value_field):
@@ -56,8 +57,8 @@ class CommodityForm(Form):
 		coerce=int)
 
 	@classmethod
-	def new(cls):
-		form = cls()
+	def new(self):
+		form = self()
 		a_class = CommodityType
 		form.type_id.choices = _get_choices(a_class, 'id', 'name')
 		form.type_id.validators = _get_validators(a_class, 'id')
@@ -69,38 +70,33 @@ class CommodityForm(Form):
 
 
 class EventTypeForm(Form):
-	name = TextField('Name', description='Type of event',
-		validators=univals)
-	commodity_id = SelectField('Unit', description='Unit of measurement',
-		coerce=int)
-
-	@classmethod
-	def new(cls):
-		form = cls()
-		a_class = Commodity
-		args = 'symbol'
-		kwargs = {'column': 'type_id', 'value': range(5, 7)}
-		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.commodity_id.validators = _get_validators(a_class, 'id')
-		return form
+	name = TextField('Name', description='Type of event', validators=univals)
 
 
 class EventForm(Form):
-	symbol = TextField('Symbol', description='Ticker symbol',
-		validators=univals)
+	commodity_id = SelectField('Stock', description='Stock', coerce=int)
 	type_id = SelectField('Event Type', description='Type of event',
 		coerce=int)
+	currency_id = SelectField('Currency',
+		description='Unit the event is measured in', coerce=int)
 	value = FloatField('Value', description='Amount the event was worth',
 		validators=univals)
 	date = DateField('Date', description='Date the event happened',
 		validators=univals)
 
 	@classmethod
-	def new(cls):
-		form = cls()
-		form.type_id.choices = _get_choices(EventType, 'id', 'name',
-			['unit', 'symbol'])
+	def new(self):
+		form = self()
+		a_class = Commodity
+		args = 'symbol'
+		kwargs = {'column': 'type_id', 'value': range(5)}
+		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = _get_validators(a_class, 'id')
+		form.type_id.choices = _get_choices(EventType, 'id', 'name')
 		form.type_id.validators = _get_validators(EventType, 'id')
+		kwargs = {'column': 'type_id', 'value': [5, 6]}
+		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
+		form.currency_id.validators = _get_validators(a_class, 'id')
 		return form
 
 
@@ -113,8 +109,8 @@ class PriceForm(Form):
 	date = DateField('Date', description='Closing date', validators=univals)
 
 	@classmethod
-	def new(cls):
-		form = cls()
+	def new(self):
+		form = self()
 		a_class = Commodity
 		args = 'symbol'
 		kwargs = {'column': 'type_id', 'value': range(5)}

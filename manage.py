@@ -59,7 +59,6 @@ def popdb():
 		"""Removes all content from database and populates it
 		with sample data
 		"""
-		resetdb()
 		initdb()
 		pop_db(site)
 		print 'Database populated'

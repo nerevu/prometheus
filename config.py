@@ -6,36 +6,44 @@ _basedir = p.abspath(p.dirname(__file__))
 
 # configuration
 class Content(object):
-# 	MODULES = ['main', 'hermes']
-	TOPNAV = [{'id': 'event', 'caption': 'Events', 'location': 'hermes.get',
-		'table': 'event'}, {'id': 'event_type', 'caption': 'Types',
-		'location': 'hermes.get', 'table': 'event_type'}, {'id': 'price',
-		'caption': 'Prices', 'location': 'hermes.get', 'table': 'price'},
-		{'id': 'commodity', 'caption': 'Commodities',
-		'location': 'hermes.get', 'table': 'commodity'},
-		{'id': 'worth', 'caption': 'Net Worth', 'location': 'hermes.worth'}]
+	site_values = ('prometheus', 'Prometheus', 'Reuben Cummings',
+		'http://reubano.github.com', 'home')
 
-	HERO = {'heading': 'Prometheus: a global asset allocation tool',
-		'text': 'Prometheus is a full featured web app that tells you how your'
-		' stock portfolio has performed over time, gives insight into how to '
-		'optimize your asset allocation, and monitors your portfolio for '
-		'rebalancing or performing enhancing opportunities.'}
+	topnav_values = [('event', 'Events', 'hermes.get', 'event'),
+		('event_type', 'Types', 'hermes.get', 'event_type'),
+		('price', 'Prices', 'hermes.get', 'price'),
+		('commodity', 'Commodities', 'hermes.get', 'commodity'),
+		('worth', 'Net Worth', 'apollo.worth', 'USD')]
 
-	SUB_UNITS = [{'heading': 'Events', 'text': 'See all your stocks events in '
-		'one convenient location. Track stock splits, dividend payments, '
-		'mergers and more!', 'location': 'hermes.get', 'table': 'event'},
-		{'heading': 'Prices', 'text': 'Update your stock prices with the click'
-		' of a button! Automatically grap the latest pricing information from '
-		'Yahoo or Google.', 'location': 'hermes.get', 'table': 'price'},
-		{'heading': 'Net Worth', 'text': 'See how the value of your portfolio '
-		'over time with these sleek interactive charts! Instantly see how the '
-		'effects of dividends impacts your return.',
-		'location': 'hermes.worth'}]
+	hero_values = ('Prometheus: a global asset allocation tool', 'Prometheus is'
+		' a full featured web app that tells you how your stock portfolio has '
+		' performed over time, gives insight into how to optimize your asset '
+		' allocation, and monitors your portfolio for rebalancing or performing'
+		'enhancing opportunities.')
 
-	SITE = {'id': 'prometheus', 'caption': 'Prometheus',
-		'date': d.today().strftime("%Y"), 'author': 'Reuben Cummings',
-		'author_url': 'http://reubano.github.com',
-		'sub_span': 12 / len(SUB_UNITS), 'location': 'home'}
+	sub_unit_values = [('Events', 'See all your stocks events in one convenient'
+		' location. Track stock splits, dividend payments, mergers and more!',
+		'hermes.get', 'event'),
+		('Prices', 'Update your stock prices with the click of a button! '
+		'Automatically grap the latest pricing information from Yahoo or '
+		'Google.', 'hermes.get', 'price'),
+		('Net Worth', 'See how the value of your portfolio changed over time '
+		'with these sleek interactive charts! Instantly see how dividends '
+		'impact your return.', 'apollo.worth', 'USD')]
+
+	total_site_values = site_values + (d.today().strftime("%Y"),
+		12 / len(sub_unit_values))
+
+	site_keys = ('id', 'caption', 'author', 'author_url', 'location', 'date',
+		'sub_span')
+	topnav_keys = ('id', 'caption', 'location', 'table')
+	hero_keys = ('heading', 'text')
+	sub_unit_keys = ('heading', 'text', 'location', 'table')
+
+	SITE = dict(zip(site_keys, total_site_values))
+	TOPNAV = [dict(zip(topnav_keys, values)) for values in topnav_values]
+	HERO = dict(zip(hero_keys, hero_values))
+	SUB_UNITS = [dict(zip(sub_unit_keys, values)) for values in sub_unit_values]
 
 
 class Config(Content):

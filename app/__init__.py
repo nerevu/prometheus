@@ -14,7 +14,7 @@ API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
 	IntegrityError, OperationalError]
 
 db = SQLAlchemy()
-module_names = ['hermes']
+module_names = ['hermes', 'apollo']
 model_names = ['app.%s.models' % x for x in module_names]
 bp_names = ['app.%s.views' % x for x in module_names]
 model_alias = 'model'
@@ -49,10 +49,10 @@ def create_app(config_mode=None, config_file=None):
 		g.sub_units = app.config['SUB_UNITS']
 
 	@app.errorhandler(404)
-	@app.errorhandler(TypeError)
+# 	@app.errorhandler(TypeError)
 	def not_found(error):
 		heading = 'Page not found.'
-		text = "Sorry, your page isn't available!."
+		text = "Sorry, your page isn't available!"
 		kwargs = {'id': 404, 'title': '404', 'heading': heading, 'text': text}
 		return render_template('page.html', **kwargs), 404
 
@@ -85,7 +85,7 @@ def create_app(config_mode=None, config_file=None):
 	# in the form [(<module>,[]),(<module>,[])]
 	# [(<module 'app.hermes.models' from '/path/to/models.pyc'>,
 	# 	['Event', 'Type'])]
-	sets = map(lambda x, y: (x, y), models, nested_classes)
+	sets = zip(models, nested_classes)
 
 	# provides a nested iterator of classes in the expanded form of <class>
 	# <class 'app.hermes.models.Event'>

@@ -140,11 +140,9 @@ class APITestCase(APIHelperCase):
 				'exchange_id': 4}]},
 
 		{'table': 'event_type',
-		'data': [{'name': 'Dividend', 'commodity_id': '1'},
-			{'name': 'Special Dividend', 'commodity_id': '1'},
-			{'name': 'Stock Split', 'commodity_id': '5'},
-			{'name': 'Name Change', 'commodity_id': '6'},
-			{'name': 'Ticker Change', 'commodity_id': '6'}]}]
+		'data': [{'name': 'Dividend'}, {'name': 'Special Dividend'},
+			{'name': 'Stock Split'}, {'name': 'Name Change'},
+			{'name': 'Ticker Change'}]}]
 
 		for dict in content:
 			table = dict['table']
@@ -169,8 +167,8 @@ class APITestCase(APIHelperCase):
 		new = old + 1
 
 		# add event
-		data = {'symbol': 'ISIS', 'date': '1/22/12',
-			'type': {'name': 'Brand New', 'commodity_id': 3}, 'value': 100}
+		data = {'commodity_id': 3, 'date': '1/22/12',
+			'type': {'name': 'Brand New'}, 'currency_id': 3, 'value': 100}
 		r = self.post_data(data, 'event')
 		self.assertEqual(r.status_code, 201)
 
