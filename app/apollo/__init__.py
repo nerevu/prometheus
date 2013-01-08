@@ -32,7 +32,8 @@ def calculate_value(shares, prices, rates, native):
 
 def convert_values(values, commodities):
 	symbols = [commodities.ix[int(x)][0] for x in values.keys()]
-	return zip(symbols, values.values())
+	totals = ['%.2f' % x for x in values.values()]
+	return zip(symbols, totals)
 
 
 def get_prices():
