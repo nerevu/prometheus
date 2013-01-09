@@ -9,7 +9,7 @@
  -->
 <div class="jumbotron">
 	<h1>{{ heading }}</h1>
-	<p class="lead">{{ text }}</p>
+	<p class="lead">{{ subheading }}</p>
 </div>
 {% for category, message in get_flashed_messages(with_categories=true) %}
 <div class="{{ category }}">
@@ -17,5 +17,6 @@
 	{{ message }}
 </div>
 {% endfor %}
+<hr>
 {% block main_content %}{% endblock %}
 {% endblock container_content %}
