@@ -37,14 +37,15 @@ def worth(table):
 		chart_caption = '%s (some price data is missing)' % chart_caption
 
 	heading = 'View your net worth'
-	text = ('On this page you can view the net worth of all ETF, Mutual Fund, '
+	subheading = ('View the net worth of all ETF, Mutual Fund, '
 		'and Stock holdings. Prices are taken from the Prices tab and a '
 		'purchase of 100 shares is assumed for each date a price is given.')
 	category = 'Commodity'
 	data_label = 'Value in %s' % table
 
-	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'columns': data, 'chart_caption': chart_caption,
-		'category': category, 'data_label': data_label}
+	kwargs = {'id': id, 'title': title, 'heading': heading,
+		'subheading': subheading, 'columns': data,
+		'chart_caption': chart_caption, 'category': category,
+		'data_label': data_label}
 
 	return render_template('barchart.html', **kwargs)
