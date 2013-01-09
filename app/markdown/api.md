@@ -19,7 +19,7 @@ The Prometheus API has endpoints located at `http://127.0.0.1:5000/api/<table>`.
 
 ## Methods
 
-The API is a RESTful service and allows the following HTTP methods:
+The API is a ReSTful service and allows the following HTTP methods:
 
 * GET
 * DELETE
