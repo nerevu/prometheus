@@ -1,3 +1,4 @@
+import os
 from os import path as p
 from datetime import date as d
 
@@ -58,17 +59,17 @@ class Config(Content):
 	TESTING = False
 	HOST = '127.0.0.1'
 	PORT = 5000
-	SECRET_KEY = 'secret_key'
+	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
+	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
+	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')
+	RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '')
 	BOOTSTRAP_USE_MINIFIED = True
 	BOOTSTRAP_USE_CDN = False
 	BOOTSTRAP_FONTAWESOME = False
 	BOOTSTRAP_HTML5_SHIM = True
 	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT = ''
 	CSRF_ENABLED = True
-	CSRF_SESSION_KEY = 'csrf_session_key2'
 	RECAPTCHA_USE_SSL = False
-	RECAPTCHA_PUBLIC_KEY = 'recaptcha_public_key'
-	RECAPTCHA_PRIVATE_KEY = 'recaptcha_private_key'
 	RECAPTCHA_OPTIONS = {'theme': 'white'}
 	API_METHODS = ['GET', 'POST', 'DELETE', 'PATCH', 'PUT']
 	API_ALLOW_FUNCTIONS = True
