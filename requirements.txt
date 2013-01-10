@@ -17,6 +17,7 @@ libxml2-python==2.7.8
 mercurial==2.3.1
 numpy==1.6.2
 pandas==0.10.0
+psycopg2==2.4.6
 python-dateutil==1.5
 pytz==2012j
 requests==0.14.2
