@@ -56,6 +56,8 @@ class Config(Content):
 	DEBUG = False
 	ADMINS = frozenset(['reubano@gmail.com'])
 	TESTING = False
+	HOST = '127.0.0.1'
+	PORT = 5000
 	SECRET_KEY = 'secret_key'
 	BOOTSTRAP_USE_MINIFIED = True
 	BOOTSTRAP_USE_CDN = False
@@ -74,7 +76,7 @@ class Config(Content):
 
 
 class Production(Config):
-	SQLALCHEMY_DATABASE_URI = 'mysql://user@localhost/foo'
+	SQLALCHEMY_DATABASE_URI = 'postgres://reubano@localhost/app'
 	HOST = '0.0.0.0'
 	BOOTSTRAP_USE_CDN = True
 	BOOTSTRAP_FONTAWESOME = True
