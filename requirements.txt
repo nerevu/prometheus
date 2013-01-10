@@ -12,13 +12,13 @@ SAValidation==0.2.0
 SQLAlchemy==0.7.9
 WTForms==1.0.2
 Werkzeug==0.8.3
+gevent==0.13.8
+greenlet==0.4.0
+gunicorn==0.17.2
 numpy==1.6.2
-pandas==0.10.0
 psycopg2==2.4.6
 python-dateutil==1.5
 pytz==2012j
 requests==0.14.2
 unittest2==0.5.1
 yolk==0.4.3
-gevent
-gunicorn
