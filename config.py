@@ -58,7 +58,7 @@ class Config(Content):
 	ADMINS = frozenset(['reubano@gmail.com'])
 	TESTING = False
 	HOST = '127.0.0.1'
-	PORT = 5000
+	PORT = int(os.environ.get('PORT', 5000))
 	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
 	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
 	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')
@@ -77,7 +77,8 @@ class Config(Content):
 
 
 class Production(Config):
-	SQLALCHEMY_DATABASE_URI = 'postgres://reubano@localhost/app'
+	defaultdb = 'postgres://reubano@localhost/app'
+	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', defaultdb)
 	HOST = '0.0.0.0'
 	BOOTSTRAP_USE_CDN = True
 	BOOTSTRAP_FONTAWESOME = True
