@@ -16,6 +16,7 @@ gevent==0.13.8
 greenlet==0.4.0
 gunicorn==0.17.2
 numpy==1.6.2
+pandas==0.10.0
 psycopg2==2.4.6
 python-dateutil==1.5
 pytz==2012j
