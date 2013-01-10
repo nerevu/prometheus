@@ -4,7 +4,8 @@
 <!-- Main hero unit -->
 <div class="hero-unit">
 	<h1>{{ g.hero.heading }}</h1>
-	<p>{{ g.hero.text }}</p>
+	<p>{{ g.hero.subheading }}</p>
+	<p><a class="btn btn-primary btn-large" href="{{ url_for('%s' % g.hero.location) }}">Learn more &raquo;</a></p>
 </div>
 
 <!-- Columns -->

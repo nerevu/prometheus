@@ -29,8 +29,8 @@ def get(table):
 	title = '%s' % plural_table_title
 	table_caption = '%s List' % table_title
 	form_caption = '%s Entry Form' % table_title
-	heading = 'Add %s to the database' % plural_table
-	text = ('On this page you can add %s to the database and see them '
+	heading = 'The %s database' % plural_table
+	subheading = ('Add %s to the database and see them '
 		'instantly updated in the lists below.' % plural_table)
 	results = query.all()
 
@@ -39,11 +39,12 @@ def get(table):
 	except AttributeError:
 		form = eval('%sForm()' % table_as_class)
 
-	kwargs = {'id': id, 'title': title, 'heading': heading, 'text': text,
-		'rows': results, 'form': form, 'form_caption': form_caption,
-		'table_caption': table_caption, 'table_headers': table_headers,
-		'data_fields': data_fields, 'form_fields': form_fields,
-		'post_location': post_location, 'post_table': post_table}
+	kwargs = {'id': id, 'title': title, 'heading': heading,
+		'subheading': subheading, 'rows': results, 'form': form,
+		'form_caption': form_caption, 'table_caption': table_caption,
+		'table_headers': table_headers, 'data_fields': data_fields,
+		'form_fields': form_fields, 'post_location': post_location,
+		'post_table': post_table}
 
 	return render_template('entry.html', **kwargs)
 

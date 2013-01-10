@@ -1,23 +1,31 @@
 from __future__ import print_function
+
+import re
 from inspect import isclass, getmembers
+from functools import partial, update_wrapper
 from importlib import import_module
 from itertools import imap, repeat
-
+from os import path as p, listdir
 from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
 from flask import Flask, render_template, g
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
+from flask.ext.markdown import Markdown
 
 API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
 	IntegrityError, OperationalError]
 
 db = SQLAlchemy()
-module_names = ['hermes', 'apollo']
-model_names = ['app.%s.models' % x for x in module_names]
-bp_names = ['app.%s.views' % x for x in module_names]
-model_alias = 'model'
+__DIR__ = p.dirname(__file__)
+
+
+def _get_modules(dir):
+	dirs = listdir(dir)
+	modules = [d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
+		and d != 'tests']
+	return modules
 
 
 def _get_app_classes(module):
@@ -31,6 +39,7 @@ def create_app(config_mode=None, config_file=None):
 	app = Flask(__name__)
 	db.init_app(app)
 	Bootstrap(app)
+	Markdown(app)
 	app.config.from_envvar('APP_SETTINGS', silent=True)
 
 	if config_mode:
@@ -52,8 +61,9 @@ def create_app(config_mode=None, config_file=None):
 # 	@app.errorhandler(TypeError)
 	def not_found(error):
 		heading = 'Page not found.'
-		text = "Sorry, your page isn't available!"
-		kwargs = {'id': 404, 'title': '404', 'heading': heading, 'text': text}
+		subheading = "Sorry, your page isn't available!"
+		kwargs = {'id': 404, 'title': '404', 'heading': heading,
+			'subheading': subheading}
 		return render_template('page.html', **kwargs), 404
 
 	@app.template_filter()
@@ -63,11 +73,44 @@ def create_app(config_mode=None, config_file=None):
 		except TypeError:
 			return x
 
+# 	app.jinja_env.filters['currency']=currency
+
 	@app.route('/')
 	def home():
 		return render_template('home.html')
 
-	# app.jinja_env.filters['currency']=currency
+	# create markdown views
+	mkd_pages = app.config['MKD_PAGES']
+	mkd_folder = app.config['MKD_FOLDER']
+
+	def template(kwargs):
+		return render_template('markdown.html', **kwargs)
+
+	for page in mkd_pages:
+		path = p.join(__DIR__, mkd_folder, page['file'])
+		text = open(path).read()
+		pattern = '---'
+
+		matches = [match for match in re.finditer(pattern, text)]
+
+		if matches:
+			cfg_start = matches[0].end() + 1
+			cfg_end = matches[1].start() - 1
+			parse = text[cfg_start:cfg_end].split('\n')
+			cfg = dict([tuple(row.split(': ')) for row in parse])
+			md = text[matches[1].end() + 1:]
+		else:
+			cfg = {}
+			md = text
+
+		kwargs = {'md': md, 'id': page['id']}
+		kwargs.update(cfg)
+		endpoint = page['id']
+		func = page['id']
+		exec '%s = partial(template, kwargs)' % func in globals(), locals()
+		update_wrapper(eval(func), template)
+		eval(func).__name__ = func
+		app.add_url_rule('/%s/' % endpoint, view_func=eval(func))
 
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
@@ -95,7 +138,10 @@ def create_app(config_mode=None, config_file=None):
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
 
-# import app models
+# import app models and views
+modules = _get_modules(__DIR__)
+model_names = ['app.%s.models' % x for x in modules]
+view_names = ['app.%s.views' % x for x in modules]
 models = [import_module(x) for x in model_names]
-views = [import_module(x) for x in bp_names]
-blueprints = map(getattr, views, module_names)
+views = [import_module(x) for x in view_names]
+blueprints = map(getattr, views, modules)
