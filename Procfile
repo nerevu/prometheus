@@ -1,1 +1,1 @@
-web: python manage.py runserver -m Production
+web: gunicorn app:create_app\(\'Production\'\) -w 3 -k gevent
