@@ -9,15 +9,13 @@ manager = Manager(create_app)
 manager.add_option('-m', '--cfgmode', dest='config_mode',
 	default='Development')
 manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
-site = 'http://127.0.0.1:5000/api'
 
 
 def get_site():
 	with app.app_context():
 		host = app.config['HOST']
 		port = app.config['PORT']
-# 		return 'http://%s:%s/api' % (host, port)
-		return 'http://127.0.0.1:5000/api'
+		return 'http://%s:%s/api' % (host, port)
 
 
 @manager.command
@@ -55,7 +53,7 @@ def initdb():
 		with default values
 		"""
 		resetdb()
-		init_db(site)
+		init_db(get_site())
 		print 'Database initialized'
 
 
