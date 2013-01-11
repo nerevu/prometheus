@@ -1,10 +1,10 @@
 # from __future__ import print_function
 import numpy as np
-import app.apollo as ap
 import pandas as pd
+import app.apollo as ap
 
 from pprint import pprint
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import Blueprint, render_template
 
 apollo = Blueprint('apollo', __name__)
 
@@ -28,29 +28,17 @@ def worth(table):
 		dfs.append(df)
 
 	prices, dividends, rates, commodities = dfs[0], dfs[1], dfs[2], dfs[3]
-
-	if not dividends.empty and not prices.empty:
-		reinvestments, missing = ap.get_reinvestments(dividends, prices)
-	else:
-		reinvestments, missing = ap.empty_df(), None
-
-	if not prices.empty or not reinvestments.empty:
-		transactions = ap.get_transactions(prices, reinvestments, 100)
-		transactions = ap.sort_df(transactions)
-		shares = ap.get_shares(transactions)
-		values = ap.calculate_value(shares, prices, rates, 1)
-		data = ap.convert_values(values, commodities)
-	else:
-		transactions = []
-		data = [('N/A', 0)]
-
+	reinvestments, missing = ap.get_reinvestments(dividends, prices)
+	myportfolio = ap.Portfolio.from_prices(prices, commodities, reinvestments)
+	values = myportfolio.calculate_value(prices, rates)
+	data = myportfolio.convert_values(values)
 	id = 'worth'
 	title = 'Net Worth'
 	chart_caption = 'Net Worth per Commodity in %s' % table
 
 	if missing:
 		chart_caption = '%s (some price data is missing)' % chart_caption
-	elif transactions.empty:
+	elif myportfolio.transactions.empty:
 		chart_caption = 'No transactions found. Please enter some events or prices.'
 
 	heading = 'View your net worth'
