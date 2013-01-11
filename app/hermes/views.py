@@ -52,6 +52,7 @@ def get(table):
 @hermes.route('/add/<table>/', methods=['GET', 'POST'])
 def add(table):
 	table_as_class = table.title().replace('_', '')
+
 	try:
 		form = eval('%sForm.new()' % table_as_class)
 	except AttributeError:
