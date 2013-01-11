@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from app.hermes.models import init_db, pop_db
 from os.path import abspath
-from flask import current_app as app
+from flask import current_app as app, url_for
 from app import create_app, db
 from flask.ext.script import Manager
 
@@ -11,10 +11,9 @@ manager.add_option('-m', '--cfgmode', dest='config_mode',
 manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
 
 
-def get_site():
+def get_api_endpoint():
 	with app.app_context():
-		domain = app.config['DOMAIN']
-		return 'http://%s/api' % domain
+		return url_for('api', _external=True)
 
 
 @manager.command
@@ -52,7 +51,7 @@ def initdb():
 		with default values
 		"""
 		resetdb()
-		init_db(get_site())
+		init_db(get_api_endpoint())
 		print 'Database initialized'
 
 
@@ -64,7 +63,7 @@ def popdb():
 		with sample data
 		"""
 		initdb()
-		pop_db(site)
+		pop_db(get_api_endpoint())
 		print 'Database populated'
 
 if __name__ == '__main__':
