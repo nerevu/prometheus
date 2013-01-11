@@ -5,7 +5,7 @@ subheading: Learn how to query and update Prometheus using the ReSTful API
 
 ## Endpoints
 
-The Prometheus API has endpoints located at `http://127.0.0.1:5000/api/<table>`. Currently accesible tables include the following:
+The Prometheus API has endpoints located at `http://prometheus.herokuapp.com/api/<table>`. Currently accesible tables include the following:
 
 * [exchange](/api/exchange)
 * [data_source](/api/data_source)
