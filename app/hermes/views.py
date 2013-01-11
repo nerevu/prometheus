@@ -71,11 +71,11 @@ def add(table):
 		[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
 			for k, v in form.errors.iteritems()]
 
-	return redirect(url_for('hermes.get', table=table))
+	return redirect(url_for('.get', table=table))
 
 
 @hermes.errorhandler(409)
 @hermes.errorhandler(IntegrityError)
 def duplicate_values(e):
 	flash('Error: %s' % e.orig[0], 'alert alert-error')
-	return redirect(url_for('hermes.get', table=__TABLE__))
+	return redirect(url_for('.get', table=__TABLE__))
