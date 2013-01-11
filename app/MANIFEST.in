@@ -1,2 +1,6 @@
 recursive-include app/templates *
 recursive-include app/static *
+recursive-include app/markdown *
+recursive-include app/tests *
+include app/README.rst
+include app/LICENSE

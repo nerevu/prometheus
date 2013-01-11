@@ -34,6 +34,7 @@ class Content(object):
 		'with these sleek interactive charts! Instantly see how dividends '
 		'impact your return.', 'apollo.worth', 'USD')]
 
+	heroku_app = site_values[0]
 	mkd_values = [('about', 'about.md'), ('api', 'api.md')]
 	total_site_values = site_values + (d.today().strftime("%Y"),
 		12 / len(sub_unit_values))
@@ -59,6 +60,7 @@ class Config(Content):
 	TESTING = False
 	HOST = '127.0.0.1'
 	PORT = int(os.environ.get('PORT', 5000))
+# 	SERVER_NAME = '%s.herokuapp.com' % Content.heroku_app
 	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
 	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
 	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')

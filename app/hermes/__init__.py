@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+	app.hermes
+	~~~~~~~~~~~~~~
+
+	Provides application price and event aggregation functions
+"""
+
 from app import db
 from sqlalchemy.orm import aliased
 from .models import Event, EventType, Price, Commodity, CommodityType
