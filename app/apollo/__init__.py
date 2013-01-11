@@ -101,6 +101,12 @@ def sort_df(df):
 
 
 def make_df(values, dtype, index):
+	"""Return a data frame given a set of components
+	more text
+	>>> make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id']).columns
+	Index([symbol], dtype=object)
+	"""
+
 	ndarray = np.array(values, dtype)
 	df = pd.DataFrame.from_records(ndarray)
 	df.set_index(index, inplace=True)
