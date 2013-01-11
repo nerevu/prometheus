@@ -1,12 +1,15 @@
-from unittest2 import TestSuite
-from unittest2 import defaultTestLoader
-
-from . import test_hermes
+from unittest import TestCase
+from app import create_app, db
 
 
-def suite():
-    """Returns the test suite for this module."""
-    result = TestSuite()
-    loader = defaultTestLoader
-    result.addTest(loader.loadTestsFromModule(test_hermes))
-    return result
+class PackageCase(TestCase):
+	def setUpPackage(self):
+		"""database context creation"""
+		self.app = create_app(config_mode='Test')
+		self.client = self.app.test_client()
+		self.jsonx = self.app.test_request_context()
+		self.jsonx.push()
+
+	def tearDownPackage(self):
+		"""database context removal"""
+		self.jsonx.pop()

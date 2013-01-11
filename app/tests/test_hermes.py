@@ -5,7 +5,8 @@ Provides unit tests for the :mod:`app.hermes` module.
 
 """
 
-from unittest2 import TestCase, TestSuite, main
+from unittest import TestCase
+from . import PackageCase
 from flask import json
 from app import create_app, db
 
@@ -14,8 +15,9 @@ loads = json.loads
 
 
 class InitialCase(TestCase):
+# class InitialCase(PackageCase):
 	def setUp(self):
-		"""Before each test, set up a blank database"""
+		"""database context creation"""
 		self.app = create_app(config_mode='Test')
 		self.client = self.app.test_client()
 		self.jsonx = self.app.test_request_context()
@@ -23,9 +25,17 @@ class InitialCase(TestCase):
 		db.create_all()
 
 	def tearDown(self):
-		"""Get rid of the database again after each test."""
+		"""database context removal"""
 		db.drop_all()
 		self.jsonx.pop()
+
+# 	def setUp(self):
+# 		"""Before each test, create database"""
+# 		db.create_all()
+#
+# 	def tearDown(self):
+# 		"""After each test, remove database"""
+# 		db.drop_all()
 
 
 class APIHelperCase(InitialCase):
@@ -262,11 +272,3 @@ class APITestCase(APIHelperCase):
 		self.assertEqual(r.status_code, 200)
 		loaded = loads(r.data)
 		self.assertEqual(loaded['num_results'], new)
-
-
-def load_tests(loader, standard_tests, pattern):
-	"""Returns the test suite for this module."""
-	suite = TestSuite()
-	suite.addTest(loader.loadTestsFromTestCase(WebTestCase))
-	suite.addTest(loader.loadTestsFromTestCase(APITestCase))
-	return suite
