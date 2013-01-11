@@ -13,9 +13,8 @@ manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
 
 def get_site():
 	with app.app_context():
-		host = app.config['HOST']
-		port = app.config['PORT']
-		return 'http://%s:%s/api' % (host, port)
+		domain = app.config['DOMAIN']
+		return 'http://%s/api' % domain
 
 
 @manager.command
