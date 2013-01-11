@@ -14,7 +14,10 @@ def calculate_value(shares, prices, rates, native):
 	prices.reset_index(level='comm_id', inplace=True)
 	converted = prices.join(rates, how='outer')
 	converted = converted.groupby(level='curr_id').fillna(method='pad')
-	converted.rate[native] = converted.rate[native].fillna(1)
+
+	if native in converted.groupby(level='curr_id').groups.keys():
+		converted.rate[native] = converted.rate[native].fillna(1)
+
 	converted.reset_index(inplace=True)
 	converted.set_index(['comm_id', 'date'], inplace=True)
 	converted['con_price'] = converted.price * converted.rate
@@ -104,20 +107,30 @@ def make_df(values, dtype, index):
 	return df
 
 
+def empty_df():
+	return pd.DataFrame({})
+
+
 def get_transactions(prices, reinvestments, shares):
 	index = prices.index.names
-	[index.append(x) for x in reinvestments.index.names if x not in index]
+
+	if not reinvestments.empty:
+		[index.append(x) for x in reinvestments.index.names if x not in index]
+
 	df = prices.reset_index()
 	df['shares'] = shares
-	reinvestments = reinvestments.reset_index()
-	df = pd.concat([df, reinvestments], ignore_index=True)
+
+	if not reinvestments.empty:
+		reinvestments = reinvestments.reset_index()
+		df = pd.concat([df, reinvestments], ignore_index=True)
+
 	df.set_index(index, inplace=True)
 	return df
 
 
 def get_reinvestments(dividends, prices):
 	df = dividends.join(prices, how='outer')
-	index = df.index.names[:-1]  # exclude the date index
+	index = df.index.names[:-1]	 # exclude the date index
 
 	for g in df.groupby(level=index).groups:
 		if df.ix[g].price.sum() > 0:
@@ -132,6 +145,10 @@ def get_reinvestments(dividends, prices):
 
 
 def get_shares(transactions):
+	"""Return the sum of shares grouped by commodity
+	more text
+	"""
+
 	df = transactions.groupby(level='comm_id').sum()
 	del df['price']
 	return df
