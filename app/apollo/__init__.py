@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+	app.apollo
+	~~~~~~~~~~~~~~
+
+	Provides application manipulation functions for input into visualization
+	libraries
+"""
+
 import numpy as np
 import pandas as pd
 

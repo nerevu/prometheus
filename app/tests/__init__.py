@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+	app.tests
+	~~~~~~~~~~~~~~
+
+	Provides application unit tests
+"""
+
 from unittest import TestCase
 from app import create_app, db
 

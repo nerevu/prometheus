@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
+"""
+	app
+	~~~~~~~~~~~~~~
+
+	Provides the flask application
+"""
+
 from __future__ import print_function
 
 import re
+
 from inspect import isclass, getmembers
 from functools import partial, update_wrapper
 from importlib import import_module
