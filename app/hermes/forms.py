@@ -40,21 +40,25 @@ def _get_validators(a_class, value_field):
 	result = a_class.query.all()
 	values = [getattr(x, value_field) for x in result]
 	values = sorted(values)
-	return [Required(), AnyOf(values, message=u'Invalid value, must be one of:'
-		'%(values)s')]
+	return [
+		Required(), AnyOf(
+			values, message=u'Invalid value, must be one of:'
+			'%(values)s')]
 
 
 class CommodityForm(Form):
 # 	cusip = TextField('CUSIP', description='CUSIP')
-	symbol = TextField('Ticker Symbol', description='Usually 3 or 4 letters',
+	symbol = TextField(
+		'Ticker Symbol', description='Usually 3 or 4 letters',
 		validators=univals)
+
 	name = TextField('Name', description='Commodity Name', validators=univals)
-	type_id = SelectField('Type', description='Type of Commodity',
-		coerce=int)
-	data_source_id = SelectField('Data Source', description='Type of Commodity',
-		coerce=int)
-	exchange_id = SelectField('Exchange', description='Type of Commodity',
-		coerce=int)
+	type_id = SelectField(
+		'Type', description='Type of Commodity', coerce=int)
+	data_source_id = SelectField(
+		'Data Source', description='Type of Commodity', coerce=int)
+	exchange_id = SelectField(
+		'Exchange', description='Type of Commodity', coerce=int)
 
 	@classmethod
 	def new(self):
@@ -75,14 +79,14 @@ class EventTypeForm(Form):
 
 class EventForm(Form):
 	commodity_id = SelectField('Stock', description='Stock', coerce=int)
-	type_id = SelectField('Event Type', description='Type of event',
-		coerce=int)
-	currency_id = SelectField('Currency',
-		description='Unit the event is measured in', coerce=int)
-	value = FloatField('Value', description='Amount the event was worth',
-		validators=univals)
-	date = DateField('Date', description='Date the event happened',
-		validators=univals)
+	type_id = SelectField(
+		'Event Type', description='Type of event', coerce=int)
+	currency_id = SelectField(
+		'Currency', description='Unit the event is measured in', coerce=int)
+	value = FloatField(
+		'Value', description='Amount the event was worth', validators=univals)
+	date = DateField(
+		'Date', description='Date the event happened', validators=univals)
 
 	@classmethod
 	def new(self):
@@ -102,10 +106,13 @@ class EventForm(Form):
 
 class PriceForm(Form):
 	commodity_id = SelectField('Stock', description='Stock', coerce=int)
-	currency_id = SelectField('Currency',
-		description='Currency the price is in', coerce=int)
-	close = FloatField('Closing Price', description='End of day closing price',
+	currency_id = SelectField(
+		'Currency', description='Currency the price is in', coerce=int)
+
+	close = FloatField(
+		'Closing Price', description='End of day closing price',
 		validators=univals)
+
 	date = DateField('Date', description='Closing date', validators=univals)
 
 	@classmethod

@@ -23,8 +23,9 @@ from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
 from flask.ext.markdown import Markdown
 
-API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
-	IntegrityError, OperationalError]
+API_EXCEPTIONS = [
+	ValidationError, ValueError, AttributeError, TypeError, IntegrityError,
+	OperationalError]
 
 db = SQLAlchemy()
 __DIR__ = p.dirname(__file__)
@@ -32,8 +33,10 @@ __DIR__ = p.dirname(__file__)
 
 def _get_modules(dir):
 	dirs = listdir(dir)
-	modules = [d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
+	modules = [
+		d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
 		and d != 'tests']
+
 	return modules
 
 
@@ -71,8 +74,10 @@ def create_app(config_mode=None, config_file=None):
 	def not_found(error):
 		heading = 'Page not found.'
 		subheading = "Sorry, your page isn't available!"
-		kwargs = {'id': 404, 'title': '404', 'heading': heading,
+		kwargs = {
+			'id': 404, 'title': '404', 'heading': heading,
 			'subheading': subheading}
+
 		return render_template('page.html', **kwargs), 404
 
 	@app.template_filter()
@@ -124,7 +129,8 @@ def create_app(config_mode=None, config_file=None):
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
 
-	kwargs = {'methods': app.config['API_METHODS'],
+	kwargs = {
+		'methods': app.config['API_METHODS'],
 		'validation_exceptions': API_EXCEPTIONS,
 		'allow_functions': app.config['API_ALLOW_FUNCTIONS'],
 		'allow_patch_many': app.config['API_ALLOW_PATCH_MANY']}

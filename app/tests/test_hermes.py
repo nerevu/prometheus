@@ -76,8 +76,8 @@ class APIHelperCase(InitialCase):
 			url = '%s/%s' % (self.endpoint, table)
 
 		if query:
-			r = self.client.patch(url, data=dumps(data), content_type=self.json,
-				q=query)
+			r = self.client.patch(
+				url, data=dumps(data), content_type=self.json, q=query)
 		else:
 			r = self.client.patch(url, data=dumps(data), content_type=self.json)
 
@@ -113,46 +113,63 @@ class APITestCase(APIHelperCase):
 		"""Initialize database with data"""
 		super(APITestCase, self).setUp()
 
-		content = [{'table': 'exchange',
-		'data': [{'symbol': 'NYSE', 'name': 'New York Stock Exchange'},
-			{'symbol': 'NASDAQ', 'name': 'NASDAQ'},
-			{'symbol': 'OTC', 'name': 'Over the counter'},
-			{'symbol': 'N/A', 'name': 'Currency'}]},
+		content = [
+		{
+			'table': 'exchange',
+			'data': [
+				{'symbol': 'NYSE', 'name': 'New York Stock Exchange'},
+				{'symbol': 'NASDAQ', 'name': 'NASDAQ'},
+				{'symbol': 'OTC', 'name': 'Over the counter'},
+				{'symbol': 'N/A', 'name': 'Currency'}]},
 
-		{'table': 'data_source',
-		'data': [{'name': 'Yahoo'}, {'name': 'Google'}, {'name': 'XE'}]},
+		{
+			'table': 'data_source',
+			'data': [{'name': 'Yahoo'}, {'name': 'Google'}, {'name': 'XE'}]},
 
-		{'table': 'commodity_group',
-		'data': [{'name': 'Security'}, {'name': 'Currency'},
-			{'name': 'Other'}]},
+		{
+			'table': 'commodity_group',
+			'data': [
+				{'name': 'Security'}, {'name': 'Currency'}, {'name': 'Other'}]},
 
-		{'table': 'commodity_type',
-		'data': [{'name': 'Stock', 'group_id': 1},
-			{'name': 'Bond', 'group_id': 1},
-			{'name': 'Mutual Fund', 'group_id': 1},
-			{'name': 'ETF', 'group_id': 1},
-			{'name': 'Currency', 'group_id': 2},
-			{'name': 'Descriptor', 'group_id': 3}]},
+		{
+			'table': 'commodity_type',
+			'data': [
+				{'name': 'Stock', 'group_id': 1},
+				{'name': 'Bond', 'group_id': 1},
+				{'name': 'Mutual Fund', 'group_id': 1},
+				{'name': 'ETF', 'group_id': 1},
+				{'name': 'Currency', 'group_id': 2},
+				{'name': 'Descriptor', 'group_id': 3}]},
 
-		{'table': 'commodity',
-		'data': [{'symbol': 'USD', 'name': 'US Dollar',
-				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
-			{'symbol': 'EUR', 'name': 'Euro',
-				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
-			{'symbol': 'GBP', 'name': 'Pound Sterling',
-				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
-			{'symbol': 'TZS', 'name': 'Tanzanian Shilling',
-				'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
-			{'symbol': 'Multiple', 'name': 'Multiple',
-				'type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
-			{'symbol': 'Text', 'name': 'Text',
-				'type_id': 6, 'data_source_id': 3,
-				'exchange_id': 4}]},
+		{
+			'table': 'commodity',
+			'data': [
+				{
+					'symbol': 'USD', 'name': 'US Dollar', 'type_id': 5,
+					'data_source_id': 3, 'exchange_id': 4},
+				{
+					'symbol': 'EUR', 'name': 'Euro', 'type_id': 5,
+					'data_source_id': 3, 'exchange_id': 4},
+				{
+					'symbol': 'GBP', 'name': 'Pound Sterling',
+					'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				{
+					'symbol': 'TZS', 'name': 'Tanzanian Shilling',
+					'type_id': 5, 'data_source_id': 3, 'exchange_id': 4},
+				{
+					'symbol': 'Multiple', 'name': 'Multiple',
+					'type_id': 6, 'data_source_id': 3, 'exchange_id': 4},
+				{
+					'symbol': 'Text', 'name': 'Text',
+					'type_id': 6, 'data_source_id': 3,
+					'exchange_id': 4}]},
 
-		{'table': 'event_type',
-		'data': [{'name': 'Dividend'}, {'name': 'Special Dividend'},
-			{'name': 'Stock Split'}, {'name': 'Name Change'},
-			{'name': 'Ticker Change'}]}]
+		{
+			'table': 'event_type',
+			'data': [
+				{'name': 'Dividend'}, {'name': 'Special Dividend'},
+				{'name': 'Stock Split'}, {'name': 'Name Change'},
+				{'name': 'Ticker Change'}]}]
 
 		for dict in content:
 			table = dict['table']
@@ -177,7 +194,8 @@ class APITestCase(APIHelperCase):
 		new = old + 1
 
 		# add event
-		data = {'commodity_id': 3, 'date': '1/22/12',
+		data = {
+			'commodity_id': 3, 'date': '1/22/12',
 			'type': {'name': 'Brand New'}, 'currency_id': 3, 'value': 100}
 		r = self.post_data(data, 'event')
 		self.assertEqual(r.status_code, 201)
@@ -228,8 +246,8 @@ class APITestCase(APIHelperCase):
 		new = old + 1
 
 		# patch the commodity with a new type
-		patch = {'type': {'add': {'name': 'Brand New',
-			'group_id': 2}}}
+		patch = {
+			'type': {'add': {'name': 'Brand New', 'group_id': 2}}}
 		r = self.patch_data(patch, 'commodity', 1)
 		self.assertEqual(r.status_code, 200)
 

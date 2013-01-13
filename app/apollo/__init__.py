@@ -19,19 +19,22 @@ from app.hermes.models import Event, EventType, Price, Commodity
 
 
 def get_prices():
-	query = (db.session.query(Price, Commodity).join(Price.commodity)
+	query = (
+		db.session.query(Price, Commodity).join(Price.commodity)
 		.order_by(Price.commodity).filter(Commodity.type_id.in_([1, 3, 4])))
 
 	keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close'), (0, 'currency_id')]
-	dtype = [('comm_id', np.int), ('date', np.datetime64),
-		('price', np.float32), ('curr_id', np.int)]
+	dtype = [
+		('comm_id', np.int), ('date', np.datetime64), ('price', np.float32),
+		('curr_id', np.int)]
+
 	index = ['comm_id', 'curr_id', 'date']
 	return query.all(), keys, dtype, index
 
 
 def get_commodities():
-	query = (db.session.query(Commodity)
-		.filter(Commodity.type_id.in_([1, 3, 4])))
+	query = (
+		db.session.query(Commodity).filter(Commodity.type_id.in_([1, 3, 4])))
 	keys = ['id', 'symbol']
 	dtype = [('id', np.int), ('symbol', 'a5')]
 	index = ['id']
@@ -39,11 +42,15 @@ def get_commodities():
 
 
 def get_dividends():
-	query = (db.session.query(Event).order_by(Event.commodity_id)
+	query = (
+		db.session.query(Event).order_by(Event.commodity_id)
 		.filter(Event.type_id.in_([1])))
+
 	keys = ['commodity_id', 'date', 'value', 'currency_id']
-	dtype = [('comm_id', np.int), ('date', np.datetime64), ('dividend',
-		np.float32), ('curr_id', np.int)]
+	dtype = [
+		('comm_id', np.int), ('date', np.datetime64), ('dividend', np.float32),
+		('curr_id', np.int)]
+
 	index = ['comm_id', 'curr_id', 'date']
 	return query.all(), keys, dtype, index
 

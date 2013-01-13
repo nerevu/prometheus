@@ -42,13 +42,16 @@ def worth(table):
 		chart_caption = 'No transactions found. Please enter some events or prices.'
 
 	heading = 'View your net worth'
-	subheading = ('View the net worth of all ETF, Mutual Fund, '
-		'and Stock holdings. Prices are taken from the Prices tab and a '
-		'purchase of 100 shares is assumed for each date a price is given.')
+	subheading = (
+		'View the net worth of all ETF, Mutual Fund, and Stock '
+		'holdings. Prices are taken from the Prices tab and a purchase of 100'
+		' shares is assumed for each date a price is given.')
+
 	category = 'Commodity'
 	data_label = 'Value in %s' % table
 
-	kwargs = {'id': id, 'title': title, 'heading': heading,
+	kwargs = {
+		'id': id, 'title': title, 'heading': heading,
 		'subheading': subheading, 'columns': data,
 		'chart_caption': chart_caption, 'category': category,
 		'data_label': data_label}

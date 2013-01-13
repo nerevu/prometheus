@@ -1,5 +1,5 @@
 # from __future__ import print_function
-# from pprint import pprint
+from pprint import pprint
 from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
@@ -30,7 +30,8 @@ def get(table):
 	table_caption = '%s List' % table_title
 	form_caption = '%s Entry Form' % table_title
 	heading = 'The %s database' % plural_table
-	subheading = ('Add %s to the database and see them '
+	subheading = (
+		'Add %s to the database and see them '
 		'instantly updated in the lists below.' % plural_table)
 	results = query.all()
 
@@ -39,7 +40,8 @@ def get(table):
 	except AttributeError:
 		form = eval('%sForm()' % table_as_class)
 
-	kwargs = {'id': id, 'title': title, 'heading': heading,
+	kwargs = {
+		'id': id, 'title': title, 'heading': heading,
 		'subheading': subheading, 'rows': results, 'form': form,
 		'form_caption': form_caption, 'table_caption': table_caption,
 		'table_headers': table_headers, 'data_fields': data_fields,
@@ -64,7 +66,8 @@ def add(table):
 		db.session.add(entry)
 		_bookmark(table)
 		db.session.commit()
-		flash('Awesome! You just posted a new %s.' % table.replace('_', ' '),
+		flash(
+			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
 			'alert alert-success')
 
 	else:

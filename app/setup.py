@@ -13,7 +13,8 @@ with open('../requirements.txt') as file:
 	requirements = requirements.split('\n')
 
 
-config = {'name': 'prometheus',
+config = {
+	'name': 'prometheus',
 	'description': 'a global asset allocation tool',
 	'long_description': long_description,
 	'author': 'Reuben Cummings',
