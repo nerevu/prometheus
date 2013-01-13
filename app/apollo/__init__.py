@@ -175,13 +175,12 @@ class Portfolio(object):
 
 		df = self.transactions.groupby(level='comm_id').sum()
 		del df['price']
-		df.shares['date'] = dt.today()
-		df.shares.set_index('date', inplace=True, append=True)
+		df['date'] = dt.today()
+		df.set_index('date', inplace=True, append=True)
 		return df
 
 	@classmethod
-	def from_prices(cls, prices, commodities=empty_df,
-		reinvestments=empty_df, shares=100):
+	def from_prices(cls, prices, commodities=empty_df, shares=100):
 		"""
 		Construct Portfolio from prices
 
@@ -200,23 +199,13 @@ class Portfolio(object):
 
 		if not prices.empty:
 			index = prices.index.names
-
-			if not reinvestments.empty:
-				[index.append(x) for x in reinvestments.index.names
-					if x not in index]
-
-			data = prices.reset_index()
-			data['shares'] = shares
-
-			if not reinvestments.empty:
-				reinvestments = reinvestments.reset_index()
-				data = pd.concat([data, reinvestments], ignore_index=True)
-
-			data.set_index(index, inplace=True)
+			trnx = prices.reset_index()
+			trnx['shares'] = shares
+			trnx.set_index(index, inplace=True)
 		else:
-			data = cls.empty_df
+			trnx = cls.empty_df
 
-		return Portfolio(data)
+		return Portfolio(trnx, commodities)
 
 	def calculate_value(self, prices, rates, native=1, convert=False):
 		"""
@@ -277,7 +266,7 @@ class Portfolio(object):
 		data : sequence of ('symbol', value)
 		"""
 
-		if not values.empty:
+		if values and not self.commodities.empty:
 			symbols = [self.commodities.ix[int(x)][0] for x in values.keys()]
 			totals = ['%.2f' % x for x in values.values()]
 			data = zip(symbols, totals)
