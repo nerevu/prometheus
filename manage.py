@@ -71,7 +71,7 @@ def popdb():
 		with sample data
 		"""
 		initdb()
-		pop_db(get_api_endpoint())
+		r = pop_db(get_api_endpoint())
 		print 'Database populated'
 
 if __name__ == '__main__':
