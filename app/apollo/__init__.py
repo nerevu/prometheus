@@ -69,6 +69,28 @@ def get_rates():
 
 
 def get_values(result, keys):
+	"""Extracts desired values from a query result
+
+	Parameters
+	----------
+	result : sequence of classes or sequence of sequences of classes
+		e.g. sqlalchemy.query.all()
+
+	keys : sequence of attributes or sequence of (int, attribute)
+		attributes should be contained in the classes from `result`
+
+	Returns
+	-------
+	df : list of tuples of values
+
+	Examples
+	--------
+	# >>> from app import db
+	# >>> from app.hermes.models import Commodity
+	# >>> get_values(db.session.query(Commodity).all(), ['id', 'symbol'])
+	# [(6, u'APL')]
+	"""
+
 	try:
 		values = [[eval('r[k[0]].%s' % k[1]) for k in keys] for r in result]
 	except TypeError:
@@ -78,13 +100,14 @@ def get_values(result, keys):
 
 
 def make_df(values, dtype, index):
-	"""Creates a data frame
+	"""Creates a DataFrame
 
 	Parameters
 	----------
-	values : sequence of (key, value) pairs
-	dtype : sequence of (key, value) pairs
-	index : sequence of strings
+	values : sequence of values
+	dtype : sequence of ('column name', data type) pairs
+	index : sequence of column names
+
 
 	Returns
 	-------
@@ -93,6 +116,7 @@ def make_df(values, dtype, index):
 
 	Examples
 	--------
+	>>> import numpy as np
 	>>> make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id']) \
 	.to_dict()
 	{'symbol': {6: 'APL'}}
@@ -105,10 +129,38 @@ def make_df(values, dtype, index):
 
 
 def empty_df():
+	"""Creates an empty pandas DataFrame
+
+	Returns
+	-------
+	df : pandas DataFrame
+
+	Examples
+	--------
+	>>> empty_df().to_dict()
+	{}
+	"""
 	return pd.DataFrame({})
 
 
 def sort_df(df):
+	"""Sorts a pandas DataFrame
+
+	Parameters
+	----------
+	df : pandas DataFrame
+
+	Returns
+	-------
+	df : pandas DataFrame sorted by each index
+
+	Examples
+	--------
+	>>> import numpy as np
+	>>> df = make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id'])
+	>>> sort_df(df).to_dict()
+	{'symbol': {6: 'APL'}}
+	"""
 	index = df.index.names
 
 	if len(index) > 1:
@@ -119,6 +171,24 @@ def sort_df(df):
 
 
 def get_reinvestments(dividends, prices):
+	"""Calculates the number of shares
+
+	Parameters
+	----------
+	dividends : pandas DataFrame
+	prices : pandas DataFrame
+
+	Returns
+	-------
+	df : pandas DataFrame sorted by each index
+
+	Examples
+	--------
+	>>> import numpy as np
+	>>> df = make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id'])
+	>>> sort_df(df).to_dict()
+	{'symbol': {6: 'APL'}}
+	"""
 	if not dividends.empty and not prices.empty:
 		df = dividends.join(prices, how='outer')
 		index = df.index.names[:-1]	 # exclude the date index
@@ -157,12 +227,12 @@ class Portfolio(object):
 
 		Parameters
 		----------
-		transactions : pandas data-frame
-		commodities : pandas data-frame
+		transactions : pandas data-frame, optional
+		commodities : pandas data-frame, optional
 
 		See also
 		--------
-		from_prices : constructor from prices
+		from_prices : make constructor from prices
 		"""
 
 		self.transactions = sort_df(transactions)
@@ -214,7 +284,7 @@ class Portfolio(object):
 		Parameters
 		----------
 		prices : pandas data-frame
-		rates : pandas data-frame, optional
+		rates : pandas data-frame
 		native : int, default 1
 			id of the native currency
 		convert : boolean, default False
@@ -259,7 +329,7 @@ class Portfolio(object):
 
 		Parameters
 		----------
-		values : pandas data-frame
+		values : dict {id: value}
 
 		Returns
 		-------
