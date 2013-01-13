@@ -1,13 +1,15 @@
 #!/usr/bin/env python
-from app.hermes.models import init_db, pop_db
+from pprint import pprint
 from os.path import abspath
+
 from flask import current_app as app, url_for
-from app import create_app, db
 from flask.ext.script import Manager
+from app import create_app, db
+from app.manage_helper import init_db, pop_db
 
 manager = Manager(create_app)
-manager.add_option('-m', '--cfgmode', dest='config_mode',
-	default='Development')
+manager.add_option(
+	'-m', '--cfgmode', dest='config_mode', default='Development')
 manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
 
 
@@ -57,7 +59,7 @@ def initdb():
 		with default values
 		"""
 		resetdb()
-		init_db(get_api_endpoint())
+		r = init_db(get_api_endpoint())
 		print 'Database initialized'
 
 
