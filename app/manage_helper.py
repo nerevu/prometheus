@@ -2,9 +2,6 @@ from pprint import pprint
 from json import dumps as dmp
 from requests import post
 
-# pep8: disable=E121
-# pep8 --ignore E121
-
 __HDR__ = {'content-type': 'application/json'}
 
 __TABLES__ = (
@@ -14,6 +11,7 @@ __TABLES__ = (
 	'commodity_type',
 	'commodity',
 	'event_type',
+	'event',
 	'price',
 	'person',
 	'company',
@@ -25,53 +23,28 @@ __TABLES__ = (
 )
 
 __KEYS__ = [
-	('symbol', 'name'),
-	# extra list is needed so dict doesn't iterate over each character
-	[('name')],
-	[('name')],
-	('name', 'group_id'),
-	('symbol', 'name', 'type_id', 'data_source_id', 'exchange_id'),
-	[('name')],
-	('commodity_id', 'currency_id', 'close'),
-	('currency_id', 'first_name', 'last_name', 'email'),
-	('name', 'website'),
-	[('name')],
-	('type_id', 'company_id', 'currency_id', 'person_id', 'name'),
-	('commodity_id', 'account_id'),
-	[('name')],
+	# '[(' is needed so dict doesn't iterate over each character
+	('symbol', 'name'),  # exchange
+	[('name')],  # data_source
+	[('name')],  # commodity_group
+	('name', 'group_id'),  # commodity_type
+	('symbol', 'name', 'type_id', 'data_source_id', 'exchange_id'),  # commodity
+	[('name')],  # event_type
+	('type_id', 'commodity_id', 'currency_id', 'value', 'date'),  # event
+	('commodity_id', 'currency_id', 'close', 'date'),  # price
+	('currency_id', 'first_name', 'last_name', 'email'),  # person
+	('name', 'website'),  # company
+	[('name')],  # account_type
+	('type_id', 'company_id', 'currency_id', 'person_id', 'name'),  # account
+	('commodity_id', 'account_id'),  # holding
+	[('name')],  # trxn_type
+
+	# transaction
 	('holding_id', 'type_id', 'shares', 'price', 'date', 'commissionable')]
 
 
-def init_db(site):
-	init_values = [
-		[('NYSE', 'New York Stock Exchange'), ('NASDAQ', 'NASDAQ'),
-			('OTC', 'Over the counter'), ('N/A', 'Currency')],
-		[[('Yahoo')], [('Google')], [('XE')]],
-		[[('Security')], [('Currency')], [('Other')]],
-		[('Stock', 1), ('Bond', 1), ('Mutual Fund', 1), ('ETF', 1),
-			('Currency', 2), ('Descriptor', 3)],
-		[('USD', 'US Dollar', 5, 3, 4),
-			('EUR', 'Euro', 5, 3, 4),
-			('GBP', 'Pound Sterling', 5, 3, 4),
-			('TZS', 'Tanzanian Shilling', 5, 3, 4),
-			('Multiple', 'Multiple', 6, 3, 4),
-			('APL', 'Apple', 1, 1, 1),
-			('Text', 'Text', 6, 3, 4)],
-		[[('Dividend')], [('Special Dividend')], [('Stock Split')],
-			[('Name Change')], [('Ticker Change')]],
-		[(2, 1, 1.2), (3, 1, 1.8), (4, 1, 1.0 / 1580.0)],
-		[(1, 'Reuben', 'Cummings', 'reubano@gmail.com')],
-		[('Scottrade', 'https://trading.scottrade.com/'),
-			('Vanguard', 'http://vanguard.com/')],
-		[[('Brokerage')], [('Roth IRA')]],
-		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],
-		[(6, 1)],
-		[[('buy')], [('sell')]],
-		[(1, 1, 10, 100, '1/1/12', True)]]
-
-	combo = zip(__KEYS__, init_values)
-
-	# content
+def process(post_values, site):
+	combo = zip(__KEYS__, post_values)
 	table_data = [
 		[dict(zip(list[0], values)) for values in list[1]] for list in combo]
 
@@ -95,5 +68,71 @@ def init_db(site):
 	return r
 
 
+def init_db(site):
+	values = [
+		[
+			('NYSE', 'New York Stock Exchange'), ('NASDAQ', 'NASDAQ'),
+			('OTC', 'Over the counter'), ('N/A', 'Currency')],  # exchange
+		[[('Yahoo')], [('Google')], [('XE')]],  # data_source
+		[[('Security')], [('Currency')], [('Other')]],  # commodity_group
+		[
+			('Stock', 1), ('Bond', 1), ('Mutual Fund', 1), ('ETF', 1),
+			('Currency', 2), ('Descriptor', 3)],  # commodity_type
+		[
+			('USD', 'US Dollar', 5, 3, 4),
+			('EUR', 'Euro', 5, 3, 4),
+			('GBP', 'Pound Sterling', 5, 3, 4),
+			('TZS', 'Tanzanian Shilling', 5, 3, 4),
+			('Multiple', 'Multiple', 6, 3, 4),
+			('APL', 'Apple', 1, 1, 1),
+			('Text', 'Text', 6, 3, 4)],  # commodity
+		[
+			[('Dividend')], [('Special Dividend')], [('Stock Split')],
+			[('Name Change')], [('Ticker Change')]],  # event_type
+		[],  # event
+		[
+			(2, 1, 1.2, '1/1/12'),
+			(3, 1, 1.8, '1/1/12'),
+			(4, 1, 1.0 / 1580.0, '1/1/12'),
+			(6, 1, 300, '1/1/12')],  # price
+		[(1, 'Reuben', 'Cummings', 'reubano@gmail.com')],  # person
+		[
+			('Scottrade', 'https://trading.scottrade.com/'),
+			('Vanguard', 'http://vanguard.com/')],  # company
+		[[('Brokerage')], [('Roth IRA')]],  # account_type
+		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
+		[(6, 1)],  # holding
+		[[('buy')], [('sell')]],  # trxn_type
+		[(1, 1, 10, 303, '1/1/12', True)]]  # transaction
+
+	process(values, site)
+
+
 def pop_db(site):
-	pass
+	values = [
+		[],  # exchange
+		[],  # data_source
+		[],  # commodity_group
+		[],  # commodity_type
+		[
+			('IBM', 'International Business Machines', 1, 1, 1),
+			('WMT', 'Wal-Mart', 1, 1, 1),
+			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
+		[],  # event_type
+		[(1, 6, 1, 10, '2/1/12'), (1, 8, 1, 12, '2/1/12')],  # event
+		[
+			(8, 1, 150, '1/1/12'),
+			(9, 1, 90, '1/1/12'),
+			(10, 1, 120, '1/1/12')],  # price
+		[],  # person
+		[],  # company
+		[],  # account_type
+		[],  # account
+		[(8, 1), (9, 1), (10, 1)],  # holding
+		[],  # trxn_type
+		[
+			(2, 1, 10, 148, '1/1/12', True),
+			(3, 1, 10, 85, '1/1/12', True),
+			(4, 1, 10, 125, '1/1/12', True)]]  # transaction
+
+	process(values, site)
