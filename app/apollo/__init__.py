@@ -55,6 +55,19 @@ def get_dividends():
 	return query.all(), keys, dtype, index
 
 
+def get_rates():
+	Currency = aliased(Commodity)
+	query = (
+		db.session.query(Price, Commodity, Currency).join(Price.commodity)
+		.join(Currency, Price.currency).order_by(Price.commodity)
+		.filter(Commodity.type_id.in_([5])).filter(Currency.id.in_([1])))
+
+	keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close')]
+	dtype = [('curr_id', np.int), ('date', np.datetime64), ('rate', np.float32)]
+	index = ['curr_id', 'date']
+	return query.all(), keys, dtype, index
+
+
 def get_values(result, keys):
 	try:
 		values = [[eval('r[k[0]].%s' % k[1]) for k in keys] for r in result]
@@ -123,18 +136,6 @@ def get_reinvestments(dividends, prices):
 		df, missing = empty_df(), False
 
 	return df, missing
-
-
-def get_rates():
-	Currency = aliased(Commodity)
-	query = (db.session.query(Price, Commodity, Currency).join(Price.commodity)
-		.join(Currency, Price.currency).order_by(Price.commodity)
-		.filter(Commodity.type_id.in_([5])).filter(Currency.id.in_([1])))
-
-	keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close')]
-	dtype = [('curr_id', np.int), ('date', np.datetime64), ('rate', np.float32)]
-	index = ['curr_id', 'date']
-	return query.all(), keys, dtype, index
 
 
 class Portfolio(object):
