@@ -35,7 +35,7 @@ __KEYS__ = [
 	('currency_id', 'first_name', 'last_name', 'email'),  # person
 	('name', 'website'),  # company
 	[('name')],  # account_type
-	('type_id', 'company_id', 'currency_id', 'person_id', 'name'),  # account
+	('type_id', 'company_id', 'currency_id', 'owner_id', 'name'),  # account
 	('commodity_id', 'account_id'),  # holding
 	[('name')],  # trxn_type
 

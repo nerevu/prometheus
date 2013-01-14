@@ -122,7 +122,7 @@ class Account(db.Model, ValidationMixin):
 	# constraints
 	__table_args__ = (
 		db.UniqueConstraint(
-			'name', 'type_id', 'company_id', 'currency_id', 'person_id'), {})
+			'name', 'type_id', 'company_id', 'currency_id', 'owner_id'), {})
 
 	# auto keys
 	id = db.Column(db.Integer, primary_key=True)
@@ -155,11 +155,11 @@ class Account(db.Model, ValidationMixin):
 		'Commodity', lazy='joined',
 		backref=backref('accounts', cascade='all, delete'))
 
-	person_id = db.Column(
+	owner_id = db.Column(
 		db.Integer, db.ForeignKey(
 			'person.id', onupdate="CASCADE", ondelete="CASCADE"),
 		nullable=False)
-	person = db.relationship(
+	owner = db.relationship(
 		'Person', lazy='joined',
 		backref=backref('accounts', cascade='all, delete'))
 
