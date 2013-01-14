@@ -11,25 +11,28 @@ apollo = Blueprint('apollo', __name__)
 
 @apollo.route('/worth/<table>/')
 def worth(table):
-#	table = 'USD'
-	list = ['prices', 'dividends', 'rates', 'commodities']
-	dfs = []
+# 	list = ['prices', 'dividends', 'rates', 'commodities']
+# 	dfs = []
+#
+# 	for item in list:
+# 		result, keys, dtype, index = eval('ap.get_%s()' % item)
+# 		values = ap.get_values(result, keys)
+#
+# 		if values:
+# 			df = ap.make_df(values, dtype, index)
+# 			df = ap.sort_df(df)
+# 		else:
+# 			df = ap.empty_df()
+#
+# 		dfs.append(df)
 
-	for item in list:
-		result, keys, dtype, index = eval('ap.get_%s()' % item)
-		values = ap.get_values(result, keys)
-
-		if values:
-			df = ap.make_df(values, dtype, index)
-			df = ap.sort_df(df)
-		else:
-			df = ap.empty_df()
-
-		dfs.append(df)
-
-	prices, dividends, rates, commodities = dfs[0], dfs[1], dfs[2], dfs[3]
-	reinvestments, missing = ap.get_reinvestments(dividends, prices)
-	myportfolio = ap.Portfolio.from_prices(prices, commodities, reinvestments)
+# 	currency_id = id_from_value(table, commodity)
+	currency_id = 1
+	result, keys = ap.get_transactions()
+	data = ap.get_values(result, keys)
+	myportfolio = ap.Portfolio(data, currency_id=currency_id)
+# 	prices, dividends, rates, commodities = dfs[0], dfs[1], dfs[2], dfs[3]
+# 	reinvestments, missing = ap.get_reinvestments(dividends, prices)
 	values = myportfolio.calculate_value(prices, rates)
 	data = myportfolio.convert_values(values)
 	id = 'worth'

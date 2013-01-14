@@ -16,6 +16,15 @@ from sqlalchemy.orm import aliased
 
 from app import db
 from app.hermes.models import Event, EventType, Price, Commodity
+from app.cronus.models import Transaction, Holding
+
+
+def get_transactions():
+	query = (db.session.query(Transaction, Holding).join(Transaction.holding))
+	keys = [
+		(1, 'commodity_id'), (1, 'account_id'), ('owner_id'), (0, 'type_id'),
+		(0, 'shares'), (0, 'price'), (0, 'date'), ('commission')]
+	return query.all(), keys
 
 
 def get_prices():
@@ -184,10 +193,6 @@ def get_reinvestments(dividends, prices):
 
 	Examples
 	--------
-	>>> import numpy as np
-	>>> df = make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id'])
-	>>> sort_df(df).to_dict()
-	{'symbol': {6: 'APL'}}
 	"""
 	if not dividends.empty and not prices.empty:
 		df = dividends.join(prices, how='outer')
@@ -217,11 +222,23 @@ class Portfolio(object):
 	transactions : pandas data-frame
 	commodities : pandas data-frame
 	shares : pandas data-frame
+
+	Examples
+	--------
+	# >>> from app import db
+	# >>> from app.hermes.models import Commodity, Prices
+	# >>> query = (db.session.query(Commodity).filter( \
+	# Commodity.type_id.in_([1, 3, 4])))
+	# >>> keys = ['id', 'symbol']
+	# >>> dtype = [('id', np.int), ('symbol', 'a5')]
+	# >>> index = ['id']
+	# >>> values = get_values(query.all(), keys)
+	# >>> commodities = make_df(values, dtype, index)
 	"""
 
-	empty_df = pd.DataFrame({})
+	EMPTY_DF = pd.DataFrame({})
 
-	def __init__(self, transactions=empty_df, commodities=empty_df):
+	def __init__(self, data=None, index=None, dtypes=None, currency_id=1):
 		"""
 		Class constructor.
 
@@ -235,8 +252,23 @@ class Portfolio(object):
 		from_prices : make constructor from prices
 		"""
 
+		INT = np.int
+		FLT = np.float32
+		DTIME = np.datetime64
+
+		index = (
+			index or [
+				'comm_id', 'account_id', 'owner_id', 'trxn_type_id', 'shares',
+				'price', 'date', 'commission'])
+
+		dtypes = (dtypes or [INT, INT, INT, INT, FLT, FLT, DTIME, FLT])
+		dtype = zip(index, dtypes)
+
+		self.transactions = make_df(data, dtype, index)
+		self.transactions.set_index(index, inplace=True)
 		self.transactions = sort_df(transactions)
-		self.commodities = commodities
+		print(transactions)
+		self.currency_id = currency_id
 
 	@property
 	def shares(self):
@@ -250,7 +282,7 @@ class Portfolio(object):
 		return df
 
 	@classmethod
-	def from_prices(cls, prices, commodities=empty_df, shares=100):
+	def from_prices(cls, prices, commodities=EMPTY_DF, shares=100):
 		"""
 		Construct Portfolio from prices
 
@@ -265,6 +297,29 @@ class Portfolio(object):
 		Returns
 		-------
 		Portfolio
+
+		Examples
+		--------
+		# >>> from app import db
+		# >>> from app.hermes.models import Commodity, Prices
+		# >>> query = (db.session.query(Commodity).filter( \
+		# Commodity.type_id.in_([1, 3, 4])))
+		# >>> keys = ['id', 'symbol']
+		# >>> dtype = [('id', np.int), ('symbol', 'a5')]
+		# >>> index = ['id']
+		# >>> values = get_values(query.all(), keys)
+		# >>> commodities = make_df(values, dtype, index)
+		# >>> query = (db.session.query(Price, Commodity) \
+		# .join(Price.commodity).filter(Commodity.type_id.in_([1, 3, 4])))
+		# >>> keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close'), \
+		# (0, 'currency_id')]
+		# >>> dtype = [('comm_id', np.int), ('date', np.datetime64), \
+		# ('price', np.float32), ('curr_id', np.int)]
+		# >>> index = ['comm_id', 'curr_id', 'date']
+		# >>> values = get_values(query.all(), keys)
+		# >>> prices = make_df(values, dtype, index)
+		# >>> Portfolio.from_prices(prices, commodities)
+		# [(6, u'APL')]
 		"""
 
 		if not prices.empty:
@@ -273,7 +328,7 @@ class Portfolio(object):
 			trnx['shares'] = shares
 			trnx.set_index(index, inplace=True)
 		else:
-			trnx = cls.empty_df
+			trnx = cls.EMPTY_DF
 
 		return Portfolio(trnx, commodities)
 
@@ -319,7 +374,7 @@ class Portfolio(object):
 			if convert:
 				pass
 		else:
-			df = self.empty_df
+			df = self.EMPTY_DF
 
 		return df
 
