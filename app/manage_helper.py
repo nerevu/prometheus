@@ -43,15 +43,7 @@ __KEYS__ = [
 	('holding_id', 'type_id', 'shares', 'price', 'date', 'commissionable')]
 
 
-def process(post_values, site):
-	combo = zip(__KEYS__, post_values)
-	table_data = [
-		[dict(zip(list[0], values)) for values in list[1]] for list in combo]
-
-	content_keys = ('table', 'data')
-	content_values = zip(__TABLES__, table_data)
-	content = [dict(zip(content_keys, values)) for values in content_values]
-
+def post(content, site):
 	for piece in content:
 		table = piece['table']
 		data = piece['data']
@@ -68,7 +60,17 @@ def process(post_values, site):
 	return r
 
 
-def init_db(site):
+def process(post_values):
+	combo = zip(__KEYS__, post_values)
+	table_data = [
+		[dict(zip(list[0], values)) for values in list[1]] for list in combo]
+
+	content_keys = ('table', 'data')
+	content_values = zip(__TABLES__, table_data)
+	return [dict(zip(content_keys, values)) for values in content_values]
+
+
+def get_init_values():
 	values = [
 		[
 			('NYSE', 'New York Stock Exchange'), ('NASDAQ', 'NASDAQ'),
@@ -105,10 +107,10 @@ def init_db(site):
 		[[('buy')], [('sell')]],  # trxn_type
 		[(1, 1, 10, 303, '1/1/12', True)]]  # transaction
 
-	process(values, site)
+	return values
 
 
-def pop_db(site):
+def get_pop_values():
 	values = [
 		[],  # exchange
 		[],  # data_source
@@ -135,4 +137,4 @@ def pop_db(site):
 			(3, 1, 10, 85, '1/1/12', True),
 			(4, 1, 10, 125, '1/1/12', True)]]  # transaction
 
-	process(values, site)
+	return values

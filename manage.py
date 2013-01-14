@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os.path as p
+import app.manage_helper as mh
 
 from subprocess import call, check_output
 from pprint import pprint
@@ -7,7 +8,6 @@ from pprint import pprint
 from flask import current_app as app, url_for
 from flask.ext.script import Manager
 from app import create_app, db
-from app.manage_helper import init_db, pop_db
 
 manager = Manager(create_app)
 manager.add_option(
@@ -70,7 +70,9 @@ def initdb():
 
 	with app.app_context():
 		resetdb()
-		r = init_db(get_api_endpoint())
+		values = mh.get_init_values()
+		content = mh.process(values)
+		post(content, mh.get_api_endpoint())
 		print 'Database initialized'
 
 
@@ -82,7 +84,9 @@ def popdb():
 
 	with app.app_context():
 		initdb()
-		r = pop_db(get_api_endpoint())
+		values = mh.get_pop_values()
+		content = mh.process(values)
+		post(content, mh.get_api_endpoint())
 		print 'Database populated'
 
 if __name__ == '__main__':
