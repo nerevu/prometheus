@@ -13,7 +13,13 @@ manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
 
 def get_api_endpoint():
 	with app.app_context():
-		return url_for('api', _external=True)
+		site = url_for('api', _external=True).split('/')
+
+		if site[2] == 'localhost':
+			site[2] = 'localhost:%s' % app.config['PORT']
+
+		site = '/'.join(site)
+		return site
 
 
 @manager.command
