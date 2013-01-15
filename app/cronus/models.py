@@ -206,7 +206,7 @@ class Contribution(db.Model, ValidationMixin):
 	val.validates_constraints()
 
 	def __repr__(self):
-		return ('<Contribution(%r, r%)>' % (self.account, self.amount))
+		return ('<Contribution(%r, %r)>' % (self.account, self.amount))
 
 	def __str__(self):
 		return ('%s: %s' % (self.account, self.amount))
@@ -246,7 +246,7 @@ class Holding(db.Model, ValidationMixin):
 	val.validates_constraints()
 
 	def __repr__(self):
-		return ('<Holding(%r, r%)>' % (self.account_id, self.commodity_id))
+		return ('<Holding(%r, %r)>' % (self.account_id, self.commodity_id))
 
 	def __str__(self):
 		return ('%s: %s' % (self.account, self.commodity))
@@ -286,7 +286,7 @@ class Transaction(db.Model, ValidationMixin):
 	val.validates_constraints()
 
 	def __repr__(self):
-		return ('<Holding(%r, r%)>' % (self.type_id, self.holding_id))
+		return ('<Holding(%r, %r)>' % (self.type_id, self.holding_id))
 
 	def __str__(self):
 		return ('%s: %s' % (self.type, self.holding))
