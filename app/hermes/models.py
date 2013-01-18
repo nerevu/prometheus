@@ -193,7 +193,7 @@ class Event(db.Model, ValidationMixin):
 
 	# other keys
 	value = db.Column(db.Float, nullable=False)
-	date = db.Column(db.Date, nullable=False, default=d.today())
+	date = db.Column(db.DateTime, nullable=False, default=d.today())
 
 	# validation
 	val.validates_constraints()
@@ -232,7 +232,7 @@ class Price(db.Model, ValidationMixin):
 
 	# other keys
 	close = db.Column(db.Float, nullable=False)
-	date = db.Column(db.Date, nullable=False, default=d.today())
+	date = db.Column(db.DateTime, nullable=False, default=d.today())
 
 	# validation
 	val.validates_constraints()
