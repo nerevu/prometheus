@@ -22,7 +22,7 @@ def setup_module():
 	values = get_init_values()
 	content = process(values)
 	initialized = True
-	err.write('Hermes Module Setup\n')
+	print('Hermes Module Setup\n')
 
 
 class TestHermesAPI(APIHelper):
@@ -43,7 +43,7 @@ class TestHermesAPI(APIHelper):
 
 		self.cls_initialized = True
 
-		err.write('\nTestAPI Class Setup\n')
+		print('\nTestAPI Class Setup\n')
 
 	def tearDown(self):
 		"""database removal"""
@@ -51,7 +51,7 @@ class TestHermesAPI(APIHelper):
 		db.drop_all()
 		self.cls_initialized = False
 
-		err.write('TestAPI Class Teardown\n')
+		print('TestAPI Class Teardown\n')
 
 	def test_post_event_new_type(self):
 		"""Test for posting an event using :http:method:`post`."""

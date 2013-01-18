@@ -32,7 +32,7 @@ def setup_package():
 	jsonx.push()
 	initialized = True
 
-	err.write('Test Package Setup\n')
+	print('Test Package Setup\n')
 
 
 def teardown_package():
@@ -43,7 +43,7 @@ def teardown_package():
 	jsonx.pop()
 	initialized = False
 
-	err.write('Test Package Teardown\n')
+	print('Test Package Teardown\n')
 
 
 def check_equal(page, x, y):

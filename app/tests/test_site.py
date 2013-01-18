@@ -30,7 +30,7 @@ def setup_module():
 	values = get_init_values()
 	content = process(values)
 	initialized = True
-	err.write('Site Module Setup\n')
+	print('Site Module Setup\n')
 
 
 class TestAPI(APIHelper):
@@ -50,7 +50,7 @@ class TestAPI(APIHelper):
 			[nt.assert_equal(r.status_code, 201) for r in result]
 
 		self.cls_initialized = True
-		err.write('\nTestAPI Class Setup\n')
+		print('\nTestAPI Class Setup\n')
 
 	def tearDown(self):
 		"""database removal"""
@@ -58,7 +58,7 @@ class TestAPI(APIHelper):
 		db.drop_all()
 		self.cls_initialized = False
 
-		err.write('TestAPI Class Teardown\n')
+		print('TestAPI Class Teardown\n')
 
 	def test_api_get(self):
 		for table in tables:
@@ -98,7 +98,7 @@ class TestWeb:
 		db.create_all()
 		self.cls_initialized = True
 
-		err.write('\nTestWeb Class Setup\n')
+		print('\nTestWeb Class Setup\n')
 
 	def tearDown(self):
 		"""Remove data from database"""
@@ -106,7 +106,7 @@ class TestWeb:
 		db.drop_all()
 		self.cls_initialized = False
 
-		err.write('TestWeb CLASS Teardown\n')
+		print('TestWeb Class Teardown\n')
 
 	def test_home(self):
 		r = client.get('/')
