@@ -9,39 +9,37 @@ from flask import Blueprint, render_template
 apollo = Blueprint('apollo', __name__)
 
 
+@apollo.route('/worth/')
 @apollo.route('/worth/<table>/')
-def worth(table):
-# 	list = ['prices', 'dividends', 'rates', 'commodities']
-# 	dfs = []
-#
-# 	for item in list:
-# 		result, keys, dtype, index = eval('ap.get_%s()' % item)
-# 		values = ap.get_values(result, keys)
-#
-# 		if values:
-# 			df = ap.make_df(values, dtype, index)
-# 			df = ap.sort_df(df)
-# 		else:
-# 			df = ap.empty_df()
-#
-# 		dfs.append(df)
-
+def worth(table='USD'):
 # 	currency_id = id_from_value(table, commodity)
 	currency_id = 1
-	result, keys = ap.get_transactions()
-	data = ap.get_values(result, keys)
-	myportfolio = ap.Portfolio(data, currency_id=currency_id)
-# 	prices, dividends, rates, commodities = dfs[0], dfs[1], dfs[2], dfs[3]
-# 	reinvestments, missing = ap.get_reinvestments(dividends, prices)
-	values = myportfolio.calculate_value(prices, rates)
-	data = myportfolio.convert_values(values)
 	id = 'worth'
 	title = 'Net Worth'
 	chart_caption = 'Net Worth per Commodity in %s' % table
+	list = ['prices', 'dividends', 'rates', 'commodities']
+
+	results = [ap.get_table_info(item)[0] for item in list]
+	keys = [ap.get_table_info(item)[1] for item in list]
+	values = [ap.get_values(z[0], z[1]) for z in zip(results, keys)]
+	dfs = [ap.DataFrame(z[0], keys=z[1]) for z in zip(values, keys)]
+	d = dict(zip(list, dfs))
+
+	result, keys = ap.get_table_info('transactions')
+	data = ap.get_values(result, keys)
+	mp = ap.Portfolio(
+		data, currency_id=currency_id, commodities=d['commodities'])
+
+	reinvestments = mp.calc_reinvestments(d['dividends'], d['prices'])
+	values = mp.calc_value(d['prices'], d['rates'], reinvestments)
+	data = mp.convert_values(values)
+
+	# fix if missing
+	missing = False
 
 	if missing:
 		chart_caption = '%s (some price data is missing)' % chart_caption
-	elif myportfolio.transactions.empty:
+	elif mp.empty:
 		chart_caption = 'No transactions found. Please enter some events or prices.'
 
 	heading = 'View your net worth'
