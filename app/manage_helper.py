@@ -1,6 +1,6 @@
 from pprint import pprint
 from json import dumps as dmp
-from requests import post
+from requests import post as p
 
 __HDR__ = {'content-type': 'application/json'}
 
@@ -19,8 +19,7 @@ __TABLES__ = (
 	'account',
 	'holding',
 	'trxn_type',
-	'transaction',
-)
+	'transaction')
 
 __KEYS__ = [
 	# '[(' is needed so dict doesn't iterate over each character
@@ -38,9 +37,9 @@ __KEYS__ = [
 	('type_id', 'company_id', 'currency_id', 'owner_id', 'name'),  # account
 	('commodity_id', 'account_id'),  # holding
 	[('name')],  # trxn_type
-
-	# transaction
-	('holding_id', 'type_id', 'shares', 'price', 'date', 'commissionable')]
+	(
+		'holding_id', 'type_id', 'shares', 'price', 'date',
+		'commissionable')] 	# transaction
 
 
 def post(content, site):
@@ -49,7 +48,7 @@ def post(content, site):
 		data = piece['data']
 
 		for d in data:
-			r = post('%s%s' % (site, table), data=dmp(d), headers=__HDR__)
+			r = p('%s%s' % (site, table), data=dmp(d), headers=__HDR__)
 
 			if r.status_code != 201:
 				raise AttributeError(
@@ -105,7 +104,7 @@ def get_init_values():
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
 		[[('buy')], [('sell')]],  # trxn_type
-		[(1, 1, 10, 303, '1/1/12', True)]]  # transaction
+		[(1, 1, 8, 303, '1/1/12', True)]]  # transaction
 
 	return values
 
@@ -134,7 +133,8 @@ def get_pop_values():
 		[],  # trxn_type
 		[
 			(2, 1, 10, 148, '1/1/12', True),
-			(3, 1, 10, 85, '1/1/12', True),
-			(4, 1, 10, 125, '1/1/12', True)]]  # transaction
+			(3, 1, 12, 85, '1/1/12', True),
+			(1, 1, 8, 320, '2/1/12', True),
+			(4, 1, 14, 125, '2/1/12', True)]]  # transaction
 
 	return values

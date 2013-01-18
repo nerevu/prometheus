@@ -72,7 +72,7 @@ def initdb():
 		resetdb()
 		values = mh.get_init_values()
 		content = mh.process(values)
-		post(content, mh.get_api_endpoint())
+		mh.post(content, get_api_endpoint())
 		print 'Database initialized'
 
 
@@ -86,7 +86,7 @@ def popdb():
 		initdb()
 		values = mh.get_pop_values()
 		content = mh.process(values)
-		post(content, mh.get_api_endpoint())
+		mh.post(content, get_api_endpoint())
 		print 'Database populated'
 
 if __name__ == '__main__':
