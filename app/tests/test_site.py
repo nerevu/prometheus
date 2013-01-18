@@ -26,7 +26,6 @@ def setup_module():
 	keys = [k for k in app.blueprints.keys() if k.endswith('api0')]
 	tables = [k.replace('api0', '') for k in keys]
 	pages = [link['id'] for link in app.config['TOPNAV']]
-	del pages[4]  # remove this line after I fix 'worth'
 	values = get_init_values()
 	content = process(values)
 	initialized = True
@@ -82,9 +81,6 @@ class TestAPI(APIHelper):
 				yield check_equal, table, new, old - 1
 			else:
 				self.tearDown()
-
-	def check_status(self, page, status, code=200):
-		nt.assert_equal(status, code)
 
 
 class TestWeb:
