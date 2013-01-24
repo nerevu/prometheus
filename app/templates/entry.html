@@ -3,20 +3,26 @@
 {% block main_content %}
 <div class="row-fluid">
 	<div class="span3">
+		{% if form_fields %}
 		<form action="{{ url_for('%s' % post_location, table=post_table) }}" class="form" method="post">
 			<legend>{{ form_caption }}</legend>
 
 			{{ form.hidden_tag() }}
-			{{ wtf.form_errors(form, True) }}
+				{{ wtf.form_errors(form, True) }}
 
-			{% for f in form_fields %}
-			{{ wtf.inline_field(form['%s' % f]) }}
+				{% for f in form_fields %}
+				{% if form[f].type == 'BooleanField' %}
+					{{ wtf.horizontal_field(form[f]) }}
+				{% else %}
+					{{ wtf.inline_field(form[f]) }}
+				{% endif %}
 			{% endfor %}
 
 			<div class="controls">
 				<button type="submit" class="btn">Submit Entry</button>
 			</div>
 		</form>
+		{% endif %}
 	</div>
 	<div class="span7 offset2">
 		{% if rows %}
@@ -26,16 +32,8 @@
 				{% for h in table_headers %}<th>{{ h }}</th>{% endfor %}
 			</tr></thead>
 			<tbody>
-				{% for d in rows %}
-				<tr>
-					{% for f in data_fields %}
-						{% if f[0] is string %}
-						<td>{{ d['%s' % f] }}</td>
-						{% else %}
-						<td>{{ d[f[0]]['%s' % f[1]] }}</td>
-						{% endif %}
-					{% endfor %}
-				</tr>
+				{% for row in rows %}
+				<tr>{% for field in row %}<td>{{ field }}</td>{% endfor %}</tr>
 				{% endfor %}
 			</tbody>
 		</table>

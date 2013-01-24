@@ -9,6 +9,7 @@
 from __future__ import print_function
 
 import re
+import config
 
 from inspect import isclass, getmembers
 from functools import partial, update_wrapper
@@ -23,8 +24,9 @@ from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
 from flask.ext.markdown import Markdown
 
-API_EXCEPTIONS = [ValidationError, ValueError, AttributeError, TypeError,
-	IntegrityError, OperationalError]
+API_EXCEPTIONS = [
+	ValidationError, ValueError, AttributeError, TypeError, IntegrityError,
+	OperationalError]
 
 db = SQLAlchemy()
 __DIR__ = p.dirname(__file__)
@@ -32,8 +34,10 @@ __DIR__ = p.dirname(__file__)
 
 def _get_modules(dir):
 	dirs = listdir(dir)
-	modules = [d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
+	modules = [
+		d for d in dirs if p.isfile(p.join(dir, d, '__init__.py'))
 		and d != 'tests']
+
 	return modules
 
 
@@ -43,18 +47,26 @@ def _get_app_classes(module):
 	return ['%s' % x[0] for x in app_classes]
 
 
+def get_plural(word):
+	if word[-1] == 'y':
+		return word[:-1] + 'ies'
+	else:
+		return word + 's'
+
+
 def create_app(config_mode=None, config_file=None):
 	# Create webapp instance
 	app = Flask(__name__)
 	db.init_app(app)
 	Bootstrap(app)
 	Markdown(app)
-	app.config.from_envvar('APP_SETTINGS', silent=True)
 
 	if config_mode:
-		app.config.from_object('config.%s' % config_mode)
-	if config_file:
+		app.config.from_object(getattr(config, config_mode))
+	elif config_file:
 		app.config.from_pyfile(config_file)
+	else:
+		app.config.from_envvar('APP_SETTINGS', silent=True)
 
 	[app.register_blueprint(bp) for bp in blueprints]
 
@@ -71,18 +83,29 @@ def create_app(config_mode=None, config_file=None):
 	def not_found(error):
 		heading = 'Page not found.'
 		subheading = "Sorry, your page isn't available!"
-		kwargs = {'id': 404, 'title': '404', 'heading': heading,
+		kwargs = {
+			'id': 404, 'title': '404', 'heading': heading,
 			'subheading': subheading}
+
 		return render_template('page.html', **kwargs), 404
 
-	@app.template_filter()
-	def currency(x):
-		try:
-			return '$%.2f' % x
-		except TypeError:
-			return x
+	@app.context_processor
+	def utility_processor():
+		def currency(x):
+			try:
+				return '$%.2f' % x
+			except TypeError:
+				return x
+		return dict(currency=currency)
 
-# 	app.jinja_env.filters['currency']=currency
+# 	@app.template_filter()
+# 	def currency(x):
+# 		try:
+# 			return '$%.2f' % x
+# 		except TypeError:
+# 			return x
+
+# 	app.jinja_env.filters['currency'] = currency
 
 	@app.route('/')
 	def home():
@@ -112,8 +135,7 @@ def create_app(config_mode=None, config_file=None):
 			cfg = {}
 			md = text
 
-		kwargs = {'md': md, 'id': page['id']}
-		kwargs.update(cfg)
+		kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
 		endpoint = page['id']
 		func = page['id']
 		exec '%s = partial(template, kwargs)' % func in globals(), locals()
@@ -124,7 +146,8 @@ def create_app(config_mode=None, config_file=None):
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
 
-	kwargs = {'methods': app.config['API_METHODS'],
+	kwargs = {
+		'methods': app.config['API_METHODS'],
 		'validation_exceptions': API_EXCEPTIONS,
 		'allow_functions': app.config['API_ALLOW_FUNCTIONS'],
 		'allow_patch_many': app.config['API_ALLOW_PATCH_MANY']}

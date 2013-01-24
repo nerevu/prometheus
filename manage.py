@@ -1,75 +1,88 @@
 #!/usr/bin/env python
-from app.hermes.models import init_db, pop_db
-from os.path import abspath
+import os.path as p
+import app.manage_helper as mh
+
+from subprocess import call, check_output
+from pprint import pprint
+
 from flask import current_app as app, url_for
-from app import create_app, db
 from flask.ext.script import Manager
+from app import create_app, db
+from app.connection import Connection, portify
 
 manager = Manager(create_app)
-manager.add_option('-m', '--cfgmode', dest='config_mode',
-	default='Development')
-manager.add_option('-f', '--cfgfile', dest='config_file', type=abspath)
+manager.add_option(
+	'-m', '--cfgmode', dest='config_mode', default='Development')
+manager.add_option('-f', '--cfgfile', dest='config_file', type=p.abspath)
 
 
-def get_api_endpoint():
-	with app.app_context():
-		site = url_for('api', _external=True).split('/')
+@manager.command
+def checkstage():
+	"""Checks staged with git pre-commit hook"""
 
-		if site[2] == 'localhost':
-			site[2] = 'localhost:%s' % app.config['PORT']
-
-		site = '/'.join(site)
-		return site
+	path = p.join(p.dirname(__file__), 'app', 'tests', 'test.sh')
+	cmd = "sh %s" % path
+	return call(cmd, shell=True)
 
 
 @manager.command
 def createdb():
-	with app.app_context():
+	"""Creates database if it doesn't already exist"""
 
-		"""Creates database if it doesn't already exist"""
+	with app.app_context():
 		db.create_all()
 		print 'Database created'
 
 
 @manager.command
 def cleardb():
-	with app.app_context():
+	"""Removes all content from database"""
 
-		"""Removes all content from database"""
+	with app.app_context():
 		db.drop_all()
 		print 'Database cleared'
 
 
 @manager.command
 def resetdb():
-	with app.app_context():
+	"""Removes all content from database and creates new tables"""
 
-		"""Removes all content from database and creates new tables"""
+	with app.app_context():
 		cleardb()
 		createdb()
 
 
 @manager.command
 def initdb():
-	with app.app_context():
-
-		"""Removes all content from database and initializes it
+	"""Removes all content from database and initializes it
 		with default values
-		"""
+	"""
+
+	with app.app_context():
 		resetdb()
-		init_db(get_api_endpoint())
+		site = portify(url_for('api', _external=True))
+		conn = Connection(site)
+
+		values = mh.get_init_values()
+		content = conn.process(values)
+		conn.post(content)
 		print 'Database initialized'
 
 
 @manager.command
 def popdb():
-	with app.app_context():
-
-		"""Removes all content from database and populates it
+	"""Removes all content from database and populates it
 		with sample data
-		"""
+	"""
+
+	with app.app_context():
 		initdb()
-		pop_db(get_api_endpoint())
+		site = portify(url_for('api', _external=True))
+		conn = Connection(site)
+
+		values = mh.get_pop_values()
+		content = conn.process(values)
+		conn.post(content)
 		print 'Database populated'
 
 if __name__ == '__main__':

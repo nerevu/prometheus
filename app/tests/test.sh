@@ -41,7 +41,7 @@ for LINE in $(git diff-index --cached --full-index $against); do
 	elif [ $FILEEXT == 'py' ]; then
 		PROGRAMS=$'pep8\npylint'
 # 		COMMANDS=$'pep8 --ignore=W191,E128\npylint --rcfile=app/tests/standard.rc -ry -fparseable'
-		COMMANDS=$'pep8 --ignore=W191,E128'
+		COMMANDS=$'pep8 --ignore=W191,E121,E122'
 	else
 		continue
 	fi

@@ -7,40 +7,45 @@ _basedir = p.dirname(__file__)
 
 # configuration
 class Content(object):
-	site_values = ('prometheus', 'Prometheus', 'Reuben Cummings',
+	site_values = (
+		'prometheus', 'Prometheus', 'Reuben Cummings',
 		'http://reubano.github.com', 'home')
 
-	topnav_values = [('event', 'Events', 'hermes.get', 'event'),
-		('event_type', 'Types', 'hermes.get', 'event_type'),
-		('price', 'Prices', 'hermes.get', 'price'),
-		('commodity', 'Commodities', 'hermes.get', 'commodity'),
+	topnav_values = [
+		('event', 'Events', 'hermes.get', 'event'),
+		('transaction', 'Transactions', 'cronus.transaction', None),
 		('worth', 'Net Worth', 'apollo.worth', 'USD'),
 		('about', 'About', 'about', None),
 		('api', 'API', 'api', None)]
 
-	hero_values = ('Prometheus: a global asset allocation tool', 'Prometheus is'
+	hero_values = (
+		'Prometheus: a global asset allocation tool', 'Prometheus is'
 		' a full featured web app that tells you how your stock portfolio has '
 		' performed over time, gives insight into how to optimize your asset '
 		' allocation, and monitors your portfolio for rebalancing or performance'
 		' enhancing opportunities.', 'about')
 
-	sub_unit_values = [('Events', 'See all your stocks events in one convenient'
-		' location. Track stock splits, dividend payments, mergers and more!',
-		'hermes.get', 'event'),
-		('Prices', 'Update your stock prices with the click of a button! '
-		'Automatically grap the latest pricing information from Yahoo or '
-		'Google.', 'hermes.get', 'price'),
-		('Net Worth', 'See how the value of your portfolio changed over time '
-		'with these sleek interactive charts! Instantly see how dividends '
-		'impact your return.', 'apollo.worth', 'USD')]
+	sub_unit_values = [
+		(
+			'Events', 'See all your stocks events in one convenient'
+			' location. Track stock splits, dividend payments,'
+			' mergers and more!', 'hermes.get', 'event'),
+		(
+			'Prices', 'Update your stock prices with the click of a button! '
+			'Automatically grap the latest pricing information from Yahoo or '
+			'Google.', 'hermes.get', 'price'),
+		(
+			'Net Worth', 'See how the value of your portfolio changed over '
+			'time with these sleek interactive charts! Instantly see how  '
+			'dividends impact your return.', 'apollo.worth', 'USD')]
 
 	heroku_app = site_values[0]
 	mkd_values = [('about', 'about.md'), ('api', 'api.md')]
-	total_site_values = site_values + (d.today().strftime("%Y"),
-		12 / len(sub_unit_values))
+	total_site_values = site_values + (
+		d.today().strftime("%Y"), 12 / len(sub_unit_values))
 
-	site_keys = ('id', 'caption', 'author', 'author_url', 'location', 'date',
-		'sub_span')
+	site_keys = (
+		'id', 'caption', 'author', 'author_url', 'location', 'date', 'sub_span')
 	topnav_keys = ('id', 'caption', 'location', 'table')
 	hero_keys = ('heading', 'subheading', 'location')
 	sub_unit_keys = ('heading', 'text', 'location', 'table')
@@ -69,8 +74,8 @@ class Config(Content):
 	BOOTSTRAP_USE_CDN = False
 	BOOTSTRAP_FONTAWESOME = False
 	BOOTSTRAP_HTML5_SHIM = True
-	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT = os.environ.get('GOOGLE_ANALYTICS_ID',
-		'')
+	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT = os.environ.get(
+		'GOOGLE_ANALYTICS_ID', '')
 
 	CSRF_ENABLED = True
 	RECAPTCHA_USE_SSL = False
