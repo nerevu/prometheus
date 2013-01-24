@@ -89,14 +89,23 @@ def create_app(config_mode=None, config_file=None):
 
 		return render_template('page.html', **kwargs), 404
 
-	@app.template_filter()
-	def currency(x):
-		try:
-			return '$%.2f' % x
-		except TypeError:
-			return x
+	@app.context_processor
+	def utility_processor():
+		def currency(x):
+			try:
+				return '$%.2f' % x
+			except TypeError:
+				return x
+		return dict(currency=currency)
 
-# 	app.jinja_env.filters['currency']=currency
+# 	@app.template_filter()
+# 	def currency(x):
+# 		try:
+# 			return '$%.2f' % x
+# 		except TypeError:
+# 			return x
+
+# 	app.jinja_env.filters['currency'] = currency
 
 	@app.route('/')
 	def home():
