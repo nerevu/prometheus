@@ -1,12 +1,13 @@
 # from __future__ import print_function
 from pprint import pprint
-from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
+
+from app import db, get_plural
 from app.connection import Connection, portify
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity, CommodityType
-from . import get_table_info, get_plural
+
 
 hermes = Blueprint('hermes', __name__)
 

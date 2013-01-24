@@ -46,6 +46,13 @@ def _get_app_classes(module):
 	return ['%s' % x[0] for x in app_classes]
 
 
+def get_plural(word):
+	if word[-1] == 'y':
+		return word[:-1] + 'ies'
+	else:
+		return word + 's'
+
+
 def create_app(config_mode=None, config_file=None):
 	# Create webapp instance
 	app = Flask(__name__)
