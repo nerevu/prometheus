@@ -1,49 +1,10 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import AnyOf
 from wtforms.ext.dateutil.fields import DateField
+from app.form_helper import get_choices, get_validators
 from .models import EventType, Commodity, CommodityType, Exchange, DataSource
 
 univals = [Required()]
-
-
-def _get_choices(a_class, value_field, *args, **kwargs):
-	order = '%s.%s' % (a_class.__table__, args[0])
-
-	try:
-		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
-		value = kwargs['value']
-		result = a_class.query.filter(eval(filter).in_(value)).order_by(order).all()
-	except KeyError:
-		result = a_class.query.order_by(order).all()
-
-	values = [getattr(x, value_field) for x in result]
-	combo = []
-
-	for arg in args:
-		try:
-			new = [getattr(getattr(x, arg[0]), arg[1]) for x in result]
-		except Exception:
-			new = [getattr(x, arg) for x in result]
-
-		combo.append(new)
-
-	try:
-# 		attr = map(lambda x, y: ', '.join([x, y]), combo[0], combo[1])
-		attr = [', '.join(x) for x in zip(combo[0], combo[1])]
-	except IndexError:
-		attr = combo[0]
-
-	return zip(values, attr)
-
-
-def _get_validators(a_class, value_field):
-	result = a_class.query.all()
-	values = [getattr(x, value_field) for x in result]
-	values = sorted(values)
-	return [
-		Required(), AnyOf(
-			values, message=u'Invalid value, must be one of:'
-			'%(values)s')]
 
 
 class CommodityForm(Form):
@@ -64,12 +25,12 @@ class CommodityForm(Form):
 	def new(self):
 		form = self()
 		a_class = CommodityType
-		form.type_id.choices = _get_choices(a_class, 'id', 'name')
-		form.type_id.validators = _get_validators(a_class, 'id')
-		form.data_source_id.choices = _get_choices(DataSource, 'id', 'name')
-		form.data_source_id.validators = _get_validators(DataSource, 'id')
-		form.exchange_id.choices = _get_choices(Exchange, 'id', 'symbol')
-		form.exchange_id.validators = _get_validators(Exchange, 'id')
+		form.type_id.choices = get_choices(a_class, 'id', 'name')
+		form.type_id.validators = get_validators(a_class, 'id')
+		form.data_source_id.choices = get_choices(DataSource, 'id', 'name')
+		form.data_source_id.validators = get_validators(DataSource, 'id')
+		form.exchange_id.choices = get_choices(Exchange, 'id', 'symbol')
+		form.exchange_id.validators = get_validators(Exchange, 'id')
 		return form
 
 
@@ -94,13 +55,13 @@ class EventForm(Form):
 		a_class = Commodity
 		args = 'symbol'
 		kwargs = {'column': 'type_id', 'value': range(5)}
-		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.commodity_id.validators = _get_validators(a_class, 'id')
-		form.type_id.choices = _get_choices(EventType, 'id', 'name')
-		form.type_id.validators = _get_validators(EventType, 'id')
+		form.commodity_id.choices = get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = get_validators(a_class, 'id')
+		form.type_id.choices = get_choices(EventType, 'id', 'name')
+		form.type_id.validators = get_validators(EventType, 'id')
 		kwargs = {'column': 'type_id', 'value': [5, 6]}
-		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.currency_id.validators = _get_validators(a_class, 'id')
+		form.currency_id.choices = get_choices(a_class, 'id', args, **kwargs)
+		form.currency_id.validators = get_validators(a_class, 'id')
 		return form
 
 
@@ -121,9 +82,9 @@ class PriceForm(Form):
 		a_class = Commodity
 		args = 'symbol'
 		kwargs = {'column': 'type_id', 'value': range(5)}
-		form.commodity_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.commodity_id.validators = _get_validators(a_class, 'id')
+		form.commodity_id.choices = get_choices(a_class, 'id', args, **kwargs)
+		form.commodity_id.validators = get_validators(a_class, 'id')
 		kwargs = {'column': 'type_id', 'value': [5]}
-		form.currency_id.choices = _get_choices(a_class, 'id', args, **kwargs)
-		form.currency_id.validators = _get_validators(a_class, 'id')
+		form.currency_id.choices = get_choices(a_class, 'id', args, **kwargs)
+		form.currency_id.validators = get_validators(a_class, 'id')
 		return form
