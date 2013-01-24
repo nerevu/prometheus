@@ -165,9 +165,9 @@ class Account(db.Model, ValidationMixin):
 
 	# other keys
 	name = db.Column(db.String(64), unique=True, nullable=False)
-	min_balance = db.Column(db.Float)
-	trade_commission = db.Column(db.Float)
-	annual_fee = db.Column(db.Float)
+	min_balance = db.Column(db.Float, default=0)
+	trade_commission = db.Column(db.Float, default=0)
+	annual_fee = db.Column(db.Float, default=0)
 
 	# validation
 	val.validates_constraints()
