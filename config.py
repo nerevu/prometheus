@@ -13,9 +13,7 @@ class Content(object):
 
 	topnav_values = [
 		('event', 'Events', 'hermes.get', 'event'),
-		('event_type', 'Types', 'hermes.get', 'event_type'),
-		('price', 'Prices', 'hermes.get', 'price'),
-		('commodity', 'Commodities', 'hermes.get', 'commodity'),
+		('transaction', 'Transactions', 'cronus.transaction', None),
 		('worth', 'Net Worth', 'apollo.worth', 'USD'),
 		('about', 'About', 'about', None),
 		('api', 'API', 'api', None)]

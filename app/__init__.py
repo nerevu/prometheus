@@ -9,6 +9,7 @@
 from __future__ import print_function
 
 import re
+import config
 
 from inspect import isclass, getmembers
 from functools import partial, update_wrapper
@@ -59,12 +60,13 @@ def create_app(config_mode=None, config_file=None):
 	db.init_app(app)
 	Bootstrap(app)
 	Markdown(app)
-	app.config.from_envvar('APP_SETTINGS', silent=True)
 
 	if config_mode:
-		app.config.from_object('config.%s' % config_mode)
-	if config_file:
+		app.config.from_object(getattr(config, config_mode))
+	elif config_file:
 		app.config.from_pyfile(config_file)
+	else:
+		app.config.from_envvar('APP_SETTINGS', silent=True)
 
 	[app.register_blueprint(bp) for bp in blueprints]
 
@@ -124,8 +126,7 @@ def create_app(config_mode=None, config_file=None):
 			cfg = {}
 			md = text
 
-		kwargs = {'md': md, 'id': page['id']}
-		kwargs.update(cfg)
+		kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
 		endpoint = page['id']
 		func = page['id']
 		exec '%s = partial(template, kwargs)' % func in globals(), locals()
