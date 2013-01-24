@@ -37,9 +37,8 @@ def get(table):
 	form_caption = '%s Entry Form' % table_title
 	heading = 'The %s database' % plural_table
 	subheading = (
-		'Add %s to the database and see them '
-		'instantly updated in the lists below.' % plural_table)
-	results = query.all()
+		'Add %s to the database and see them instantly updated in the lists '
+		'below.' % plural_table)
 
 	try:
 		form = eval('%sForm.new()' % table_as_class)
