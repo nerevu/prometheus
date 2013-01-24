@@ -36,6 +36,18 @@ def worth(table='USD'):
 
 	result, keys = conn.raw_transaction
 	data = conn.values(result, keys)
+	mp = ap.Portfolio(data, currency_id=currency_id, mapping=d['stock'])
+
+	div_prices = ap.DataObject(d['dividend'].join(d['raw_price'], how='outer'))
+	share_prices = mp.join_shares(div_prices)
+	reinvestments = mp.calc_reinvestments(share_prices)
+
+	native_prices = mp.convert_prices(d['raw_price'], d['rate'])
+	native_share_prices = mp.join_shares(native_prices)
+	values = mp.calc_values(native_share_prices, reinvestments)
+	worth = mp.calc_worth(values)
+	data = mp.convert_values(worth)
+
 	if mp.missing:
 		chart_caption = '%s (some price data is missing)' % chart_caption
 	elif mp.empty:

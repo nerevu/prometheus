@@ -25,112 +25,138 @@ def char_range(number, letter='a'):
 		yield chr(c)
 
 
-class DataFrame(pd.DataFrame):
+def id_from_value(symbol):
+	result = db.session.query(Commodity).all()
+	keys = ('symbol', 'id')
+	values = [[getattr(r, k) for k in keys] for r in result]
+	values = dict([tuple(x) for x in values])
+	return values.get(symbol, None)
+
+
+class DataObject(pd.DataFrame):
 	def __init__(
-			self, data=None, dtype=None, index=None, keys=None):
-		"""Creates a DataFrame
+		self, data=None, dtype=None, keys=[], index=[], series=False):
+		"""Creates a DataObject
 
 		Parameters
 		----------
-		data : sequence of values, Pandas DataFrame, Pandas Series,
-			or dict of Pandas Series, optional
+		data : a sequence of values, a Pandas DataFrame, a Series,
+			or a dict of Series, optional
 
-		dtype : sequence of ('column name', data type) pairs, optional
-		index : subset of column names to use for category names, optional
-		keys : sequence of column names, optional
+		dtype : a sequence of ('column name', data type) pairs, optional
+		index : a subset of column names to use for category names, optional
+		keys : a sequence of column names, optional
+		series : boolean, default False
+			Treat a single instance of sequential data as a series
+			[('Tom', 'Dick', 'Jane')] as opposed to a set [(1, 'Tom', 34)].
+			Does not apply to multiple sequences [(1, 2, 3), ('a', 'b', 'c')].
+			These are always treated as sets and should be entered as
+			[(1, 'a'), (2, 'b'), (3, 'c')] or zip((1, 2, 3), ('a', 'b', 'c'))
 
 		Examples
 		--------
-# 		>>> make_df().to_dict()
-# 		{}
-# 		>>> import numpy as np
-# 		>>> make_df([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id']) \
-# 		.to_dict()
-# 		{'symbol': {6: 'APL'}}
+		>>> DataObject().to_dict()
+		{}
+		>>> DataObject([(6, 'APL')]).to_dict()
+		{1: {6: 'APL'}}
+		>>> import numpy as np
+		>>> DataObject([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], \
+		index=['id']).to_dict()
+		{'symbol': {6: 'APL'}}
+		>>> import pandas as pd
+		>>> series1 = pd.Series((6, 7, 8))
+		>>> DataObject(series1).to_dict()
+		{None: {0: 6, 1: 7, 2: 8}}
+		>>> series2 = pd.Series(('APL', 'IBM', 'CAT'))
+		>>> DataObject({'one': series1, 'two': series2}).to_dict()
+		{'two': {0: 'APL', 1: 'IBM', 2: 'CAT'}, 'one': {0: 6, 1: 7, 2: 8}}
 		"""
-		sequence = False
 		switch = {'frame': data, 'dict': pd.DataFrame(data)}
 
-		try:
-			empty = True if data.empty else False
-			type = 'frame'
-		except AttributeError:
+		data_values = [
+			('empty', True, 'frame', switch, False),
+			('any', False, 'series', None, True),
+			('values', False, 'dict', switch, True),
+			(None, False, 'sequence', 'N/A', False)]
+
+		data_keys = ('attr', 'empty', 'stype', 'switch', 'ismeth')
+		data_dict = [dict(zip(data_keys, values)) for values in data_values]
+
+		for d in data_dict:
 			try:
-				empty = False if data.any() else True
-				type = 'series'
-				switch = {'series': pd.DataFrame({data.name: data})}
+				test = data if not d['attr'] else getattr(data, d['attr'])
+				test = test() if d['ismeth'] else test
 			except AttributeError:
-				try:
-					empty = False if data.values() else True
-					type = 'dict'
-				except AttributeError:
-					empty = False if data else True
-					sequence = True
-					type = 'sequence'
+				continue
+			else:
+				empty = d['empty'] if test else not d['empty']
+				stype = d['stype']
+				switch = (
+					d['switch'] or {'series': pd.DataFrame({data.name: data})})
+				sequence = True if stype.startswith('seq') else False
+				break
+
+		if keys and hasattr(keys[0][0], 'denominator'):
+			# test for case like [(0, 'commodity_id')]
+			keys = [k[1] for k in keys]
+		else:
+			keys = keys
 
 		if empty:
-			df = pd.DataFrame({})
+			data = self.fill_data(keys)
+			df = pd.DataFrame(data, columns=keys)
 		elif not sequence:
-			df = switch.get(type)
+			df = switch.get(stype)
 		elif dtype:
 			ndarray = np.array(data, dtype)
 			df = pd.DataFrame.from_records(ndarray)
 		else:
-			if not keys:
-				mod_keys = [c for c in char_range(len(data))]
+			transpose = True if len(data) == 1 and not series else False
+			fix = None
 
-			try:
-				# test for case like [(0, 'commodity_id')
-				keys[0][0] / 1
-				mod_keys = [k[1] for k in keys]
-			except TypeError:
-				mod_keys = keys
+			if transpose and not keys:
+				keys = range(len(data[0]) - 1)
+			elif not keys:
+				keys = [c for c in char_range(len(data))]
 
-			zip_data = zip(*data)
-			series = [pd.Series(z) for z in zip_data]
-			combo = dict(zip(mod_keys, series))
-			df = pd.DataFrame(combo)
-# 	 		types = [d for d in df.dtypes]
-# 	 		dtype = zip(df.dtypes.index, types)
-			types = [df.ix[0][p] for p in mod_keys]
-			dtype = zip(mod_keys, types)
+			if transpose and keys:
+				fix = dict(zip(range(len(keys)), keys))
+
+			if len(data) == 1:
+				pdseries = [pd.Series(*data)]
+			else:
+				zip_data = zip(*data)
+				pdseries = [pd.Series(z) for z in zip_data]
+
+			if transpose:
+				df = pd.DataFrame(pdseries)
+				df = df.rename(columns=fix) if fix else df
+			else:
+				df = pd.DataFrame(dict(zip(keys, pdseries)))
+
+			types = [df.ix[0][p] for p in keys]
+			dtype = zip(keys, types)
 
 		if not (empty or index) and sequence:
-# 	 		index = [d[0] for d in dtype if d[1].kind in ['i', 'O']]
+			# add date and integer data to the index
 			index = [
-				d[0] for d in dtype if (
-					isinstance(d[1], np.int64) or
-					isinstance(d[1], date) or
-					isinstance(d[1], dt))]
+				d[0] for d in dtype if set(['year', 'numerator'])
+				.intersection(dir(d[1]))]
+		elif empty and not index and sequence:
+			index = [c for c in df if c.endswith('_id') or c.startswith('date')]
 
-		if not empty and sequence:
+		if index:
 			df.set_index(index, inplace=True)
 
-		super(DataFrame, self).__init__(df)
+		super(DataObject, self).__init__(df)
 
 	@property
 	def non_date_index(self):
-		return [i for i in self.index.names if i != 'date']
+# 		return [i for i in self.index.names if i != 'date']
+		return list(set(self.index.names).difference(['date']))
 
 	@property
 	def sorted(self):
-		"""Sorts a pandas DataFrame
-
-		Parameters
-		----------
-		df : pandas DataFrame
-
-		Returns
-		-------
-		df : pandas DataFrame or Series sorted by each index
-
-		Examples
-		--------
-		>>> import numpy as np
-		>>> df = DataFrame([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], ['id'])
-		>>> df.to_dict()
-		{'symbol': {6: 'APL'}}
-		"""
 		index = self.index.names
 
 		if len(index) > 1:
@@ -139,48 +165,82 @@ class DataFrame(pd.DataFrame):
 		else:
 			df = self.sort_index()
 
-		return DataFrame(df)
+		return DataObject(df)
 
 	def merge_index(self, dfs):
 		"""
-		Merge index with another dataframe
+		Merge current index with another
 
 		Parameters
 		----------
+		dfs : DataFrame/DataObject or sequence of DataFrame/DataObjects
+
 		Returns
 		-------
-		df : pandas DataFrame
+		index : merged index
+
+		Examples
+		--------
+		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
+		>>> df1.merge_index(df2)
+		[0]
 		"""
 		# TODO: switch order of 'currency_id' and 'commodity_id'
-		merged_index = self.index.names
-		[merged_index.extend(x.index.names) for x in dfs]
-		index = [i for i in set(merged_index)]
-		index = [i for i in reversed(index)]
-		return index
+		merged = set(self.index.names)
+
+		if hasattr(dfs, 'empty'):
+			dfs = [dfs]
+
+		for x in dfs:
+			merged = merged.union(x.index.names)
+
+		return [i for i in reversed(list(merged))]
 
 	def split_frame(self, index):
 		"""
-		Split data frame in two
+		Split data frame by an index
 
 		Parameters
 		----------
+		index : string
+			used to sep the DataObject into groups
+
 		Returns
 		-------
-		df : pandas DataFrame
+		tuple of DataObjects
+
+		Examples
+		--------
+		>>> df = DataObject([(6, 'APL'), (2, 'IBM')])
+		>>> df1, df2 = df.split_frame('a')
+		>>> df1.to_dict()
+		{'b': {2: 'IBM'}}
+		>>> df2.to_dict()
+		{'b': {6: 'APL'}}
 		"""
 		df = self.reset_index().set_index(index)
-		g = [DataFrame(g[1]) for g in df.groupby(level=0)]
+		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
-	def merge_frames(self, y, on, toffill=[]):
+	def merge_frame(self, y, on, toffill=[]):
 		"""
-		Merge with another dataframe
+		Merge a DataObject with another a DataFrame/DataObject
 
 		Parameters
 		----------
+		y : DataObject or DataFrame
+		on : string
+		toffill : sequence of strings
+
 		Returns
 		-------
-		df : pandas DataFrame
+		DataObject
+
+		Examples
+		--------
+		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
+		>>> df1.merge_frame(df2, 1).to_dict()
+		{1: {0: 'APL', 1: 'IBM'}, '0_x': {0: 6.0, 1: nan}, '0_y': {0: nan, 1: 2.0}}
 		"""
 		# reset index so I can merge
 		#
@@ -192,47 +252,69 @@ class DataFrame(pd.DataFrame):
 		y.reset_index(inplace=True)
 		merged = x.merge(y, on=on, how='outer')
 		[merged[f].fillna(method='ffill', inplace=True) for f in toffill]
-		return DataFrame(merged)
+		return DataObject(merged)
 
-	def concat_frames(self, df_y, index, delete_x=None, delete_y=None):
+	def concat_frames(self, y, index=None, delete_x=[], delete_y=[]):
 		"""
-		Concatenate onto another dataframe
+		Concatenate a DataObject onto a DataFrame/DataObject
 
 		Parameters
 		----------
+		y : DataObject or DataFrame
+		index : string, optional
+		delete_x : sequence of strings, optional
+		delete_y : sequence of strings, optional
+
 		Returns
 		-------
-		df : pandas DataFrame
+		DataObject
+
+		Examples
+		--------
+		>>> df1, df2 = DataObject([(1, 'a')]), DataObject([(2, 'b')])
+		>>> df1.concat_frames(df2).to_dict()
+		{0: {0: 1, 1: 2}, 1: {0: 'a', 1: 'b'}}
 		"""
-		df_x = self.copy()
+		x = self.copy()
 
 		# rename columns
 		to = [word[:-2] for word in delete_x]
 		fix_x = dict(zip(delete_y, to))
 		fix_y = dict(zip(delete_x, to))
-		df_x.rename(columns=fix_x, inplace=True)
-		df_y.rename(columns=fix_y, inplace=True)
+		x.rename(columns=fix_x, inplace=True)
+		y.rename(columns=fix_y, inplace=True)
 
 		# delete remaining columns
 		for f in delete_x:
-			del df_x[f]
+			del x[f]
 
 		for f in delete_y:
-			del df_y[f]
+			del y[f]
 
 		# Concatenate and set index
-		df = pd.concat([df_x, df_y]).reset_index().set_index(index)
-		return DataFrame(df)
+		df = pd.concat([x, y]).reset_index()
+		df = df.set_index(index) if index else df
+		return DataObject(df)
 
-	def join_merged(self, index, delete_x=None, delete_y=None):
+	def join_merged(self, index=None, delete_x=[], delete_y=[]):
 		"""
 		Join a merged dataframe to itself
 
 		Parameters
 		----------
+		index : string, optional
+		delete_x : sequence of strings, optional
+		delete_y : sequence of strings, optional
+
 		Returns
 		-------
-		df : pandas DataFrame
+		DataObject
+
+		Examples
+		--------
+		>>> df = DataObject()
+		>>> df.join_merged().to_dict()
+		{}
 		"""
 		# remove the common fields between the 2 data frames
 		df_x = self.copy()
@@ -246,23 +328,75 @@ class DataFrame(pd.DataFrame):
 
 		# set index so I can now join the data frames since they have
 		# different fields
-		df_x = df_x.rename(columns={'date_x': 'date'}).set_index(index)
-		df_y = df_y.rename(columns={'date_y': 'date'}).set_index(index)
-		return DataFrame(df_x.join(df_y, how='outer'))
+		df_x = df_x.rename(columns={'date_x': 'date'})
+		df_y = df_y.rename(columns={'date_y': 'date'})
+		df_x, df_y = (df_x, df_y) if not index else (
+			df_x.set_index(index), df_y.set_index(index))
+		return DataObject(df_x.join(df_y, how='outer'))
+
+	def fill_data(self, columns, index=[]):
+		"""
+		Provide data to fill the columns and index of a DataFrame
+
+		Parameters
+		----------
+		columns : sequence of strings
+			The keys to use for the columns
+
+		index : sequence of strings
+			The keys to use for the index
+
+		Returns
+		-------
+		list of a tuple
+
+		Examples
+		--------
+		>>> index = ['owner_id', 'account_id', 'date']
+		>>> columns = ['shares', 'price']
+		>>> DataObject().fill_data(columns, index)
+		[(1, 1, datetime.datetime(2013, 1, 1, 0, 0), 0, 0)]
+		"""
+		i = len(index)
+		c = len(columns)
+		keys = index + columns
+		data = list(it.repeat(1, i)) + list(it.repeat(0, c))
+
+		if 'date' in keys:
+			data[dict(zip(keys, range(i + c)))['date']] = dt(2013, 1, 1)
+
+		return [tuple(data)]
 
 	def fill_missing(
 			self, toffill=[], tobfill=[], tointerpolate=[], dedupe=False):
 		"""
-		Merge with shares
+		Fill in missing values of a DataObject
 
 		Parameters
 		----------
+		toffill : sequence of strings
+		tobfill : sequence of strings
+		tointerpolate : sequence of strings
+		dedupe : sequence of strings
+
 		Returns
 		-------
-		df : pandas DataFrame
+		DataObject
+		missing : boolean
+			True if interpolate was unable to fill in all values
+
+		Examples
+		--------
+		>>> df = DataObject()
+		>>> df, missing = df.fill_missing(['list'])
+		>>> df.to_dict()
+		{}
+		>>> missing
+		False
 		"""
 		df = self.copy()
 		index = self.non_date_index
+		index = index if len(index) > 1 else index[0]
 		missing = False
 
 		if 'date' in df.index.names:
@@ -289,16 +423,16 @@ class DataFrame(pd.DataFrame):
 					missing = True
 
 		df = df.drop_duplicates() if dedupe else df
-		return DataFrame(df), missing
+		return DataObject(df), missing
 
 
-class Portfolio(DataFrame):
+class Portfolio(DataObject):
 	"""
 	Collection of commodity transactions.
 
 	Attributes
 	----------
-	transactions : pandas DataFrame
+	transactions : DataObject
 			transactions.dtypes =
 				shares        float64
 				price         float64
@@ -318,7 +452,7 @@ class Portfolio(DataFrame):
 				<type 'numpy.int64'>,
 				<class 'pandas.tslib.Timestamp'>]
 
-	shares : pandas Series
+	shares : Series
 			shares.dtype = dtype('float64')
 			shares.name = 'shares'
 
@@ -356,7 +490,7 @@ class Portfolio(DataFrame):
 
 	def __init__(
 			self, data=None, keys=None, index=None, dtypes=None,
-			currency_id=1, commodities={}):
+			currency_id=1, mapping={}):
 		"""
 		Class constructor.
 
@@ -370,7 +504,7 @@ class Portfolio(DataFrame):
 		dtypes : sequence of data types, optional
 		currency_id : INT, optional
 			id of the default currency
-		commodities : dict, or Pandas Series, or Pandas DataFrame, optional
+		mapping : dict, or Series, or Pandas DataFrame, optional
 			commodity_id to commodity mapping
 
 		See also
@@ -382,6 +516,13 @@ class Portfolio(DataFrame):
 		FLT = np.float32
 		DTIME = np.datetime64
 
+		index = (
+			index or [
+				'owner_id', 'account_id', 'commodity_id', 'trxn_type_id',
+				'date'])
+
+		keys = (keys or index + ['shares', 'price', 'commission'])
+
 		try:
 			empty = True if data.empty else False
 			sequence = False
@@ -390,115 +531,111 @@ class Portfolio(DataFrame):
 			sequence = True
 
 		if empty:
-			super(Portfolio, self).__init__()
+			data = self.fill_data(list(set(keys).difference(index)), index)
+			super(Portfolio, self).__init__(data, None, keys, index)
 		elif not sequence:
 			super(Portfolio, self).__init__(df)
 		else:
-			keys = (
-				keys or [
-					'owner_id', 'account_id', 'commodity_id', 'trxn_type_id',
-					'shares', 'price', 'date', 'commission'])
-
-			index = (
-				index or [
-					'owner_id', 'account_id', 'commodity_id', 'trxn_type_id',
-					'date'])
-
-			dtypes = (dtypes or [INT, INT, INT, INT, FLT, FLT, DTIME, FLT])
+			dtypes = (dtypes or [INT, INT, INT, INT, DTIME, FLT, FLT, FLT])
 			dtype = zip(keys, dtypes)
 
-			super(Portfolio, self).__init__(data, dtype, index)
+			super(Portfolio, self).__init__(data, dtype, index=index)
 
 		try:
-			empty = True if commodities.empty else False
-			dict = False
+			unmapped = True if mapping.empty else False
+			is_dict = False
 		except AttributeError:
-			empty = False if commodities.values() else True
-			dict = True
+			unmapped = False if mapping.values() else True
+			is_dict = True
 
-		if empty:
-			commodities = {}
-		elif not dict:
-			commodities = commodities.symbol.to_dict()
+		if unmapped:
+			mapping = {}
+		elif not is_dict:
+			mapping = mapping.symbol.to_dict()
 
-		self.commodities = commodities
+		self.mapping = mapping
+		self.missing = False
 		self.currency_id = currency_id
 
 	@property
 	def transactions(self):
 		"""Portfolio transactions
 		"""
-
 		pass
 
 	@property
 	def shares(self):
-		"""Sum of shares grouped by commodity
+		"""Sum of shares for each commodity
 		"""
+		index = list(set(self.index.names).difference(['trxn_type_id']))
 		df = self.reset_index(level='trxn_type_id')
-		del df['price'], df['trxn_type_id'], df['commission']
-		index = df.index.names
-		df = df.groupby(level=index).cumsum()
-# 		for g in df.groupby(level=index).groups:
-# 			df.ix[g] = df.ix[g].cumsum()
-
-		return df
+		bad = ['price', 'trxn_type_id', 'commission']
+		keys = set([n for n in df]).intersection(bad)
+		[df.pop(key) for key in keys]
+		index = index if len(index) > 1 else index[0]
+		return DataObject(df.groupby(level=index).cumsum())
 
 	@classmethod
 	def from_prices(cls):
 		"""
 		Construct Portfolio from prices
 
+		"""
+
+		return Portfolio()
+
+	def join_shares(self, other, common=['date', 'commodity_id']):
+		"""Joins shares to other
+
 		Parameters
 		----------
-
-		Returns
-		-------
-		Portfolio
+		other : DataObject
+		common : sequence of strings, default ['date', 'commodity_id']
+			Columns/indices that are shared by both shares and other
 
 		Examples
 		--------
+		>>> from datetime import datetime as dt
+		>>> mp = Portfolio(DataObject())
+		>>> keys=['date', 'commodity_id', 'price']
+		>>> data = [(dt(2013, 1, 1), 1, 34.)]
+		>>> df = DataObject(data, keys=keys)
+		>>> mp.join_shares(df).to_dict()
+		{'price': {(1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
+'shares': {(1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
+		cols = list(set([c for c in other]).difference(common))
+		y = ['date_x'] + cols if cols else ['date_x']
+		x = ['date_y', 'shares']
+		merged = other.merge_frame(self.shares, 'commodity_id')
+		index = other.merge_index([self.shares])
+		df = merged.join_merged(index, x, y)
+		df, self.missing = df.fill_missing(['shares'], ['shares'], cols, True)
+		return df
 
-		pass
-# 		return Portfolio()
-
-	def calc_reinvestments(self, dividends, prices):
-		"""Calculates the number of shares purchased assuming dividend reinvestment
+	def calc_reinvestments(self, df):
+		"""Calculates the number of shares purchased assuming dividend
+		reinvestment
 
 		Parameters
 		----------
-		dividends : pandas Series of commodity dividends
-			dividends.dtype = dtype('float64')
-			dividends.name = 'value'
+		df : Series or DataFrame/DataObject
+			df.dtype = dtype('float64')
+			df.name = 'value'
 
-			dividends.index.names = [
+			df.index.names = [
 				'currency_id',
 				'commodity_id',
 				'date']
 
-			[type(i) for i in dividends.index[0]] = [
-				<type 'numpy.int64'>,
-				<type 'numpy.int64'>,
-				<class 'pandas.tslib.Timestamp'>]
-
-		prices : pandas Series of commodity prices
-			prices.dtype = dtype('float64')
-			prices.name = 'close'
-
-			prices.index.names = [
-				'currency_id',
-				'commodity_id',
-				'date']
-
-			[type(i) for i in prices.index[0]] = [
+			[type(i) for i in df.index[0]] = [
 				<type 'numpy.int64'>,
 				<type 'numpy.int64'>,
 				<class 'pandas.tslib.Timestamp'>]
 
 		Returns
 		-------
-		reinvestments : pandas Series of dividend reinvestments
+		reinvestments : Series of dividend reinvestments
 			reinvestments.name = 'new_shares'
 			reinvestments.dtype = dtype('float64')
 
@@ -529,22 +666,7 @@ class Portfolio(DataFrame):
 # 		>>> myportfolio = Portfolio(data).to_dict()
 # 		"""
 
-		if dividends.any() and prices.any():
-			# first join dividends and prices
-			try:
-				df_dict = {'value': dividends, 'close': prices}
-				joined = DataFrame(df_dict)
-			except ValueError:
-				joined = DataFrame(dividends.join(prices, how='outer'))
-
-			y = ['date_x', 'value', 'close']
-			x = ['date_y', 'shares']
-			merged = joined.merge_frames(self.shares, 'commodity_id')
-			index = joined.merge_index([self.shares])
-			df = merged.join_merged(index, x, y)
-			df, missing = df.fill_missing(
-				['shares'], ['shares'], ['close'], True)
-
+		if not df.empty:
 			# remove 'currency_id' from index
 			df.reset_index(level='currency_id', inplace=True)
 			index = df.non_date_index
@@ -558,19 +680,141 @@ class Portfolio(DataFrame):
 			df['div_shares'] = df['purchases'].groupby(level=index).cumsum()
 			reinvestments = df['div_shares']
 		else:
-			reinvestments = DataFrame()
+			reinvestments = DataObject()
 
 		return reinvestments
 
-	def calc_value(
-			self, prices, rates, reinvestments=EMPTY_S, native=1, how='stock',
-			mode='latest', convert=False):
+	def extend_values(self, df):
 		"""
-		Calculate the portfolio value grouped by commodity id
+		Extend values to obtain the same number of 	observances for each date
+		(currently only works for a set of 2 dates)
 
 		Parameters
 		----------
-		prices : pandas Series or DataFrame of commodity prices
+		df : DataObject
+			df.dtype = dtype('float64')
+			df.name = 'close'
+
+			df.index.names = [
+				'currency_id',
+				'commodity_id',
+				'date']
+
+			[type(i) for i in prices.index[0]] = [
+				<type 'numpy.int64'>,
+				<type 'numpy.int64'>,
+				<class 'pandas.tslib.Timestamp'>]
+
+		Returns
+		-------
+		DataObject
+
+		Examples
+		--------
+		>>> from app import db
+		"""
+		new_index = df.non_date_index
+		dfs = [df for df in df.sorted.split_frame('date')]
+
+		# merge sep data frames together
+		df_x, df_y = tuple(dfs)
+		merged = df_x.merge_frame(df_y, new_index, ['date_x', 'date_y'])
+		x = ['date_y', 'native_price_y', 'shares_y', 'div_shares_y']
+		y = ['date_x', 'native_price_x', 'shares_x', 'div_shares_x']
+		df = merged.join_merged(index, x, y)
+
+		# combine *_x and *_y values
+		df_x, df_y = df.split_frame('date')
+		return df_x.concat_frames(df_y, index, x[1:], y[1:]).sorted
+
+	def calc_worth(self, df, how='stock', mode='latest', convert=False):
+		"""
+		Calculate portfolio worth for a specific date
+
+		Parameters
+		----------
+		df : DataFrame/DataObject
+			df.dtype = dtype('float64')
+			df.name = 'close'
+
+			df.index.names = [
+				'currency_id',
+				'commodity_id',
+				'date']
+
+			[type(i) for i in prices.index[0]] = [
+				<type 'numpy.int64'>,
+				<type 'numpy.int64'>,
+				<class 'pandas.tslib.Timestamp'>]
+
+		how : {'own', 'act', 'stock', 'own_stock', 'act_stock', 'own_act'}
+			How to group the values:
+			* own: by owner
+			* act: by account
+			* stock: by stock
+			* own_stock: by owner and stock
+			* act_stock: by account and stock
+			* own_act: by owner and account
+
+			default 'stock'
+
+		mode : {'latest', 'uniform'}
+			How to select the date on which to calculate the value
+			* latest: view most recent data irrespective of incomplete entries
+			* uniform: view most recent data that contains values for all
+				entries
+
+		convert : boolean, default False
+			convert commodity ids to symbols
+
+		"""
+		# group transactions by date
+#		max_date = max([i[3] for i in df.index])
+
+		# make sep data frames for each date
+		# TODO: account for multiple owners and/or accounts
+		old_index = df.non_date_index
+		dfs = [df for df in df.sorted.split_frame('date')]
+		date_list = [(df.index[0], len(df)) for df in dfs]
+		by_date = dict(date_list)
+		max_entries = max(by_date.values())
+		items = by_date.items()
+		df.reset_index(inplace=True)
+
+		# select grouping
+		switch = {
+			'own': ['owner_id'],
+			'act': ['account_id'],
+			'stock': ['commodity_id'],
+			'own_stock': ['owner_id', 'commodity_id'],
+			'act_stock': ['account_id', 'commodity_id'],
+			'own_act': ['owner_id', 'account_id']}
+
+		new_index = ['date'] + switch.get(how.lower())
+		to_delete = list(set(old_index).difference(new_index))
+		df.set_index(new_index, inplace=True)
+		df = df.sorted
+
+		for f in to_delete:
+			del df[f]
+
+		# select mode
+		switch = {
+			'latest': max(by_date.keys()),
+			'uniform': max([d[0] for d in items if d[1] == max_entries])}
+
+		the_date = switch.get(mode.lower())
+		selected = df.groupby(level='date').get_group(the_date)
+		selected.reset_index('date', inplace=True)
+		return selected.to_dict()['value']
+
+	def convert_prices(self, prices, rates, native=1):
+		"""
+		Convert prices to native currency
+
+		Parameters
+		----------
+		prices : Series or DataFrame/DataObject
 			prices.dtype = dtype('float64')
 			prices.name = 'close'
 
@@ -584,21 +828,7 @@ class Portfolio(DataFrame):
 				<type 'numpy.int64'>,
 				<class 'pandas.tslib.Timestamp'>]
 
-		rates : pandas Series of exchange rates
-			rates.dtypes = dtype('float64')
-			rates.name = 'close'
-
-			rates.index.names = [
-				'currency_id',
-				'commodity_id',
-				'date']
-
-			[type(i) for i in rates.index[0]] = [
-				<type 'numpy.int64'>,
-				<type 'numpy.int64'>,
-				<class 'pandas.tslib.Timestamp'>]
-
-		reinvestments : pandas Series of dividend reinvestments, optional
+		rates : Series or DataFrame/DataObject
 			rates.dtypes = dtype('float64')
 			rates.name = 'close'
 
@@ -615,21 +845,19 @@ class Portfolio(DataFrame):
 		native : int, default 1
 			id of the native currency
 
-		convert : boolean, default False
-			convert commodity ids to symbols
-
 		Returns
 		-------
-		df : pandas DataFrame
+		converted : DataObject
 		"""
 
 		if prices.any():
-			# TODO: check for missing prices
 			# first rename rates column and index
-			try:
+
+			if not hasattr(rates, 'empty'):
 				rates = pd.DataFrame({'rate': rates})
-			except ValueError:
-				pass
+
+			if not hasattr(prices, 'empty'):
+				prices = pd.DataFrame({'price': prices})
 
 			rates.reset_index(inplace=True)
 			rates.rename(
@@ -638,119 +866,68 @@ class Portfolio(DataFrame):
 			rates.set_index(['currency_id', 'date'], inplace=True)
 
 			# now join prices and rates
-			try:
-				prices = pd.DataFrame({'price': prices})
-			except ValueError:
-				pass
-
 			prices.reset_index(level='commodity_id', inplace=True)
 			converted = prices.join(rates, how='left')
 			converted = converted.groupby(level='currency_id').fillna(
 				method='pad')
-
-			# fill in native currency rates with value of 1
-			if native in converted.groupby(level='currency_id').groups.keys():
-				converted.rate[native].fillna(1, inplace=True)
-
-			# calculate share closing prices in native currency
-			converted = DataFrame(converted.reset_index())
-			converted.set_index(['commodity_id', 'date'], inplace=True)
-			converted['native_price'] = converted.close * converted.rate
-			del converted['currency_id'], converted['close'], converted['rate']
-
-			# join with shares
-			y = ['date_x', 'native_price']
-			x = ['date_y', 'shares']
-			merged = converted.merge_frames(self.shares, 'commodity_id')
-			index = converted.merge_index([self.shares])
-			df = merged.join_merged(index, x, y)
-			df, missing = df.fill_missing(
-				['shares'], ['shares'], ['native_price'], True)
-
-			# join with reinvestments
-			df = DataFrame(df.join(reinvestments, how='outer'))
-# 			max_date = max([i[3] for i in df.index])
-
-			# group transactions by date
-			index = df.index.names
-			new_index = df.non_date_index
-			sorted = df.sorted
-
-			# make sep data frames for each date
-			# TODO: account for multiple owners and/or accounts
-			dfs = [df for df in sorted.split_frame('date')]
-			date_list = [(df.index[0], len(df)) for df in dfs]
-			by_date = dict(date_list)
-			max_entries = max(by_date.values())
-			items = by_date.items()
-
-			##### 					experimental 					#####
-			#															#
-			# fill in missing values so I have the same number of
-			# observances for each date (currently only works for a set
-			# of 2 dates
-			#
-			# merge sep data frames together
-			df_x, df_y = tuple(dfs)
-			x = ['date_y', 'native_price_y', 'shares_y', 'div_shares_y']
-			y = ['date_x', 'native_price_x', 'shares_x', 'div_shares_x']
-			merged = df_x.merge_frames(df_y, new_index, ['date_x', 'date_y'])
-			df = merged.join_merged(index, x, y)
-
-			# combine *_x and *_y values
-			df_x, df_y = df.split_frame('date')
-			df = df_x.concat_frames(df_y, index, x[1:], y[1:]).sorted
-			#															#
-			##### 					experimental 					#####
-
-			# fill in missing values
-			df, missing = df.fill_missing(
-				['shares', 'div_shares'], ['shares', 'div_shares'],
-				['native_price'])
-
-			# calculate value
-			df['total_shares'] = df['shares'] + df['div_shares']
-			df['value'] = df.native_price * df.total_shares
-			old_index = df.non_date_index
-			df.reset_index(inplace=True)
-
-			# select report type
-			switch = {
-				'owner': ['owner_id'],
-				'account': ['account_id'],
-				'stock': ['commodity_id'],
-				'owner_stock': ['owner_id', 'commodity_id'],
-				'account_stock': ['account_id', 'commodity_id'],
-				'owner_account': ['owner_id', 'account_id']}
-
-			new_index = ['date'] + switch.get(how.lower())
-			to_delete = [i for i in old_index if i not in new_index]
-			df.set_index(new_index, inplace=True)
-			df = df.sorted
-
-			for f in to_delete:
-				del df[f]
-
-			df_dict = {'total_shares': df.total_shares, 'value': df.value}
-			all_dates = DataFrame(df_dict)
-
-			# view most recent data irrespective of incomplete entries
-			# or view most recent data that contains values for all entries
-			switch = {
-				'latest': max(by_date.keys()),
-				'uniform': max([d[0] for d in items if d[1] == max_entries])}
-
-			the_date = switch.get(mode.lower())
-			selected = all_dates.groupby(level='date').get_group(the_date)
-			selected.reset_index('date', inplace=True)
-			values = selected.to_dict()['value']
-
-			if convert:
-				pass
 		else:
-			values = {}
+			converted = prices.reset_index(level='commodity_id')
+			converted['rate'] = 0
 
-		return values
+		# fill in native currency rates with value of 1
+		if native in converted.groupby(level='currency_id').groups.keys():
+			converted.rate[native].fillna(1, inplace=True)
+
+		# calculate share closing prices in native currency
+		converted = DataObject(converted.reset_index())
+		converted.set_index(['commodity_id', 'date'], inplace=True)
+		converted['native_price'] = converted.close * converted.rate
+		del converted['currency_id'], converted['close'], converted['rate']
+		return converted
+
+	def calc_values(self, df, reinvestments=EMPTY_S):
+		"""
+		Calculate portfolio values over all dates
+
+		Parameters
+		----------
+		df : Series or DataFrame/DataObject
+
+		reinvestments : Series or DataFrame/DataObject, optional
+			rates.dtypes = dtype('float64')
+			rates.name = 'close'
+
+			rates.index.names = [
+				'currency_id',
+				'commodity_id',
+				'date']
+
+			[type(i) for i in rates.index[0]] = [
+				<type 'numpy.int64'>,
+				<type 'numpy.int64'>,
+				<class 'pandas.tslib.Timestamp'>]
+
+		Returns
+		-------
+		all_dates : DataObject
+		"""
+		if reinvestments.any():
+			# join with reinvestments
+			df = DataObject(df.join(reinvestments, how='outer'))
+
+		# fill in missing values
+		df, self.missing = df.fill_missing(
+			['shares', 'div_shares'], ['shares', 'div_shares'],
+			['native_price'])
+
+		df.fillna(0, inplace=True)
+
+		# calculate value
+		df['total_shares'] = df['shares'] + df['div_shares']
+		df['value'] = df.native_price * df.total_shares
+		df_dict = {'total_shares': df.total_shares, 'value': df.value}
+		all_dates = DataObject(df_dict)
+		return DataObject(all_dates)
 
 	def convert_values(self, values):
 		"""
@@ -765,8 +942,8 @@ class Portfolio(DataFrame):
 		data : sequence of ('symbol', value)
 		"""
 
-		if values and not self.commodities.values():
-			symbols = [self.commodities[x] for x in values.keys()]
+		if values and not self.mapping.values():
+			symbols = [self.mapping.get(x, 'N/A') for x in values.keys()]
 			totals = ['%.2f' % x for x in values.values()]
 			data = zip(symbols, totals)
 		elif values:
