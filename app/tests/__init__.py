@@ -11,12 +11,14 @@ import nose.tools as nt
 
 from flask import json
 from app import create_app, db
-from app.manage_helper import get_init_values, process
+from app.manage_helper import get_init_values
+from app.connection import Connection
 
 loads = json.loads
 dumps = json.dumps
 err = sys.stderr
 initialized = False
+conn = Connection()
 
 
 def setup_package():

@@ -16,105 +16,13 @@ from datetime import datetime as dt, date
 from sqlalchemy.orm import aliased
 
 from app import db
-from app.hermes.models import Event, EventType, Price, Commodity
-from app.cronus.models import Transaction, Holding, Account
+from app.hermes.models import Commodity
 
 
 def char_range(number, letter='a'):
 	"""Generates the characters from letter to letter + number, inclusive."""
 	for c in xrange(ord(letter), ord(letter) + number):
 		yield chr(c)
-
-
-def get_table_info(table):
-	def get_commodities():
-		query = (
-			db.session.query(Commodity).filter(
-				Commodity.type_id.in_([1, 3, 4])))
-
-		keys = ['id', 'symbol']
-		return query.all(), keys
-
-	def get_dividends():
-		query = (
-			db.session.query(Event).order_by(Event.commodity_id)
-			.filter(Event.type_id.in_([1])))
-
-		keys = ['currency_id', 'commodity_id', 'date', 'value']
-		return query.all(), keys
-
-	def get_prices():
-		query = (
-			db.session.query(Price, Commodity).join(Price.commodity)
-			.order_by(Price.commodity)
-			.filter(Commodity.type_id.in_([1, 3, 4])))
-
-		keys = [
-			(0, 'currency_id'), (0, 'commodity_id'), (0, 'date'), (0, 'close')]
-
-		return query.all(), keys
-
-	def get_rates(native=1):
-		Currency = aliased(Commodity)
-		query = (
-			db.session.query(Price, Commodity, Currency).join(Price.commodity)
-			.join(Currency, Price.currency).order_by(Price.commodity)
-			.filter(Commodity.type_id.in_([5])).filter(Currency.id.in_([native])))
-
-		keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close')]
-		return query.all(), keys
-
-	def get_transactions():
-		query = (
-			db.session.query(Transaction, Holding, Account).join(Transaction.holding)
-				.join(Account, Holding.account))
-
-		keys = [
-			(2, 'owner_id'), (1, 'account_id'), (1, 'commodity_id'),
-			(0, 'type_id'), (0, 'shares'), (0, 'price'), (0, 'date'),
-			(2, 'trade_commission')]
-
-		return query.all(), keys
-
-	switch = {
-		'commodities': get_commodities(),
-		'dividends': get_dividends(),
-		'prices': get_prices(),
-		'rates': get_rates(),
-		'transactions': get_transactions()}
-
-	return switch.get(table)
-
-
-def get_values(result, keys):
-	"""Extracts desired values from a query result
-
-	Parameters
-	----------
-	result : sequence of classes or sequence of sequences of classes
-		e.g. sqlalchemy.query.all()
-
-	keys : sequence of attributes or sequence of (int, attribute)
-		attributes should be contained in the classes from `result`
-
-	Returns
-	-------
-	df : list of tuples of values
-
-	Examples
-	--------
-	# >>> from app import db
-	# >>> from app.hermes.models import Commodity
-	# >>> get_values(db.session.query(Commodity).all(), ['id', 'symbol'])
-	# [(6, u'APL')]
-	"""
-
-	try:
-		values = [[eval('r[k[0]].%s' % k[1]) for k in keys] for r in result]
-	except TypeError:
-		values = [[eval('r.%s' % k) for k in keys] for r in result]
-
-	return [tuple(value) for value in values]
 
 
 class DataFrame(pd.DataFrame):

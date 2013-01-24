@@ -4,7 +4,10 @@ import pandas as pd
 import app.apollo as ap
 
 from pprint import pprint
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, url_for
+
+from app import db
+from app.connection import Connection, portify
 
 apollo = Blueprint('apollo', __name__)
 
@@ -12,32 +15,28 @@ apollo = Blueprint('apollo', __name__)
 @apollo.route('/worth/')
 @apollo.route('/worth/<table>/')
 def worth(table='USD'):
-# 	currency_id = id_from_value(table, commodity)
-	currency_id = 1
+	site = portify(url_for('api', _external=True))
+	currency_id = ap.id_from_value(table)
+
+	if not currency_id:
+		currency_id = 1
+		table = 'USD (%s rates not available)' % table
+
+	conn = Connection(site, currency_id)
 	id = 'worth'
 	title = 'Net Worth'
 	chart_caption = 'Net Worth per Commodity in %s' % table
-	list = ['prices', 'dividends', 'rates', 'commodities']
+	tables = ['dividend', 'raw_price', 'rate', 'stock']
 
-	results = [ap.get_table_info(item)[0] for item in list]
-	keys = [ap.get_table_info(item)[1] for item in list]
-	values = [ap.get_values(z[0], z[1]) for z in zip(results, keys)]
-	dfs = [ap.DataFrame(z[0], keys=z[1]) for z in zip(values, keys)]
-	d = dict(zip(list, dfs))
+	results = [getattr(conn, item)[0] for item in tables]
+	keys = [getattr(conn, item)[1] for item in tables]
+	values = [conn.values(z[0], z[1]) for z in zip(results, keys)]
+	dfs = [ap.DataObject(z[0], keys=z[1]) for z in zip(values, keys)]
+	d = dict(zip(tables, dfs))
 
-	result, keys = ap.get_table_info('transactions')
-	data = ap.get_values(result, keys)
-	mp = ap.Portfolio(
-		data, currency_id=currency_id, commodities=d['commodities'])
-
-	reinvestments = mp.calc_reinvestments(d['dividends'], d['prices'])
-	values = mp.calc_value(d['prices'], d['rates'], reinvestments)
-	data = mp.convert_values(values)
-
-	# fix if missing
-	missing = False
-
-	if missing:
+	result, keys = conn.raw_transaction
+	data = conn.values(result, keys)
+	if mp.missing:
 		chart_caption = '%s (some price data is missing)' % chart_caption
 	elif mp.empty:
 		chart_caption = 'No transactions found. Please enter some events or prices.'

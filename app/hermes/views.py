@@ -3,6 +3,7 @@ from pprint import pprint
 from app import db
 from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
+from app.connection import Connection, portify
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity, CommodityType
 from . import get_table_info, get_plural
@@ -17,11 +18,15 @@ def _bookmark(table):
 
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
+	site = portify(url_for('api', _external=True))
+	conn = Connection(site, display=True)
+
 	plural_table = get_plural(table).replace('_', ' ')
 	table_as_class = table.title().replace('_', '')
 	table_title = table.title().replace('_', ' ')
 	plural_table_title = plural_table.title()
-	form_fields, table_headers, query, data_fields = get_table_info(table)
+	form_fields, table_headers, results, keys = getattr(conn, table)
+	rows = conn.values(results, keys)
 
 	id = table
 	post_location = 'hermes.add'
@@ -42,11 +47,10 @@ def get(table):
 
 	kwargs = {
 		'id': id, 'title': title, 'heading': heading,
-		'subheading': subheading, 'rows': results, 'form': form,
+		'subheading': subheading, 'rows': rows, 'form': form,
 		'form_caption': form_caption, 'table_caption': table_caption,
-		'table_headers': table_headers, 'data_fields': data_fields,
-		'form_fields': form_fields, 'post_location': post_location,
-		'post_table': post_table}
+		'table_headers': table_headers, 'form_fields': form_fields,
+		'post_location': post_location, 'post_table': post_table}
 
 	return render_template('entry.html', **kwargs)
 

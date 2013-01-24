@@ -8,10 +8,10 @@
 
 import nose.tools as nt
 
-from . import APIHelper, get_globals, check_equal, loads, dumps, err
+from . import APIHelper, get_globals, check_equal, loads, dumps, err, conn
 from pprint import pprint
 from app import create_app, db
-from app.manage_helper import get_init_values, process
+from app.manage_helper import get_init_values
 
 
 def setup_module():
@@ -27,7 +27,7 @@ def setup_module():
 	tables = [k.replace('api0', '') for k in keys]
 	pages = [link['id'] for link in app.config['TOPNAV']]
 	values = get_init_values()
-	content = process(values)
+	content = conn.process(values)
 	initialized = True
 	print('Site Module Setup\n')
 
