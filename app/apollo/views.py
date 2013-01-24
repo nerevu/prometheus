@@ -18,10 +18,10 @@ def worth(table='USD'):
 	site = portify(url_for('api', _external=True))
 	currency_id = ap.id_from_value(table)
 
-	if not currency_id:
-		currency_id = 1
+	if not currency_id and table != 'USD':
 		table = 'USD (%s rates not available)' % table
 
+	currency_id = (currency_id or 1)
 	conn = Connection(site, currency_id)
 	id = 'worth'
 	title = 'Net Worth'
