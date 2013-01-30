@@ -28,5 +28,4 @@ after_success:
   - heroku keys:clear
   - yes | heroku keys:add
   - git push staging $TRAVIS_BRANCH
-  - heroku run python manage.py popdb -m Production
 
