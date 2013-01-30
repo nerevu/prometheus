@@ -27,6 +27,14 @@ def checkstage():
 
 
 @manager.command
+def runtests():
+	"""Checks staged with git pre-commit hook"""
+
+	cmd = 'nosetests -xv'
+	return call(cmd, shell=True)
+
+
+@manager.command
 def createdb():
 	"""Creates database if it doesn't already exist"""
 
