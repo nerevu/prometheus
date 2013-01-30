@@ -57,7 +57,7 @@ class DataObject(pd.DataFrame):
 		>>> DataObject().to_dict()
 		{}
 		>>> DataObject([(6, 'APL')]).to_dict()
-		{1: {6: 'APL'}}
+		{1: {0: 6}, 2: {0: 'APL'}}
 		>>> import numpy as np
 		>>> DataObject([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], \
 		index=['id']).to_dict()
@@ -98,8 +98,6 @@ class DataObject(pd.DataFrame):
 		if keys and hasattr(keys[0][0], 'denominator'):
 			# test for case like [(0, 'commodity_id')]
 			keys = [k[1] for k in keys]
-		else:
-			keys = keys
 
 		if empty:
 			data = self.fill_data(keys)
@@ -114,7 +112,7 @@ class DataObject(pd.DataFrame):
 			fix = None
 
 			if transpose and not keys:
-				keys = range(len(data[0]) - 1)
+				keys = range(1, len(data[0]) + 1)
 			elif not keys:
 				keys = [c for c in char_range(len(data))]
 
@@ -164,6 +162,12 @@ class DataObject(pd.DataFrame):
 
 		return DataObject(df)
 
+	@property
+	def unindexed(self):
+		df = self.reset_index() if self.index.names[0] else self
+# 		return DataObject(df)
+		return df
+
 	def merge_index(self, dfs):
 		"""
 		Merge current index with another
@@ -180,7 +184,7 @@ class DataObject(pd.DataFrame):
 		--------
 		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
 		>>> df1.merge_index(df2)
-		[0]
+		[None]
 		"""
 		# TODO: switch order of 'currency_id' and 'commodity_id'
 		merged = set(self.index.names)
@@ -215,7 +219,7 @@ class DataObject(pd.DataFrame):
 		>>> df2.to_dict()
 		{'b': {6: 'APL'}}
 		"""
-		df = self.reset_index().set_index(index)
+		df = self.unindexed.set_index(index)
 		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
@@ -235,9 +239,10 @@ class DataObject(pd.DataFrame):
 
 		Examples
 		--------
-		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
-		>>> df1.merge_frame(df2, 1).to_dict()
-		{1: {0: 'APL', 1: 'IBM'}, '0_x': {0: 6.0, 1: nan}, '0_y': {0: nan, 1: 2.0}}
+		>>> df1 = DataObject([(6, 'APL')])
+		>>> df2 = DataObject([(2, 'IBM')])
+		>>> df1.merge_frame(df2, 2).to_dict()
+		{2: {0: 'APL', 1: 'IBM'}, '1_y': {0: nan, 1: 2.0}, '1_x': {0: 6.0, 1: nan}}
 		"""
 		# reset index so I can merge
 		#
@@ -245,8 +250,8 @@ class DataObject(pd.DataFrame):
 		# 'owner_id', 'account_id' into into merge DataFrame
 		# and 'currency_id' into shares DataFrame
 		# returns two sets of date fields (x and y)
-		x = self.reset_index()
-		y.reset_index(inplace=True)
+		x = self.unindexed
+		y = DataObject(y).unindexed
 		merged = x.merge(y, on=on, how='outer')
 		[merged[f].fillna(method='ffill', inplace=True) for f in toffill]
 		return DataObject(merged)
@@ -270,7 +275,9 @@ class DataObject(pd.DataFrame):
 		--------
 		>>> df1, df2 = DataObject([(1, 'a')]), DataObject([(2, 'b')])
 		>>> df1.concat_frames(df2).to_dict()
-		{0: {0: 1, 1: 2}, 1: {0: 'a', 1: 'b'}}
+		{1: {0: 2}, 2: {0: 'b'}}
+		>>> df1.concat_frames(df2, 1).to_dict()
+		{2: {1: 'a', 2: 'b'}}
 		"""
 		x = self.copy()
 
@@ -289,9 +296,9 @@ class DataObject(pd.DataFrame):
 			del y[f]
 
 		# Concatenate and set index
-		df = pd.concat([x, y]).reset_index()
-		df = df.set_index(index) if index else df
-		return DataObject(df)
+		df = DataObject(pd.concat([x, y]))
+		df = df.unindexed.set_index(index) if index else df
+		return df
 
 	def join_merged(self, index=None, delete_x=[], delete_y=[]):
 		"""
