@@ -16,7 +16,7 @@ env:
   global:
     - secure: "0oiH4eRiFpUdnrbMI42NAbu35qowKj8ebQ/J74IVNd0yB1LsEB3edfqs7mT2\nt9CmOlCPHEst7QBcTXeH09xdpcqO2J00p9keL5ipT6nybkF8nQcOj17St2c3\nygQiMi07KUKbQv9vjM/i6ker0D7QQwRkdge8E1RAg4p/VzjW9wo="
 
-after_script:
+after_success:
   - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
   - git remote add heroku git@heroku.com:prometheus.git
 
