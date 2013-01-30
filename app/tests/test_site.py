@@ -11,7 +11,7 @@ import nose.tools as nt
 from . import APIHelper, get_globals, check_equal, loads, dumps, err, conn
 from pprint import pprint
 from app import create_app, db
-from app.manage_helper import get_init_values
+from app.helper import get_init_values
 
 
 def setup_module():

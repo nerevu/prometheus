@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os.path as p
-import app.manage_helper as mh
 
 from subprocess import call, check_output
 from pprint import pprint
@@ -9,7 +8,7 @@ from flask import current_app as app, url_for
 from flask.ext.script import Manager
 from app import create_app, db
 from app.connection import Connection
-from app.helper import portify
+from app.helper import get_init_values, get_pop_values, portify
 
 manager = Manager(create_app)
 manager.add_option(
@@ -72,7 +71,7 @@ def initdb():
 		site = portify(url_for('api', _external=True))
 		conn = Connection(site)
 
-		values = mh.get_init_values()
+		values = get_init_values()
 		content = conn.process(values)
 		conn.post(content)
 		print 'Database initialized'
@@ -89,7 +88,7 @@ def popdb():
 		site = portify(url_for('api', _external=True))
 		conn = Connection(site)
 
-		values = mh.get_pop_values()
+		values = get_pop_values()
 		content = conn.process(values)
 		conn.post(content)
 		print 'Database populated'
