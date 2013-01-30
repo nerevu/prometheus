@@ -163,7 +163,7 @@ def create_app(config_mode=None, config_file=None):
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
 
-# import app models and views
+# dynamically import app models and views
 modules = _get_modules(__DIR__)
 model_names = ['app.%s.models' % x for x in modules]
 view_names = ['app.%s.views' % x for x in modules]
