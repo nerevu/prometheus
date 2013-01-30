@@ -4,7 +4,7 @@ python:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install libevent
+  - sudo apt-get install libevent-dev
 
 install:
   - pip install -r requirements.txt --use-mirrors
@@ -27,7 +27,7 @@ after_script:
   - echo "   UserKnownHostsFile=/dev/null" >> ~/.ssh/config
   - heroku keys:clear
   - yes | heroku keys:add
-  - yes | git push heroku master # or whatever your heroku push looks like
+  - yes | git push heroku master
   - yes | heroku ps
   - yes | heroku open
   - yes | heroku run python manage.py popdb -m Production
