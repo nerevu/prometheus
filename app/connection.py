@@ -17,15 +17,6 @@ from app.hermes.models import Event, EventType, Price, Commodity, CommodityType
 from app.cronus.models import Transaction, Holding, Account, TrxnType
 
 
-def portify(site):
-	site = site.split('/')
-
-	if site[2] == 'localhost':
-		site[2] = 'localhost:%s' % app.config['PORT']
-
-	return '/'.join(site)
-
-
 class Connection(object):
 	HDR = {'content-type': 'application/json'}
 	TABLES = [
