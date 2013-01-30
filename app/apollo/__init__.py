@@ -34,8 +34,7 @@ def id_from_value(symbol):
 
 
 class DataObject(pd.DataFrame):
-	def __init__(
-		self, data=None, dtype=None, keys=[], index=[], series=False):
+	def __init__(self, data=None, dtype=None, keys=[], index=[], series=False):
 		"""Creates a DataObject
 
 		Parameters
@@ -139,9 +138,7 @@ class DataObject(pd.DataFrame):
 
 		if not (empty or index) and sequence:
 			# add date and integer data to the index
-			index = [
-				d[0] for d in dtype if set(['year', 'numerator'])
-				.intersection(dir(d[1]))]
+			index = [d[0] for d in dtype if hasattr(d[1], 'year')]
 		elif empty and not index and sequence:
 			index = [c for c in df if c.endswith('_id') or c.startswith('date')]
 
