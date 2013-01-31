@@ -15,7 +15,7 @@ table = 'transaction'
 def transaction():
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
-	kwargs = get_kwargs(str(table), 'cronus', conn, False)
+	kwargs = get_kwargs(str(table), 'cronus', conn, TransactionForm, False)
 	return render_template('entry.html', **kwargs)
 
 

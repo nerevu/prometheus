@@ -20,9 +20,11 @@ def _bookmark(table):
 
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
+	table_as_class = table.title().replace('_', '')
+	form = eval('%sForm.new()' % table_as_class)
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
-	kwargs = get_kwargs(str(table), 'hermes', conn)
+	kwargs = get_kwargs(str(table), 'hermes', conn, form)
 	return render_template('entry.html', **kwargs)
 
 

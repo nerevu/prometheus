@@ -3,9 +3,6 @@ from app.hermes.models import EventType, Commodity, CommodityType, Exchange
 from app.hermes.models import DataSource
 from app.cronus.models import Transaction
 
-from app.hermes.forms import EventForm, EventTypeForm, PriceForm, CommodityForm
-from app.cronus.forms import TransactionForm
-
 
 # For use with Connection
 def portify(site):
@@ -97,9 +94,8 @@ def get_plural(word):
 		return word + 's'
 
 
-def get_kwargs(table, module, conn, post_table=True):
+def get_kwargs(table, module, conn, form=None, post_table=True):
 	plural_table = get_plural(table).replace('_', ' ')
-	table_as_class = table.title().replace('_', '')
 	table_title = table.title().replace('_', ' ')
 	plural_table_title = plural_table.title()
 	form_fields, table_headers, results, keys = getattr(conn, table)
@@ -113,9 +109,9 @@ def get_kwargs(table, module, conn, post_table=True):
 		'below.' % plural_table)
 
 	try:
-		form = eval('%sForm.new()' % table_as_class)
+		form = form.new()
 	except AttributeError:
-		form = eval('%sForm()' % table_as_class)
+		pass
 
 	return {
 		'id': table, 'title': plural_table_title, 'heading': heading,
