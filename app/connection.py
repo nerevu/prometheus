@@ -10,7 +10,6 @@ from pprint import pprint
 from json import dumps as dmp
 from requests import post as p
 from sqlalchemy.orm import aliased
-# from flask import current_app as app
 
 from app import db
 from app.hermes.models import Event, EventType, Price, Commodity, CommodityType

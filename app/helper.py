@@ -1,3 +1,4 @@
+from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
 from app.hermes.models import EventType, Commodity, CommodityType, Exchange
 from app.hermes.models import DataSource
