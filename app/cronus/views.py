@@ -2,8 +2,8 @@
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
-from app.connection import Connection, portify
-from app.view_helper import get_kwargs
+from app.connection import Connection
+from app.helper import get_kwargs, portify
 from .forms import TransactionForm
 from .models import Transaction
 

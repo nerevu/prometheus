@@ -8,7 +8,8 @@ from pprint import pprint
 from flask import current_app as app, url_for
 from flask.ext.script import Manager
 from app import create_app, db
-from app.connection import Connection, portify
+from app.connection import Connection
+from app.helper import portify
 
 manager = Manager(create_app)
 manager.add_option(

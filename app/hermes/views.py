@@ -4,8 +4,8 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.connection import Connection, portify
-from app.view_helper import get_kwargs
+from app.connection import Connection
+from app.helper import get_kwargs, portify
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity, CommodityType
 

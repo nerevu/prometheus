@@ -7,7 +7,8 @@ from pprint import pprint
 from flask import Blueprint, render_template, url_for
 
 from app import db
-from app.connection import Connection, portify
+from app.connection import Connection
+from app.helper import portify
 
 apollo = Blueprint('apollo', __name__)
 
