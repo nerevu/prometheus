@@ -3,8 +3,8 @@ from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
 from app.connection import Connection
-from app.helper import get_kwargs, portify
 from .forms import TransactionForm
+from app.helper import get_kwargs, portify, init_form
 from .models import Transaction
 
 cronus = Blueprint('cronus', __name__)
@@ -15,7 +15,8 @@ table = 'transaction'
 def transaction():
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
-	kwargs = get_kwargs(str(table), 'cronus', conn, TransactionForm, False)
+	form = init_form(TransactionForm)
+	kwargs = get_kwargs(str(table), 'cronus', conn, form, False)
 	return render_template('entry.html', **kwargs)
 
 
@@ -23,10 +24,7 @@ def transaction():
 def add():
 	table_as_class = table.title().replace('_', '')
 
-	try:
-		form = eval('%sForm.new()' % table_as_class)
-	except AttributeError:
-		form = eval('%sForm()' % table_as_class)
+	form = init_form(TransactionForm)
 
 	if form.validate_on_submit():
 		site = portify(url_for('api', _external=True))
