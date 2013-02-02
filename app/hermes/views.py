@@ -34,10 +34,10 @@ def add(table):
 	form = init_form(eval('%sForm' % table_as_class))
 
 	if form.validate_on_submit():
+		_bookmark(table)
 		entry = eval('%s()' % table_as_class)
 		form.populate_obj(entry)
 		db.session.add(entry)
-		_bookmark(table)
 		db.session.commit()
 		flash(
 			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
