@@ -13,13 +13,13 @@ class CommodityForm(Form):
 		'Ticker Symbol', description='Usually 3 or 4 letters',
 		validators=univals)
 
-	name = TextField('Name', description='Commodity Name', validators=univals)
+	name = TextField('Name', description='Commodity name', validators=univals)
 	type_id = SelectField(
-		'Type', description='Type of Commodity', coerce=int)
+		'Type', description='Type of commodity', coerce=int)
 	data_source_id = SelectField(
-		'Data Source', description='Type of Commodity', coerce=int)
+		'Data Source', description='Data source', coerce=int)
 	exchange_id = SelectField(
-		'Exchange', description='Type of Commodity', coerce=int)
+		'Exchange', description='Stock exchange', coerce=int)
 
 	@classmethod
 	def new(self):
