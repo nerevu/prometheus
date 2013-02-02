@@ -9,6 +9,7 @@ from .models import Transaction
 
 cronus = Blueprint('cronus', __name__)
 table = 'transaction'
+table_as_class = table.title().replace('_', '')
 
 
 @cronus.route('/transaction/', methods=['GET', 'POST'])
@@ -22,8 +23,6 @@ def transaction():
 
 @cronus.route('/add_trxn/', methods=['GET', 'POST'])
 def add():
-	table_as_class = table.title().replace('_', '')
-
 	form = init_form(TransactionForm)
 
 	if form.validate_on_submit():
@@ -31,10 +30,11 @@ def add():
 		conn = Connection(site, display=True)
 		entry = eval('%s()' % table_as_class)
 		form.populate_obj(entry)
-		keys = [f for f in form._fields.keys() if f != 'csrf_token']
+		keys = set(form._fields.keys()).difference(['csrf_token'])
 		values = [getattr(form, k).data for k in keys]
 		content = conn.process(values, table, keys)
 		conn.post(content)
+
 		flash(
 			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
 			'alert alert-success')
