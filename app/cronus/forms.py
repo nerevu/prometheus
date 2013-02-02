@@ -30,3 +30,7 @@ class TransactionForm(Form):
 		form.type_id.choices = get_choices(TrxnType, 'id', 'name')
 		form.type_id.validators = get_validators(a_class, 'id')
 		return form
+
+
+class TrxnUploadForm(Form):
+	name = TextField('Name', description='File name', validators=univals)
