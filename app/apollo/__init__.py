@@ -351,10 +351,10 @@ class DataObject(pd.DataFrame):
 
 		Parameters
 		----------
-		columns : sequence of strings
+		columns : list of strings
 			The keys to use for the columns
 
-		index : sequence of strings
+		index : list of strings
 			The keys to use for the index
 
 		Returns
@@ -373,10 +373,8 @@ class DataObject(pd.DataFrame):
 
 		if i and c:
 			keys = index + columns
-		elif i or c:
-			keys = (index or columns)
 		else:
-			keys = []
+			keys = (index or columns or [])
 
 		data = list(it.repeat(1, i)) + list(it.repeat(0, c))
 
@@ -808,7 +806,7 @@ class Portfolio(DataObject):
 			'own_act': ['owner_id', 'account_id']}
 
 		new_index = ['date'] + switch.get(how.lower())
-		to_delete = list(set(old_index).difference(new_index))
+		to_delete = set(old_index).difference(new_index)
 		df.set_index(new_index, inplace=True)
 		df = df.sorted
 
