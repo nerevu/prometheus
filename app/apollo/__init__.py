@@ -588,6 +588,46 @@ class Portfolio(DataObject):
 
 		return Portfolio()
 
+	def join_shares7(self, other, common=['date', 'commodity_id']):
+		"""Examples
+		--------
+		>>> from datetime import datetime as dt
+		>>> keys=['date', 'commodity_id', 'price']
+		>>> data = [(dt(2013, 1, 1), 1., 34.)]
+		>>> data
+		[(datetime.datetime(2013, 1, 1, 0, 0), 1.0, 34.0)]
+		>>> DataObject(data, keys=keys).to_records()[0]
+		(datetime.datetime(1970, 1, 16, 48, 0), 1.0, 34.0)
+		"""
+		pass
+
+	def join_shares6(self, other, common=['date', 'commodity_id']):
+		"""Examples
+		--------
+		>>> from datetime import datetime as dt
+		>>> keys=['date', 'commodity_id', 'price']
+		>>> data = [(dt(2013, 1, 1), 1, 34.)]
+		>>> data
+		[(datetime.datetime(2013, 1, 1, 0, 0), 1, 34.0)]
+		>>> DataObject(data, keys=keys).to_records()[0]
+		(datetime.datetime(1970, 1, 16, 48, 0), 1, 34.0)
+		"""
+		pass
+
+	def join_shares5(self, other, common=['date', 'commodity_id']):
+		"""Examples
+		--------
+		>>> from datetime import datetime as dt
+		>>> keys=['date', 'commodity_id', 'price']
+		>>> data = [(dt(2013, 1, 1), 1, 34.)]
+		>>> data
+		[(datetime.datetime(2013, 1, 1, 0, 0), 1, 34.0)]
+		>>> DataObject(data, keys=keys).to_dict()
+		{'price': {<Timestamp: 2013-01-01 00:00:00>: 34.0}, 'commodity_id': \
+{<Timestamp: 2013-01-01 00:00:00>: 1}}
+		"""
+		pass
+
 	def join_shares4(self, other, common=['date', 'commodity_id']):
 		"""Examples
 		--------
@@ -596,20 +636,6 @@ class Portfolio(DataObject):
 		{'commission': {(1, 1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 0}, \
 'price': {(1, 1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 0}, 'shares': \
 {(1, 1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
-		>>> keys=['date', 'commodity_id', 'price']
-		>>> data = [(dt(2013, 1, 1), 1, 34.)]
-		>>> data
-		[(datetime.datetime(2013, 1, 1, 0, 0), 1, 34.0)]
-		>>> DataObject(data, keys=keys).to_dict()
-		{'price': {<Timestamp: 2013-01-01 00:00:00>: 34.0}, 'commodity_id': \
-{<Timestamp: 2013-01-01 00:00:00>: 1}}
-		>>> DataObject(data, keys=keys).to_records()[0]
-		(datetime.datetime(1970, 1, 16, 48, 0), 1, 34.0)
-		>>> data = [(dt(2013, 1, 1), 1., 34.)]
-		>>> data
-		[(datetime.datetime(2013, 1, 1, 0, 0), 1.0, 34.0)]
-		>>> DataObject(data, keys=keys).to_records()[0]
-		(datetime.datetime(1970, 1, 16, 48, 0), 1.0, 34.0)
 		"""
 		pass
 
