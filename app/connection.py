@@ -229,6 +229,18 @@ class Connection(object):
 		return returned
 
 	@property
+	def raw_commodity(self):
+		query = db.session.query(Commodity)
+		keys = ['id', 'symbol']
+
+		if self.display:
+			returned = [], [], query.all(), keys
+		else:
+			returned = query.all(), keys
+
+		return returned
+
+	@property
 	def raw_price(self):
 		query = (
 			db.session.query(Price, Commodity).join(Price.commodity)
@@ -291,6 +303,10 @@ class Connection(object):
 			values = [[getattr(r, k) for k in keys] for r in result]
 
 		return [tuple(value) for value in values]
+
+	def id_from_value(self, symbol):
+		ids = dict(self.values(*self.raw_commodity))
+		return ids.get(symbol, None)
 
 	def process(self, post_values, tables=None, keys=[]):
 		def fix_dates(v):
