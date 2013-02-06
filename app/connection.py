@@ -280,9 +280,8 @@ class Connection(object):
 
 		Examples
 		--------
-		# >>> from app import db
-		# >>> from app.hermes.models import Commodity
-		# >>> values(db.session.query(Commodity).all(), ['id', 'symbol'])
+		# >>> conn = Connection('http://localhost:5000/api/')
+		# >>> conn.values(conn.raw_commodity)
 		# [(6, u'APL')]
 		"""
 
