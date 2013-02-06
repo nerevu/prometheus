@@ -17,37 +17,32 @@ apollo = Blueprint('apollo', __name__)
 @apollo.route('/worth/<table>/')
 def worth(table='USD'):
 	site = portify(url_for('api', _external=True))
-	currency_id = ap.id_from_value(table)
+	conn = Connection(site)
+	currency_id = conn.id_from_value(table)
 
 	if not currency_id and table != 'USD':
 		table = 'USD (%s rates not available)' % table
 
 	currency_id = (currency_id or 1)
-	conn = Connection(site, currency_id)
+	conn.native = currency_id
 	id = 'worth'
 	title = 'Net Worth'
 	chart_caption = 'Net Worth per Commodity in %s' % table
-	tables = ['dividend', 'raw_price', 'rate', 'stock']
+	tables = ['raw_transaction', 'dividend', 'raw_price', 'rate', 'stock']
 
 	results = [getattr(conn, item)[0] for item in tables]
 	keys = [getattr(conn, item)[1] for item in tables]
 	values = [conn.values(z[0], z[1]) for z in zip(results, keys)]
-	dfs = [ap.DataObject(z[0], keys=z[1]) for z in zip(values, keys)]
-	d = dict(zip(tables, dfs))
+	data = zip(values, keys)
+	d = dict(zip(tables, data))
+	data, keys = d['raw_transaction'][0], d['raw_transaction'][1]
+	keys = [k[1] for k in keys]
+	args = [data, keys, None, d['dividend'], d['raw_price'], d['rate']]
+	kwargs = {'currency_id': currency_id, 'mapping': d['stock']}
 
-	result, keys = conn.raw_transaction
-	data = conn.values(result, keys)
-	mp = ap.Portfolio(data, currency_id=currency_id, mapping=d['stock'])
-
-	div_prices = ap.DataObject(d['dividend'].join(d['raw_price'], how='outer'))
-	share_prices = mp.join_shares(div_prices)
-	reinvestments = mp.calc_reinvestments(share_prices)
-
-	native_prices = mp.convert_prices(d['raw_price'], d['rate'])
-	native_share_prices = mp.join_shares(native_prices)
-	values = mp.calc_values(native_share_prices, reinvestments)
-	worth = mp.calc_worth(values)
-	data = mp.convert_values(worth)
+	mp = ap.Worth(args, kwargs)
+	worth = mp.calc_worth()
+	data = mp.convert_worth(worth)
 
 	if mp.missing:
 		chart_caption = '%s (some price data is missing)' % chart_caption
