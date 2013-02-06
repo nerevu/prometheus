@@ -17,6 +17,23 @@ from app.cronus.models import Transaction, Holding, Account, TrxnType
 
 
 class Connection(object):
+	"""
+	DB connection.
+
+	Attributes
+	----------
+	event : tuple
+	event_type : tuple
+	price : tuple
+	commodity : tuple
+	transaction : tuple
+	stock : tuple
+	dividend : tuple
+	rate : tuple
+	raw_commodity : tuple
+	raw_price : tuple
+	raw_transaction : tuple
+	"""
 	HDR = {'content-type': 'application/json'}
 	TABLES = [
 		'exchange', 'data_source', 'commodity_group', 'commodity_type',
@@ -45,6 +62,23 @@ class Connection(object):
 
 	def __init__(
 			self, site='http://localhost:5000/api/', native=1, display=False):
+		"""Creates a connection to the database
+
+		Parameters
+		----------
+		site : a string
+			api endpoint
+
+		native : a number, default 1
+			id of the native currency
+
+		display : boolean, default False
+
+		Examples
+		--------
+		>>> Connection('http://localhost:5000/api/')  #doctest: +ELLIPSIS
+		<app.connection.Connection object at 0x...>
+		"""
 		self.site = site
 		self.native = native
 		self.display = display
