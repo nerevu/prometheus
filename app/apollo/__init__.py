@@ -581,11 +581,8 @@ class Portfolio(DataObject):
 
 	@classmethod
 	def from_prices(cls):
+		"""Construct Portfolio from prices
 		"""
-		Construct Portfolio from prices
-
-		"""
-
 		return Portfolio()
 
 	def join_shares7(self, other, common=['date', 'commodity_id']):
