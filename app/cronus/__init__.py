@@ -763,10 +763,10 @@ class Portfolio(DataObject):
 		>>> data = [(dt(2013, 1, 1), 1., 34.)]
 		>>> df = DataObject(data, keys=keys)
 		>>> mp.join_shares(df).to_records()[0]
-		((1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>), 34.0, 0)
+		((1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>), 34.0, 0)
 		>>> mp.join_shares(df).to_dict()
-		{'price': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
-'shares': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
+		{'price': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
+'shares': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
 		common = (common or ['date', 'commodity_id'])
 		cols = set([c for c in other]).difference(common)
