@@ -22,7 +22,7 @@ config = {
 	'download_url':
 		'https://github.com/reubano/prometheus/downloads/prometheus*.tgz',
 	'author_email': 'reubano@gmail.com',
-	'version': '0.10.0',
+	'version': '0.10.1',
 	'install_requires': requirements,
 	'classifiers': ['Development Status :: 4 - Beta',
 		'License :: OSI Approved :: The MIT License (MIT)',
