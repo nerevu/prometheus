@@ -109,17 +109,21 @@ def get_kwargs(table, module, conn, form=None, post_table=True):
 		'Add %s to the database and see them instantly updated in the lists '
 		'below.' % plural_table)
 
-	try:
-		form = form.new()
-	except AttributeError:
-		pass
-
 	return {
 		'id': table, 'title': plural_table_title, 'heading': heading,
 		'subheading': subheading, 'rows': rows, 'form': form,
 		'form_caption': form_caption, 'table_caption': '%s List' % table_title,
 		'table_headers': table_headers, 'form_fields': form_fields,
 		'post_location': '%s.add' % module, 'post_table': post_table}
+
+
+def init_form(form):
+	try:
+		form = form.new()
+	except AttributeError:
+		pass
+
+	return form
 
 
 # For forms

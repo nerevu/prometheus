@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db
 from app.connection import Connection
-from app.helper import get_kwargs, portify
+from app.helper import get_kwargs, portify, init_form
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity, CommodityType
 
@@ -21,7 +21,7 @@ def _bookmark(table):
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
 	table_as_class = table.title().replace('_', '')
-	form = eval('%sForm.new()' % table_as_class)
+	form = init_form(eval('%sForm' % table_as_class))
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
 	kwargs = get_kwargs(str(table), 'hermes', conn, form)
@@ -31,17 +31,13 @@ def get(table):
 @hermes.route('/add/<table>/', methods=['GET', 'POST'])
 def add(table):
 	table_as_class = table.title().replace('_', '')
-
-	try:
-		form = eval('%sForm.new()' % table_as_class)
-	except AttributeError:
-		form = eval('%sForm()' % table_as_class)
+	form = init_form(eval('%sForm' % table_as_class))
 
 	if form.validate_on_submit():
+		_bookmark(table)
 		entry = eval('%s()' % table_as_class)
 		form.populate_obj(entry)
 		db.session.add(entry)
-		_bookmark(table)
 		db.session.commit()
 		flash(
 			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
