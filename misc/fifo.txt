@@ -1,4 +1,0 @@
-- Searches through the cumulative buy quantities to date (column E) and figures out the highest number that is LESS THAN the cumulative quantity sold to date, and return the corresponding cumulative buy cost to date (column F). (We need the full amount of this bucket of costs.)
-- Calculates the difference between cumulative quantity sold to date, and the cumulative quantity purchased to date, determined in step 1. (We only take a portion of this bucket.)
-- Multiplies this marginal quantity purchased by the cost per unit for this row.
-- Subtracts all costs of sale to date, thereby leaving you with the purchase cost of the row in question.

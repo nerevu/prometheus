@@ -1,7 +1,7 @@
 Flask==0.9
 Flask-Bootstrap==2.2.1-1
 Flask-Markdown==0.3
-Flask-Restless==0.8.0
+Flask-Restless==0.9.3
 Flask-SQLAlchemy==0.16
 Flask-Script==0.5.1
 Flask-WTF==0.8

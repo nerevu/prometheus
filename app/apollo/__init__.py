@@ -34,8 +34,7 @@ def id_from_value(symbol):
 
 
 class DataObject(pd.DataFrame):
-	def __init__(
-		self, data=None, dtype=None, keys=[], index=[], series=False):
+	def __init__(self, data=None, dtype=None, keys=[], index=[], series=False):
 		"""Creates a DataObject
 
 		Parameters
@@ -58,7 +57,7 @@ class DataObject(pd.DataFrame):
 		>>> DataObject().to_dict()
 		{}
 		>>> DataObject([(6, 'APL')]).to_dict()
-		{1: {6: 'APL'}}
+		{1: {0: 6}, 2: {0: 'APL'}}
 		>>> import numpy as np
 		>>> DataObject([(6, u'APL')], [('id', np.int), ('symbol', 'a5')], \
 		index=['id']).to_dict()
@@ -99,8 +98,6 @@ class DataObject(pd.DataFrame):
 		if keys and hasattr(keys[0][0], 'denominator'):
 			# test for case like [(0, 'commodity_id')]
 			keys = [k[1] for k in keys]
-		else:
-			keys = keys
 
 		if empty:
 			data = self.fill_data(keys)
@@ -115,7 +112,7 @@ class DataObject(pd.DataFrame):
 			fix = None
 
 			if transpose and not keys:
-				keys = range(len(data[0]) - 1)
+				keys = range(1, len(data[0]) + 1)
 			elif not keys:
 				keys = [c for c in char_range(len(data))]
 
@@ -139,9 +136,7 @@ class DataObject(pd.DataFrame):
 
 		if not (empty or index) and sequence:
 			# add date and integer data to the index
-			index = [
-				d[0] for d in dtype if set(['year', 'numerator'])
-				.intersection(dir(d[1]))]
+			index = [d[0] for d in dtype if hasattr(d[1], 'year')]
 		elif empty and not index and sequence:
 			index = [c for c in df if c.endswith('_id') or c.startswith('date')]
 
@@ -167,6 +162,12 @@ class DataObject(pd.DataFrame):
 
 		return DataObject(df)
 
+	@property
+	def unindexed(self):
+		df = self.reset_index() if self.index.names[0] else self
+# 		return DataObject(df)
+		return df
+
 	def merge_index(self, dfs):
 		"""
 		Merge current index with another
@@ -183,7 +184,7 @@ class DataObject(pd.DataFrame):
 		--------
 		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
 		>>> df1.merge_index(df2)
-		[0]
+		[None]
 		"""
 		# TODO: switch order of 'currency_id' and 'commodity_id'
 		merged = set(self.index.names)
@@ -218,7 +219,7 @@ class DataObject(pd.DataFrame):
 		>>> df2.to_dict()
 		{'b': {6: 'APL'}}
 		"""
-		df = self.reset_index().set_index(index)
+		df = self.unindexed.set_index(index)
 		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
@@ -238,9 +239,10 @@ class DataObject(pd.DataFrame):
 
 		Examples
 		--------
-		>>> df1, df2 = DataObject([(6, 'APL')]), DataObject([(2, 'IBM')])
-		>>> df1.merge_frame(df2, 1).to_dict()
-		{1: {0: 'APL', 1: 'IBM'}, '0_x': {0: 6.0, 1: nan}, '0_y': {0: nan, 1: 2.0}}
+		>>> df1 = DataObject([(6, 'APL')])
+		>>> df2 = DataObject([(2, 'IBM')])
+		>>> df1.merge_frame(df2, 2).to_dict()
+		{2: {0: 'APL', 1: 'IBM'}, '1_y': {0: nan, 1: 2.0}, '1_x': {0: 6.0, 1: nan}}
 		"""
 		# reset index so I can merge
 		#
@@ -248,8 +250,8 @@ class DataObject(pd.DataFrame):
 		# 'owner_id', 'account_id' into into merge DataFrame
 		# and 'currency_id' into shares DataFrame
 		# returns two sets of date fields (x and y)
-		x = self.reset_index()
-		y.reset_index(inplace=True)
+		x = self.unindexed
+		y = DataObject(y).unindexed
 		merged = x.merge(y, on=on, how='outer')
 		[merged[f].fillna(method='ffill', inplace=True) for f in toffill]
 		return DataObject(merged)
@@ -273,7 +275,9 @@ class DataObject(pd.DataFrame):
 		--------
 		>>> df1, df2 = DataObject([(1, 'a')]), DataObject([(2, 'b')])
 		>>> df1.concat_frames(df2).to_dict()
-		{0: {0: 1, 1: 2}, 1: {0: 'a', 1: 'b'}}
+		{1: {0: 2}, 2: {0: 'b'}}
+		>>> df1.concat_frames(df2, 1).to_dict()
+		{2: {1: 'a', 2: 'b'}}
 		"""
 		x = self.copy()
 
@@ -292,9 +296,9 @@ class DataObject(pd.DataFrame):
 			del y[f]
 
 		# Concatenate and set index
-		df = pd.concat([x, y]).reset_index()
-		df = df.set_index(index) if index else df
-		return DataObject(df)
+		df = DataObject(pd.concat([x, y]))
+		df = df.unindexed.set_index(index) if index else df
+		return df
 
 	def join_merged(self, index=None, delete_x=[], delete_y=[]):
 		"""
@@ -577,11 +581,8 @@ class Portfolio(DataObject):
 
 	@classmethod
 	def from_prices(cls):
+		"""Construct Portfolio from prices
 		"""
-		Construct Portfolio from prices
-
-		"""
-
 		return Portfolio()
 
 	def join_shares(self, other, common=['date', 'commodity_id']):
@@ -598,11 +599,13 @@ class Portfolio(DataObject):
 		>>> from datetime import datetime as dt
 		>>> mp = Portfolio(DataObject())
 		>>> keys=['date', 'commodity_id', 'price']
-		>>> data = [(dt(2013, 1, 1), 1, 34.)]
+		>>> data = [(dt(2013, 1, 1), 1., 34.)]
 		>>> df = DataObject(data, keys=keys)
+		>>> mp.join_shares(df).to_records()[0]
+		((1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>), 34.0, 0)
 		>>> mp.join_shares(df).to_dict()
-		{'price': {(1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
-'shares': {(1, 1, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
+		{'price': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
+'shares': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
 		cols = list(set([c for c in other]).difference(common))
 		y = ['date_x'] + cols if cols else ['date_x']

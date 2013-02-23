@@ -1,0 +1,31 @@
+language: python
+python:
+  - "2.7"
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install libevent-dev
+
+install:
+  - pip install -r requirements.txt --use-mirrors
+  - pip install -r test-requirements.txt --use-mirrors
+
+script: nosetests -v
+
+env:
+  global:
+    - secure: "0oiH4eRiFpUdnrbMI42NAbu35qowKj8ebQ/J74IVNd0yB1LsEB3edfqs7mT2\nt9CmOlCPHEst7QBcTXeH09xdpcqO2J00p9keL5ipT6nybkF8nQcOj17St2c3\nygQiMi07KUKbQv9vjM/i6ker0D7QQwRkdge8E1RAg4p/VzjW9wo="
+
+after_success:
+  - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+  - git remote add heroku git@heroku.com:prometheus.git
+
+  # Turn off warnings about SSH keys:
+  - echo "Host heroku.com" >> ~/.ssh/config
+  - echo "   StrictHostKeyChecking no" >> ~/.ssh/config
+  - echo "   CheckHostIP no" >> ~/.ssh/config
+  - echo "   UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+  - heroku keys:clear
+  - yes | heroku keys:add
+  - git push staging $TRAVIS_BRANCH
+
