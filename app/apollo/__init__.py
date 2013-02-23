@@ -581,11 +581,8 @@ class Portfolio(DataObject):
 
 	@classmethod
 	def from_prices(cls):
+		"""Construct Portfolio from prices
 		"""
-		Construct Portfolio from prices
-
-		"""
-
 		return Portfolio()
 
 	def join_shares(self, other, common=['date', 'commodity_id']):
@@ -602,10 +599,13 @@ class Portfolio(DataObject):
 		>>> from datetime import datetime as dt
 		>>> mp = Portfolio(DataObject())
 		>>> keys=['date', 'commodity_id', 'price']
-		>>> data = [(dt(2013, 1, 1), 1, 34.)]
+		>>> data = [(dt(2013, 1, 1), 1., 34.)]
 		>>> df = DataObject(data, keys=keys)
 		>>> mp.join_shares(df).to_records()[0]
-		((1, 1, 1, <Timestamp: 2013-01-01 00:00:00>), 34.0, 0)
+		((1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>), 34.0, 0)
+		>>> mp.join_shares(df).to_dict()
+		{'price': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
+'shares': {(1, 1.0, 1, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
 		cols = list(set([c for c in other]).difference(common))
 		y = ['date_x'] + cols if cols else ['date_x']
