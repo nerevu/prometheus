@@ -1,7 +1,7 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import AnyOf, BooleanField
 from wtforms.ext.dateutil.fields import DateField
-from app.form_helper import get_choices, get_validators
+from app.helper import get_choices, get_validators
 from .models import Holding, TrxnType
 
 univals = [Required()]

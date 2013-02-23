@@ -11,7 +11,6 @@ import nose.tools as nt
 
 from flask import json
 from app import create_app, db
-from app.manage_helper import get_init_values
 from app.connection import Connection
 
 loads = json.loads

@@ -7,7 +7,8 @@ from pprint import pprint
 from flask import Blueprint, render_template, url_for
 
 from app import db
-from app.connection import Connection, portify
+from app.connection import Connection
+from app.helper import portify
 
 apollo = Blueprint('apollo', __name__)
 
@@ -18,10 +19,10 @@ def worth(table='USD'):
 	site = portify(url_for('api', _external=True))
 	currency_id = ap.id_from_value(table)
 
-	if not currency_id:
-		currency_id = 1
+	if not currency_id and table != 'USD':
 		table = 'USD (%s rates not available)' % table
 
+	currency_id = (currency_id or 1)
 	conn = Connection(site, currency_id)
 	id = 'worth'
 	title = 'Net Worth'

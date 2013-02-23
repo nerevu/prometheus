@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-	app.database
+	app.connection
 	~~~~~~~~~~~~~~
 
 	Provides functions for querying the database
@@ -10,20 +10,10 @@ from pprint import pprint
 from json import dumps as dmp
 from requests import post as p
 from sqlalchemy.orm import aliased
-from flask import current_app as app
 
 from app import db
 from app.hermes.models import Event, EventType, Price, Commodity, CommodityType
 from app.cronus.models import Transaction, Holding, Account, TrxnType
-
-
-def portify(site):
-	site = site.split('/')
-
-	if site[2] == 'localhost':
-		site[2] = 'localhost:%s' % app.config['PORT']
-
-	return '/'.join(site)
 
 
 class Connection(object):

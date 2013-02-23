@@ -1,11 +1,9 @@
-import app.apollo as ap
-
+# from __future__ import print_function
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
-from flask import current_app as app
 
-from app import db, get_plural
-from app.connection import Connection, portify
+from app.connection import Connection
+from app.helper import get_kwargs, portify
 from .forms import TransactionForm
 from .models import Transaction
 
@@ -17,40 +15,40 @@ table = 'transaction'
 def transaction():
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
+	kwargs = get_kwargs(str(table), 'cronus', conn, TransactionForm, False)
+	return render_template('entry.html', **kwargs)
 
-	plural_table = get_plural(table).replace('_', ' ')
+
+@cronus.route('/add_trxn/', methods=['GET', 'POST'])
+def add():
 	table_as_class = table.title().replace('_', '')
-	table_title = table.title().replace('_', ' ')
-	plural_table_title = plural_table.title()
-	form_fields, table_headers, results, keys = getattr(conn, table)
-	rows = conn.values(results, keys)
-
-	id = table
-	post_location = 'cronus.add_trxn'
-	post_table = None
-	title = '%s' % plural_table_title
-	table_caption = '%s List' % table_title
-	form_caption = '%s Entry Form' % table_title
-	heading = 'The %s database' % plural_table
-	subheading = (
-		'Add %s to the database and see them '
-		'instantly updated in the lists below.' % plural_table)
 
 	try:
 		form = eval('%sForm.new()' % table_as_class)
 	except AttributeError:
 		form = eval('%sForm()' % table_as_class)
 
-	kwargs = {
-		'id': id, 'title': title, 'heading': heading,
-		'subheading': subheading, 'rows': rows, 'form': form,
-		'form_caption': form_caption, 'table_caption': table_caption,
-		'table_headers': table_headers, 'form_fields': form_fields,
-		'post_location': post_location, 'post_table': post_table}
+	if form.validate_on_submit():
+		site = portify(url_for('api', _external=True))
+		conn = Connection(site, display=True)
+		entry = eval('%s()' % table_as_class)
+		form.populate_obj(entry)
+		keys = [f for f in form._fields.keys() if f != 'csrf_token']
+		values = [getattr(form, k).data for k in keys]
+		content = conn.process(values, table, keys)
+		conn.post(content)
+		flash(
+			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
+			'alert alert-success')
 
-	return render_template('entry.html', **kwargs)
+	else:
+		[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
+			for k, v in form.errors.iteritems()]
+
+	return redirect(url_for('.transaction'))
 
 
-@cronus.route('/add_trxn/', methods=['GET', 'POST'])
-def add_trxn():
-	pass
+@cronus.errorhandler(409)
+def duplicate_values(e):
+	flash('Error: %s' % e.orig[0], 'alert alert-error')
+	return redirect(url_for('.transaction'))

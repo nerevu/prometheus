@@ -3,8 +3,9 @@ from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 
-from app import db, get_plural
-from app.connection import Connection, portify
+from app import db
+from app.connection import Connection
+from app.helper import get_kwargs, portify
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 from .models import Event, EventType, Price, Commodity, CommodityType
 
@@ -19,39 +20,11 @@ def _bookmark(table):
 
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
+	table_as_class = table.title().replace('_', '')
+	form = eval('%sForm.new()' % table_as_class)
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site, display=True)
-
-	plural_table = get_plural(table).replace('_', ' ')
-	table_as_class = table.title().replace('_', '')
-	table_title = table.title().replace('_', ' ')
-	plural_table_title = plural_table.title()
-	form_fields, table_headers, results, keys = getattr(conn, table)
-	rows = conn.values(results, keys)
-
-	id = table
-	post_location = 'hermes.add'
-	post_table = table
-	title = '%s' % plural_table_title
-	table_caption = '%s List' % table_title
-	form_caption = '%s Entry Form' % table_title
-	heading = 'The %s database' % plural_table
-	subheading = (
-		'Add %s to the database and see them instantly updated in the lists '
-		'below.' % plural_table)
-
-	try:
-		form = eval('%sForm.new()' % table_as_class)
-	except AttributeError:
-		form = eval('%sForm()' % table_as_class)
-
-	kwargs = {
-		'id': id, 'title': title, 'heading': heading,
-		'subheading': subheading, 'rows': rows, 'form': form,
-		'form_caption': form_caption, 'table_caption': table_caption,
-		'table_headers': table_headers, 'form_fields': form_fields,
-		'post_location': post_location, 'post_table': post_table}
-
+	kwargs = get_kwargs(str(table), 'hermes', conn, form)
 	return render_template('entry.html', **kwargs)
 
 

@@ -34,7 +34,8 @@ def id_from_value(symbol):
 
 
 class DataObject(pd.DataFrame):
-	def __init__(self, data=None, dtype=None, keys=[], index=[], series=False):
+	def __init__(
+			self, data=None, dtype=None, keys=None, index=None, series=False):
 		"""Creates a DataObject
 
 		Parameters
@@ -223,7 +224,7 @@ class DataObject(pd.DataFrame):
 		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
-	def merge_frame(self, y, on, toffill=[]):
+	def merge_frame(self, y, on, toffill=None):
 		"""
 		Merge a DataObject with another a DataFrame/DataObject
 
@@ -252,11 +253,13 @@ class DataObject(pd.DataFrame):
 		# returns two sets of date fields (x and y)
 		x = self.unindexed
 		y = DataObject(y).unindexed
+		toffill = (toffill or [])
+
 		merged = x.merge(y, on=on, how='outer')
 		[merged[f].fillna(method='ffill', inplace=True) for f in toffill]
 		return DataObject(merged)
 
-	def concat_frames(self, y, index=None, delete_x=[], delete_y=[]):
+	def concat_frames(self, y, index=None, delete_x=None, delete_y=None):
 		"""
 		Concatenate a DataObject onto a DataFrame/DataObject
 
@@ -280,6 +283,8 @@ class DataObject(pd.DataFrame):
 		{2: {1: 'a', 2: 'b'}}
 		"""
 		x = self.copy()
+		delete_x = (delete_x or [])
+		delete_y = (delete_y or [])
 
 		# rename columns
 		to = [word[:-2] for word in delete_x]
@@ -300,7 +305,7 @@ class DataObject(pd.DataFrame):
 		df = df.unindexed.set_index(index) if index else df
 		return df
 
-	def join_merged(self, index=None, delete_x=[], delete_y=[]):
+	def join_merged(self, index=None, delete_x=None, delete_y=None):
 		"""
 		Join a merged dataframe to itself
 
@@ -323,6 +328,8 @@ class DataObject(pd.DataFrame):
 		# remove the common fields between the 2 data frames
 		df_x = self.copy()
 		df_y = self.copy()
+		delete_x = (delete_x or [])
+		delete_y = (delete_y or [])
 
 		for f in delete_x:
 			del df_x[f]
@@ -338,7 +345,7 @@ class DataObject(pd.DataFrame):
 			df_x.set_index(index), df_y.set_index(index))
 		return DataObject(df_x.join(df_y, how='outer'))
 
-	def fill_data(self, columns, index=[]):
+	def fill_data(self, columns=None, index=None):
 		"""
 		Provide data to fill the columns and index of a DataFrame
 
@@ -361,9 +368,16 @@ class DataObject(pd.DataFrame):
 		>>> DataObject().fill_data(columns, index)
 		[(1, 1, datetime.datetime(2013, 1, 1, 0, 0), 0, 0)]
 		"""
-		i = len(index)
-		c = len(columns)
-		keys = index + columns
+		i = len(index) if index else 0
+		c = len(columns) if columns else 0
+
+		if i and c:
+			keys = index + columns
+		elif i or c:
+			keys = (index or columns)
+		else:
+			keys = []
+
 		data = list(it.repeat(1, i)) + list(it.repeat(0, c))
 
 		if 'date' in keys:
@@ -372,7 +386,7 @@ class DataObject(pd.DataFrame):
 		return [tuple(data)]
 
 	def fill_missing(
-			self, toffill=[], tobfill=[], tointerpolate=[], dedupe=False):
+			self, toffill=None, tobfill=None, tointerpolate=None, dedupe=False):
 		"""
 		Fill in missing values of a DataObject
 
