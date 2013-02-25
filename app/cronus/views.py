@@ -47,14 +47,10 @@ def add():
 	form = init_form(TransactionForm)
 
 	if form.validate_on_submit():
-		site = portify(url_for('api', _external=True))
-		conn = Connection(site, display=True)
 		entry = eval('%s()' % table_as_class)
 		form.populate_obj(entry)
-		keys = set(form._fields.keys()).difference(['csrf_token'])
-		values = [getattr(form, k).data for k in keys]
-		content = conn.process(values, table, keys)
-		conn.post(content)
+		db.session.add(entry)
+		db.session.commit()
 
 		flash(
 			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
