@@ -170,8 +170,9 @@ def create_app(config_mode=None, config_file=None):
 
 
 class Add(View):
-	def dispatch_request(self, table):
+	def dispatch_request(self, table=None):
 		form, entry, redir = self.get_vars
+		table = (table or self.get_table)
 
 		if form.validate_on_submit():
 			self.bookmark_table(table)
