@@ -47,6 +47,10 @@ def _get_app_classes(module):
 	return ['%s' % x[0] for x in app_classes]
 
 
+def _template(kwargs):
+	return render_template('markdown.html', **kwargs)
+
+
 def create_app(config_mode=None, config_file=None):
 	# Create webapp instance
 	app = Flask(__name__)
@@ -108,9 +112,6 @@ def create_app(config_mode=None, config_file=None):
 	mkd_pages = app.config['MKD_PAGES']
 	mkd_folder = app.config['MKD_FOLDER']
 
-	def template(kwargs):
-		return render_template('markdown.html', **kwargs)
-
 	for page in mkd_pages:
 		path = p.join(__DIR__, mkd_folder, page['file'])
 		text = open(path).read()
@@ -131,8 +132,8 @@ def create_app(config_mode=None, config_file=None):
 		kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
 		endpoint = page['id']
 		func = page['id']
-		exec '%s = partial(template, kwargs)' % func in globals(), locals()
-		update_wrapper(eval(func), template)
+		exec '%s = partial(_template, kwargs)' % func in globals(), locals()
+		update_wrapper(eval(func), _template)
 		eval(func).__name__ = func
 		app.add_url_rule('/%s/' % endpoint, view_func=eval(func))
 
