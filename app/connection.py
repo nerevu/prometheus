@@ -8,7 +8,7 @@
 
 from pprint import pprint
 from json import dumps as dmp
-from requests import post as p
+from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
 from app import db
@@ -338,6 +338,10 @@ class Connection(object):
 		content_keys = ('table', 'data')
 		content_values = zip(tables, table_data)
 		return [dict(zip(content_keys, values)) for values in content_values]
+
+	def get(table):
+		r = g('%s%s' % (self.site, table))
+		return r.text
 
 	def post(self, content):
 		for piece in content:
