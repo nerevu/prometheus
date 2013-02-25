@@ -47,6 +47,31 @@ def _get_app_classes(module):
 	return ['%s' % x[0] for x in app_classes]
 
 
+def _get_view_func(page, mkd_folder):
+	path = p.join(__DIR__, mkd_folder, page['file'])
+	text = open(path).read()
+	pattern = '---'
+	matches = [match for match in re.finditer(pattern, text)]
+
+	if matches:
+		cfg_start = matches[0].end() + 1
+		cfg_end = matches[1].start() - 1
+		parse = text[cfg_start:cfg_end].split('\n')
+		cfg = dict([tuple(row.split(': ')) for row in parse])
+		md = text[matches[1].end() + 1:]
+	else:
+		cfg = {}
+		md = text
+
+	kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
+	endpoint = page['id']
+	func = page['id']
+	exec '%s = partial(_template, kwargs)' % func in globals(), locals()
+	update_wrapper(eval(func), _template)
+	eval(func).__name__ = func
+	return eval(func)
+
+
 def _template(kwargs):
 	return render_template('markdown.html', **kwargs)
 
@@ -113,29 +138,8 @@ def create_app(config_mode=None, config_file=None):
 	mkd_folder = app.config['MKD_FOLDER']
 
 	for page in mkd_pages:
-		path = p.join(__DIR__, mkd_folder, page['file'])
-		text = open(path).read()
-		pattern = '---'
-
-		matches = [match for match in re.finditer(pattern, text)]
-
-		if matches:
-			cfg_start = matches[0].end() + 1
-			cfg_end = matches[1].start() - 1
-			parse = text[cfg_start:cfg_end].split('\n')
-			cfg = dict([tuple(row.split(': ')) for row in parse])
-			md = text[matches[1].end() + 1:]
-		else:
-			cfg = {}
-			md = text
-
-		kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
-		endpoint = page['id']
-		func = page['id']
-		exec '%s = partial(_template, kwargs)' % func in globals(), locals()
-		update_wrapper(eval(func), _template)
-		eval(func).__name__ = func
-		app.add_url_rule('/%s/' % endpoint, view_func=eval(func))
+		func = _get_view_func(page, mkd_folder)
+		app.add_url_rule('/%s/' % endpoint, view_func=func)
 
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
