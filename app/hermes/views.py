@@ -3,7 +3,7 @@ from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
 
-from app import db, Add
+from app import Add
 from app.connection import Connection
 from app.helper import get_kwargs, portify, init_form
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
@@ -33,7 +33,7 @@ class AddHermes(Add):
 		table_as_class = table.title().replace('_', '')
 		form = init_form(eval('%sForm' % table_as_class))
 		entry = eval('%s()' % table_as_class)
-		redir = 'hermes.get'
+		redir = '.get'
 		return form, entry, redir
 
 	def bookmark_table(self, table):
@@ -46,7 +46,6 @@ def duplicate_values(e):
 	flash('Error: %s' % e.orig[0], 'alert alert-error')
 	return redirect(url_for('.get', table=__TABLE__))
 
-
 hermes.add_url_rule(
-	'/add/<table>/', view_func=AddHermes.as_view('about_page'),
+	'/add/<table>/', view_func=AddHermes.as_view('add'),
 	methods=['GET', 'POST'])
