@@ -2,6 +2,7 @@
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
+from app import Add
 from app.connection import Connection
 from app.helper import get_kwargs, portify, init_form
 from . import CSV
@@ -42,28 +43,24 @@ def upload():
 	return redirect(url_for('.transaction'))
 
 
-@cronus.route('/add_trxn/', methods=['GET', 'POST'])
-def add():
-	form = init_form(TransactionForm)
-
-	if form.validate_on_submit():
+class AddCronus(Add):
+	def get_vars(self):
+		form = init_form(eval('%sForm' % table_as_class))
 		entry = eval('%s()' % table_as_class)
-		form.populate_obj(entry)
-		db.session.add(entry)
-		db.session.commit()
+		redir = '.transaction'
+		return form, entry, redir
 
-		flash(
-			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
-			'alert alert-success')
+	def get_table(self):
+		return table
 
-	else:
-		[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
-			for k, v in form.errors.iteritems()]
-
-	return redirect(url_for('.transaction'))
+	def bookmark_table(self, table):
+		pass
 
 
 @cronus.errorhandler(409)
 def duplicate_values(e):
 	flash('Error: %s' % e.orig[0], 'alert alert-error')
 	return redirect(url_for('.transaction'))
+
+cronus.add_url_rule(
+	'/add_trxn/', view_func=AddCronus.as_view('add'), methods=['GET', 'POST'])
