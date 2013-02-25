@@ -339,7 +339,7 @@ class Connection(object):
 		content_values = zip(tables, table_data)
 		return [dict(zip(content_keys, values)) for values in content_values]
 
-	def get(table):
+	def get(self, table):
 		r = g('%s%s' % (self.site, table))
 		return r.text
 
