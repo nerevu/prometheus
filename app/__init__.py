@@ -64,7 +64,6 @@ def _get_view_func(page, mkd_folder):
 		md = text
 
 	kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
-	endpoint = page['id']
 	func = page['id']
 	exec '%s = partial(_template, kwargs)' % func in globals(), locals()
 	update_wrapper(eval(func), _template)
@@ -139,7 +138,7 @@ def create_app(config_mode=None, config_file=None):
 
 	for page in mkd_pages:
 		func = _get_view_func(page, mkd_folder)
-		app.add_url_rule('/%s/' % endpoint, view_func=func)
+		app.add_url_rule('/%s/' % page['id'], view_func=func)
 
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
