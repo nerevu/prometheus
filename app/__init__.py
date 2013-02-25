@@ -19,6 +19,7 @@ from os import path as p, listdir
 from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
 from flask import Flask, render_template, g
+from flask.views import View
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
@@ -166,6 +167,27 @@ def create_app(config_mode=None, config_file=None):
 	# Create API endpoints (available at /api/<tablename>)
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
+
+
+class Add(View):
+	def dispatch_request(self, table):
+		form, entry, redir = self.get_vars
+
+		if form.validate_on_submit():
+			self.bookmark_table(table)
+			form.populate_obj(entry)
+			db.session.add(entry)
+			db.session.commit()
+
+			flash(
+				'Awesome! You just posted a new %s.' % table.replace('_', ' '),
+				'alert alert-success')
+
+		else:
+			[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
+				for k, v in self.form.errors.iteritems()]
+
+		return redirect(url_for(redir, table=table))
 
 # dynamically import app models and views
 modules = _get_modules(__DIR__)
