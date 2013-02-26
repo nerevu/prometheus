@@ -174,6 +174,7 @@ class Add(View):
 	def dispatch_request(self, table=None):
 		form, entry, redir = self.get_vars
 		table = (table or self.get_table)
+		name = table.replace('_', ' ')
 
 		if form.validate_on_submit():
 			self.bookmark_table(table)
@@ -182,7 +183,7 @@ class Add(View):
 			db.session.commit()
 
 			flash(
-				'Awesome! You just posted a new %s.' % table.replace('_', ' '),
+				'Awesome! You just posted a new %s.' % name,
 				'alert alert-success')
 
 		else:
