@@ -53,23 +53,6 @@ class TestHermesAPI(APIHelper):
 
 		print('TestAPI Class Teardown\n')
 
-	def test_post_event_new_type(self):
-		"""Test for posting an event using :http:method:`post`."""
-		# check initial number of events and type
-		types = self.get_num_results('event_type')
-		events = self.get_num_results('event')
-
-		# add event
-		data = {
-			'commodity_id': 3, 'date': '1/22/12',
-			'type': {'name': 'Brand New'}, 'currency_id': 3, 'value': 100}
-		r = self.post_data(data, 'event')
-		nt.assert_equal(r.status_code, 201)
-
-		# test that the new event and type were added
-		nt.assert_equal(self.get_num_results('event'), events + 1)
-		nt.assert_equal(self.get_num_results('event_type'), types + 1)
-
 	def test_patch_commodity_exisiting_type(self):
 		"""Test for patching a commodity with an existing type using
 		:http:method:`patch`.
@@ -111,6 +94,23 @@ class TestHermesAPI(APIHelper):
 
 		# test that the new commodity type was changed
 		nt.assert_equal(self.get_type(table), types + 1)
+
+	def test_post_event_new_type(self):
+		"""Test for posting an event using :http:method:`post`."""
+		# check initial number of events and type
+		types = self.get_num_results('event_type')
+		events = self.get_num_results('event')
+
+		# add event
+		data = {
+			'commodity_id': 3, 'date': '1/22/12',
+			'type': {'name': 'Brand New'}, 'currency_id': 3, 'value': 100}
+		r = self.post_data(data, 'event')
+		nt.assert_equal(r.status_code, 201)
+
+		# test that the new event and type were added
+		nt.assert_equal(self.get_num_results('event'), events + 1)
+		nt.assert_equal(self.get_num_results('event_type'), types + 1)
 
 	def test_post_price(self):
 		"""Test for posting a price using :http:method:`post`."""
