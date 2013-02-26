@@ -93,18 +93,24 @@ class CSV(DataSource):
 	@property
 	def values(self):
 		transactions = []
-		table = 'transaction'
-		keys = [
-			'holding_id', 'type_id', 'shares', 'price', 'date',
-			'commissionable']
 
-		with open(file, 'rb') as csvfile:
-			spamreader = csv.reader(
-				csvfile, delimiter=self.delimiter, quotechar=self.quotechar)
+		if self.file:
+			with open(self.file, 'rb') as csvfile:
+				reader = csv.reader(
+					csvfile, delimiter=self.delimiter, quotechar=self.quotechar)
 
-			[transactions.append(row) for row in spamreader]
+				[transactions.append(row) for row in reader]
 
-		return self.process(transactions, table, keys)
+		return transactions
+
+	@property
+	def num_trnx(self):
+		return len(self.values) - 1
+
+	def load(self):
+		values = [[tuple(v) for v in self.values[1:]]]
+		keys = [tuple(self.values[0])]
+		return self.process(values, ['transaction'], keys)
 
 
 class GnuCash(DataSource):
