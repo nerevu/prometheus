@@ -2,7 +2,7 @@
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
-from app import Add, q
+from app import Add, RQ
 from app.connection import Connection
 from app.helper import get_kwargs, portify, init_form
 from . import CSV
@@ -11,6 +11,7 @@ from .models import Transaction
 
 cronus = Blueprint('cronus', __name__)
 table = 'transaction'
+redir = '.transaction'
 table_as_class = table.title().replace('_', '')
 
 
@@ -23,32 +24,20 @@ def transaction():
 	return render_template('entry.html', **kwargs)
 
 
-@cronus.route('/upload_trxn/', methods=['GET', 'POST'])
-def upload():
-	form = init_form(TrxnUploadForm)
-	name = table.replace('_', ' ')
-
-	if form.validate_on_submit():
+class Upload(RQ):
+	def get_vars(self):
+		form = init_form(TrxnUploadForm)
 		site = portify(url_for('api', _external=True))
 		csv = CSV(form['name'], site, display=True)
-		job = q.enqueue(csv.post, csv.content)
-
-		flash(
-			'Awesome! Your %s upload has just been %s.' % (name, job.status),
-			'alert alert-success')
-
-	else:
-		[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
-			for k, v in form.errors.iteritems()]
-
-	return redirect(url_for('.transaction'))
+		func = csv.post
+		args = (csv.load(),)
+		return form, func, args, table, redir
 
 
 class AddCronus(Add):
 	def get_vars(self):
 		form = init_form(eval('%sForm' % table_as_class))
 		entry = eval('%s()' % table_as_class)
-		redir = '.transaction'
 		return form, entry, redir
 
 	def get_table(self):
@@ -62,6 +51,9 @@ class AddCronus(Add):
 def duplicate_values(e):
 	flash('Error: %s' % e.orig[0], 'alert alert-error')
 	return redirect(url_for('.transaction'))
+
+cronus.add_url_rule(
+	'/upload/', view_func=Upload.as_view('upload'), methods=['GET', 'POST'])
 
 cronus.add_url_rule(
 	'/add_trxn/', view_func=AddCronus.as_view('add'), methods=['GET', 'POST'])

@@ -33,7 +33,6 @@ API_EXCEPTIONS = [
 	OperationalError]
 
 db = SQLAlchemy()
-q = Queue(connection=Redis())
 __DIR__ = p.dirname(__file__)
 
 
@@ -194,6 +193,25 @@ class Add(View):
 				for k, v in self.form.errors.iteritems()]
 
 		return redirect(url_for(redir, table=table))
+
+
+class RQ(View):
+	def dispatch_request(self):
+		form, func, args, name, redir = self.get_vars
+
+		if form.validate_on_submit():
+			q = Queue(connection=Redis())
+			job = q.enqueue_call(func=func, args=args)
+
+			flash(
+				'Awesome! Your %s upload has just been %s.' %
+				(name, job.status), 'alert alert-success')
+
+		else:
+			[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
+				for k, v in form.errors.iteritems()]
+
+		return redirect(url_for(redir))
 
 # dynamically import app models and views
 modules = _get_modules(__DIR__)
