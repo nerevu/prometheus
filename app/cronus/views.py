@@ -2,7 +2,7 @@
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
-from app import Add
+from app import Add, q
 from app.connection import Connection
 from app.helper import get_kwargs, portify, init_form
 from . import CSV
@@ -26,14 +26,15 @@ def transaction():
 @cronus.route('/upload_trxn/', methods=['GET', 'POST'])
 def upload():
 	form = init_form(TrxnUploadForm)
+	name = table.replace('_', ' ')
 
 	if form.validate_on_submit():
 		site = portify(url_for('api', _external=True))
 		csv = CSV(form['name'], site, display=True)
-		csv.post(csv.content)
+		job = q.enqueue(csv.post, csv.content)
 
 		flash(
-			'Awesome! You just posted a new %s.' % table.replace('_', ' '),
+			'Awesome! Your %s upload has just been %s.' % (name, job.status),
 			'alert alert-success')
 
 	else:

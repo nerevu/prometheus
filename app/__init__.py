@@ -17,6 +17,8 @@ from importlib import import_module
 from itertools import imap, repeat
 from os import path as p, listdir
 from savalidation import ValidationError
+from redis import Redis
+from rq import Queue
 from flask import Flask, render_template, g
 
 from sqlalchemy.exc import IntegrityError, OperationalError
@@ -31,6 +33,7 @@ API_EXCEPTIONS = [
 	OperationalError]
 
 db = SQLAlchemy()
+q = Queue(connection=Redis())
 __DIR__ = p.dirname(__file__)
 
 
