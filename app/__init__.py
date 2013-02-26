@@ -16,9 +16,10 @@ from functools import partial, update_wrapper
 from importlib import import_module
 from itertools import imap, repeat
 from os import path as p, listdir
-from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
 from flask import Flask, render_template, g
+
+from sqlalchemy.exc import IntegrityError, OperationalError
 from flask.views import View
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
