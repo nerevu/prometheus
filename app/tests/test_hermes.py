@@ -43,7 +43,7 @@ class TestHermesAPI(APIHelper):
 
 		self.cls_initialized = True
 
-		print('\nTestAPI Class Setup\n')
+		print('\TestHermesAPI Class Setup\n')
 
 	def tearDown(self):
 		"""database removal"""
