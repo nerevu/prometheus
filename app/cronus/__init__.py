@@ -27,7 +27,7 @@ class DataSource(Connection):
 	"""
 	Generic data source.
 	"""
-	def __init__(self, site, native=1, display=False):
+	def __init__(self, site=None, native=1, display=False):
 		"""Creates a DataSource
 
 		Parameters
@@ -54,11 +54,11 @@ class CSV(DataSource):
 
 	Attributes
 	----------
-	content : list of dicts
+	value : list of lists
 		csv contents
 	"""
 	def __init__(
-			self, file, site, native=1, display=False, delimiter=',',
+			self, file=None, site=None, native=1, display=False, delimiter=',',
 			quotechar='"'):
 		"""Creates a CSV DataSource
 
@@ -91,7 +91,7 @@ class CSV(DataSource):
 		super(CSV, self).__init__(site, native, display)
 
 	@property
-	def content(self):
+	def values(self):
 		transactions = []
 		table = 'transaction'
 		keys = [
