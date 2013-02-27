@@ -31,9 +31,9 @@ class Content(object):
 			' location. Track stock splits, dividend payments,'
 			' mergers and more!', 'hermes.get', 'event'),
 		(
-			'Prices', 'Update your stock prices with the click of a button! '
-			'Automatically grap the latest pricing information from Yahoo or '
-			'Google.', 'hermes.get', 'price'),
+			'Transactions', 'Add your stock transactions with the click of a '
+			'button! CSV file upload feature coming soon.',
+			'cronus.transaction', None),
 		(
 			'Net Worth', 'See how the value of your portfolio changed over '
 			'time with these sleek interactive charts! Instantly see how  '
