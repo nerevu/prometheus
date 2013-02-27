@@ -1,8 +1,5 @@
 from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
-from app.hermes.models import EventType, Commodity, CommodityType, Exchange
-from app.hermes.models import DataSource
-from app.cronus.models import Transaction
 
 
 # For use with Connection
@@ -128,12 +125,12 @@ def init_form(form):
 
 # For forms
 def get_choices(a_class, value_field, *args, **kwargs):
-	order = '%s.%s' % (a_class.__table__, args[0])
+	order = getattr(a_class, args[0])
 
 	try:
-		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
+		filter = getattr(a_class, kwargs['column'])
 		value = kwargs['value']
-		result = a_class.query.filter(eval(filter).in_(value)).order_by(order).all()
+		result = a_class.query.filter(filter.in_(value)).order_by(order).all()
 	except KeyError:
 		result = a_class.query.order_by(order).all()
 
