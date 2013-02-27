@@ -169,7 +169,7 @@ class DataObject(pd.DataFrame):
 			or a dict of Series, optional
 
 		dtype : a sequence of ('column name', data type) pairs, optional
-		index : a subset of column names to use for category names, optional
+		index : a sequence of column names to use for category names, optional
 		keys : a sequence of column names, optional
 		series : boolean, default False
 			Treat a single instance of sequential data as a series
