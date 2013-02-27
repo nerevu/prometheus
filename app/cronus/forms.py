@@ -27,7 +27,8 @@ class TransactionForm(Form):
 		form = self()
 		a_class = Holding
 		b_class = Commodity
-		form.holding_id.choices = get_x_choices((a_class, 'id'), (b_class, 'name'))
+		form.holding_id.choices = get_x_choices(
+			(a_class, 'id'), (b_class, 'symbol'))
 		form.holding_id.validators = get_validators(a_class, 'id')
 		form.type_id.choices = get_choices(TrxnType, 'id', 'name')
 		form.type_id.validators = get_validators(a_class, 'id')
