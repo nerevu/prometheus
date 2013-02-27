@@ -50,7 +50,7 @@ def get_init_values():
 		[[('Brokerage')], [('Roth IRA')]],  # account_type
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
-		[[('buy')], [('sell')]],  # trxn_type
+		[[('Buy')], [('Sell')]],  # trxn_type
 		[(1, 1, 8, 303, '1/1/12', True)]]  # transaction
 
 	return values
