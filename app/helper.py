@@ -1,6 +1,9 @@
 from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
 
+from app import db
+from app.connection import Connection
+
 
 # For use with Connection
 def portify(site):
@@ -151,6 +154,14 @@ def get_choices(a_class, value_field, *args, **kwargs):
 		selection = combo[0]
 
 	return zip(values, selection)
+
+
+def get_x_choices(value, select):
+	class_a, class_b = value[0], select[0]
+	field_a, field_b = value[1], select[1]
+	result = db.session.query(class_a, class_b).join(class_b).all()
+	keys = [(0, field_a), (1, field_b)]
+	return Connection().values(result, keys)
 
 
 def get_validators(a_class, value_field):
