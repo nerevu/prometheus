@@ -149,11 +149,11 @@ def get_choices(a_class, value_field, *args, **kwargs):
 		combo.append(new)
 
 	try:
-		attr = [', '.join(x) for x in zip(combo[0], combo[1])]
+		selection = [', '.join(x) for x in zip(combo[0], combo[1])]
 	except IndexError:
-		attr = combo[0]
+		selection = combo[0]
 
-	return zip(values, attr)
+	return zip(values, selection)
 
 
 def get_validators(a_class, value_field):
