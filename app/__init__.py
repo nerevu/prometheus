@@ -16,9 +16,11 @@ from functools import partial, update_wrapper
 from importlib import import_module
 from itertools import imap, repeat
 from os import path as p, listdir
-from sqlalchemy.exc import IntegrityError, OperationalError
 from savalidation import ValidationError
 from flask import Flask, render_template, g
+
+from sqlalchemy.exc import IntegrityError, OperationalError
+from flask.views import View
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
 from flask.ext.restless import APIManager
@@ -45,6 +47,34 @@ def _get_app_classes(module):
 	classes = getmembers(module, isclass)
 	app_classes = filter(lambda x: str(x[1]).startswith("<class 'app"), classes)
 	return ['%s' % x[0] for x in app_classes]
+
+
+def _get_view_func(page, mkd_folder):
+	path = p.join(__DIR__, mkd_folder, page['file'])
+	text = open(path).read()
+	pattern = '---'
+	matches = [match for match in re.finditer(pattern, text)]
+
+	if matches:
+		cfg_start = matches[0].end() + 1
+		cfg_end = matches[1].start() - 1
+		parse = text[cfg_start:cfg_end].split('\n')
+		cfg = dict([tuple(row.split(': ')) for row in parse])
+		md = text[matches[1].end() + 1:]
+	else:
+		cfg = {}
+		md = text
+
+	kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
+	func = page['id']
+	exec '%s = partial(_template, kwargs)' % func in globals(), locals()
+	update_wrapper(eval(func), _template)
+	eval(func).__name__ = func
+	return eval(func)
+
+
+def _template(kwargs):
+	return render_template('markdown.html', **kwargs)
 
 
 def create_app(config_mode=None, config_file=None):
@@ -108,33 +138,9 @@ def create_app(config_mode=None, config_file=None):
 	mkd_pages = app.config['MKD_PAGES']
 	mkd_folder = app.config['MKD_FOLDER']
 
-	def template(kwargs):
-		return render_template('markdown.html', **kwargs)
-
 	for page in mkd_pages:
-		path = p.join(__DIR__, mkd_folder, page['file'])
-		text = open(path).read()
-		pattern = '---'
-
-		matches = [match for match in re.finditer(pattern, text)]
-
-		if matches:
-			cfg_start = matches[0].end() + 1
-			cfg_end = matches[1].start() - 1
-			parse = text[cfg_start:cfg_end].split('\n')
-			cfg = dict([tuple(row.split(': ')) for row in parse])
-			md = text[matches[1].end() + 1:]
-		else:
-			cfg = {}
-			md = text
-
-		kwargs = {'md': md, 'id': page['id'], 'cfg': cfg}
-		endpoint = page['id']
-		func = page['id']
-		exec '%s = partial(template, kwargs)' % func in globals(), locals()
-		update_wrapper(eval(func), template)
-		eval(func).__name__ = func
-		app.add_url_rule('/%s/' % endpoint, view_func=eval(func))
+		func = _get_view_func(page, mkd_folder)
+		app.add_url_rule('/%s/' % page['id'], view_func=func)
 
 	# Create the Flask-Restless API manager.
 	mgr = APIManager(app, flask_sqlalchemy_db=db)
@@ -162,6 +168,29 @@ def create_app(config_mode=None, config_file=None):
 	# Create API endpoints (available at /api/<tablename>)
 	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
+
+
+class Add(View):
+	def dispatch_request(self, table=None):
+		form, entry, redir = self.get_vars
+		table = (table or self.get_table)
+		name = table.replace('_', ' ')
+
+		if form.validate_on_submit():
+			self.bookmark_table(table)
+			form.populate_obj(entry)
+			db.session.add(entry)
+			db.session.commit()
+
+			flash(
+				'Awesome! You just posted a new %s.' % name,
+				'alert alert-success')
+
+		else:
+			[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
+				for k, v in self.form.errors.iteritems()]
+
+		return redirect(url_for(redir, table=table))
 
 # dynamically import app models and views
 modules = _get_modules(__DIR__)

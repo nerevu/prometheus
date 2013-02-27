@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os.path as p
 
-from subprocess import call, check_output
+from subprocess import call
 from pprint import pprint
 
 from flask import current_app as app, url_for

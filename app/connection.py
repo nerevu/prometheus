@@ -8,7 +8,7 @@
 
 from pprint import pprint
 from json import dumps as dmp
-from requests import post as p
+from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
 from app import db
@@ -17,6 +17,23 @@ from app.cronus.models import Transaction, Holding, Account, TrxnType
 
 
 class Connection(object):
+	"""
+	DB connection.
+
+	Attributes
+	----------
+	event : tuple
+	event_type : tuple
+	price : tuple
+	commodity : tuple
+	transaction : tuple
+	stock : tuple
+	dividend : tuple
+	rate : tuple
+	raw_commodity : tuple
+	raw_price : tuple
+	raw_transaction : tuple
+	"""
 	HDR = {'content-type': 'application/json'}
 	TABLES = [
 		'exchange', 'data_source', 'commodity_group', 'commodity_type',
@@ -45,6 +62,23 @@ class Connection(object):
 
 	def __init__(
 			self, site='http://localhost:5000/api/', native=1, display=False):
+		"""Creates a connection to the database
+
+		Parameters
+		----------
+		site : a string
+			api endpoint
+
+		native : a number, default 1
+			id of the native currency
+
+		display : boolean, default False
+
+		Examples
+		--------
+		>>> Connection('http://localhost:5000/api/')  #doctest: +ELLIPSIS
+		<app.connection.Connection object at 0x...>
+		"""
 		self.site = site
 		self.native = native
 		self.display = display
@@ -195,6 +229,18 @@ class Connection(object):
 		return returned
 
 	@property
+	def raw_commodity(self):
+		query = db.session.query(Commodity)
+		keys = ['id', 'symbol']
+
+		if self.display:
+			returned = [], [], query.all(), keys
+		else:
+			returned = query.all(), keys
+
+		return returned
+
+	@property
 	def raw_price(self):
 		query = (
 			db.session.query(Price, Commodity).join(Price.commodity)
@@ -246,9 +292,8 @@ class Connection(object):
 
 		Examples
 		--------
-		# >>> from app import db
-		# >>> from app.hermes.models import Commodity
-		# >>> values(db.session.query(Commodity).all(), ['id', 'symbol'])
+		# >>> conn = Connection('http://localhost:5000/api/')
+		# >>> conn.values(conn.raw_commodity)
 		# [(6, u'APL')]
 		"""
 
@@ -258,6 +303,10 @@ class Connection(object):
 			values = [[getattr(r, k) for k in keys] for r in result]
 
 		return [tuple(value) for value in values]
+
+	def id_from_value(self, symbol):
+		ids = dict(self.values(*self.raw_commodity))
+		return ids.get(symbol, None)
 
 	def process(self, post_values, tables=None, keys=[]):
 		def fix_dates(v):
@@ -289,6 +338,10 @@ class Connection(object):
 		content_keys = ('table', 'data')
 		content_values = zip(tables, table_data)
 		return [dict(zip(content_keys, values)) for values in content_values]
+
+	def get(self, table):
+		r = g('%s%s' % (self.site, table))
+		return r.text
 
 	def post(self, content):
 		for piece in content:
