@@ -658,7 +658,7 @@ class Portfolio(DataObject):
 		dtypes : sequence of data types, optional
 		currency_id : INT, optional
 			id of the default currency
-		mapping : dict, or Series, or Pandas DataFrame, optional
+		mapping : tuple of lists ([values], [keys]), optional, optional
 			commodity_id to commodity mapping
 
 		See also
@@ -692,40 +692,15 @@ class Portfolio(DataObject):
 			dtype = zip(keys, dtypes)
 			super(Portfolio, self).__init__(data, dtype, index=index)
 
-		map_values = [
-			('empty', True, 'frame', False),
-			('any', False, 'series', True),
-			('values', False, 'dict', True)]
-
-		map_keys = ('attr', 'empty', 'stype', 'ismeth')
-		map_dict = [dict(zip(map_keys, values)) for values in map_values]
-		unmapped, stype = None, None
-
-		for d in map_dict:
-			try:
-				attr = getattr(data, d['attr'])
-				test = attr() if d['ismeth'] else attr
-			except AttributeError:
-				continue
-			else:
-				unmapped = d['empty'] if test else not d['empty']
-				stype = d['stype']
-				is_dict = True if stype.startswith('d') else False
-				break
-
-		if unmapped or not stype:
-			mapping = {}
-		elif not is_dict:
-			mapping = mapping.symbol.to_dict()
-
+		mapping = (mapping or ([], []))
 		dividends = (dividends or ([], []))
 		prices = (prices or ([], []))
 		rates = (rates or ([], []))
 
 		div_df = DataObject(dividends[0], keys=dividends[1])
 
-		self.mapping = mapping
 		self.transactions = self
+		self.mapping = DataObject(mapping[0], keys=mapping[1], index='id')
 		self.prices = DataObject(prices[0], keys=prices[1])
 		self.rates = DataObject(rates[0], keys=rates[1])
 		self.dividends = DataObject(div_df.join(self.prices, how='outer'))
