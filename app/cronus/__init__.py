@@ -27,7 +27,7 @@ class DataSource(Connection):
 	"""
 	Generic data source.
 	"""
-	def __init__(self, site, native=1, display=False):
+	def __init__(self, site=None, native=1, display=False):
 		"""Creates a DataSource
 
 		Parameters
@@ -54,11 +54,11 @@ class CSV(DataSource):
 
 	Attributes
 	----------
-	content : list of dicts
+	value : list of lists
 		csv contents
 	"""
 	def __init__(
-			self, file, site, native=1, display=False, delimiter=',',
+			self, file=None, site=None, native=1, display=False, delimiter=',',
 			quotechar='"'):
 		"""Creates a CSV DataSource
 
@@ -91,20 +91,26 @@ class CSV(DataSource):
 		super(CSV, self).__init__(site, native, display)
 
 	@property
-	def content(self):
+	def values(self):
 		transactions = []
-		table = 'transaction'
-		keys = [
-			'holding_id', 'type_id', 'shares', 'price', 'date',
-			'commissionable']
 
-		with open(file, 'rb') as csvfile:
-			spamreader = csv.reader(
-				csvfile, delimiter=self.delimiter, quotechar=self.quotechar)
+		if self.file:
+			with open(self.file, 'rb') as csvfile:
+				reader = csv.reader(
+					csvfile, delimiter=self.delimiter, quotechar=self.quotechar)
 
-			[transactions.append(row) for row in spamreader]
+				[transactions.append(row) for row in reader]
 
-		return self.process(transactions, table, keys)
+		return transactions
+
+	@property
+	def num_trnx(self):
+		return len(self.values) - 1
+
+	def load(self):
+		values = [[tuple(v) for v in self.values[1:]]]
+		keys = [tuple(self.values[0])]
+		return self.process(values, ['transaction'], keys)
 
 
 class GnuCash(DataSource):
@@ -163,7 +169,7 @@ class DataObject(pd.DataFrame):
 			or a dict of Series, optional
 
 		dtype : a sequence of ('column name', data type) pairs, optional
-		index : a subset of column names to use for category names, optional
+		index : a sequence of column names to use for category names, optional
 		keys : a sequence of column names, optional
 		series : boolean, default False
 			Treat a single instance of sequential data as a series
@@ -652,7 +658,7 @@ class Portfolio(DataObject):
 		dtypes : sequence of data types, optional
 		currency_id : INT, optional
 			id of the default currency
-		mapping : dict, or Series, or Pandas DataFrame, optional
+		mapping : tuple of lists ([values], [keys]), optional, optional
 			commodity_id to commodity mapping
 
 		See also
@@ -686,40 +692,15 @@ class Portfolio(DataObject):
 			dtype = zip(keys, dtypes)
 			super(Portfolio, self).__init__(data, dtype, index=index)
 
-		map_values = [
-			('empty', True, 'frame', False),
-			('any', False, 'series', True),
-			('values', False, 'dict', True)]
-
-		map_keys = ('attr', 'empty', 'stype', 'ismeth')
-		map_dict = [dict(zip(map_keys, values)) for values in map_values]
-		unmapped, stype = None, None
-
-		for d in map_dict:
-			try:
-				attr = getattr(data, d['attr'])
-				test = attr() if d['ismeth'] else attr
-			except AttributeError:
-				continue
-			else:
-				unmapped = d['empty'] if test else not d['empty']
-				stype = d['stype']
-				is_dict = True if stype.startswith('d') else False
-				break
-
-		if unmapped or not stype:
-			mapping = {}
-		elif not is_dict:
-			mapping = mapping.symbol.to_dict()
-
+		mapping = (mapping or ([], []))
 		dividends = (dividends or ([], []))
 		prices = (prices or ([], []))
 		rates = (rates or ([], []))
 
 		div_df = DataObject(dividends[0], keys=dividends[1])
 
-		self.mapping = mapping
 		self.transactions = self
+		self.mapping = DataObject(mapping[0], keys=mapping[1], index=['id'])
 		self.prices = DataObject(prices[0], keys=prices[1])
 		self.rates = DataObject(rates[0], keys=rates[1])
 		self.dividends = DataObject(div_df.join(self.prices, how='outer'))

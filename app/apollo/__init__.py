@@ -119,8 +119,8 @@ class Worth(Metrics):
 		data : sequence of ('symbol', value)
 		"""
 
-		if worth and not self.mapping.values():
-			symbols = [self.mapping.get(x, 'N/A') for x in worth.keys()]
+		if worth.values() and not self.mapping.empty:
+			symbols = [self.mapping.symbol.get(x, 'N/A') for x in worth.keys()]
 			totals = ['%.2f' % x for x in worth.values()]
 			data = zip(symbols, totals)
 		elif worth:

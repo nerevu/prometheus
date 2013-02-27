@@ -308,7 +308,7 @@ class Connection(object):
 		ids = dict(self.values(*self.raw_commodity))
 		return ids.get(symbol, None)
 
-	def process(self, post_values, tables=None, keys=[]):
+	def process(self, post_values, tables=None, keys=None):
 		def fix_dates(v):
 			if hasattr(v, 'year'):
 				v = str(v)
@@ -322,7 +322,7 @@ class Connection(object):
 
 			return v
 
-		keys = (keys or self.KEYS)
+		keys = (keys or self.KEYS or [])
 		tables = (tables or self.TABLES)
 		post_values = map(fix_dates, post_values)
 		combo = zip(keys, post_values)

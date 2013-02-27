@@ -18,8 +18,11 @@ gunicorn==0.17.2
 numpy==1.6.2
 pandas==0.10.0
 psycopg2==2.4.6
-python-dateutil==1.5
+python-dateutil==2.1
 pytz==2012j
+redis==2.7.2
 requests==0.14.2
+rq==0.3.6
 six==1.1.0
+times==0.6.1
 yolk==0.4.3

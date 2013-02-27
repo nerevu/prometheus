@@ -1,7 +1,6 @@
 # from __future__ import print_function
 import numpy as np
 import pandas as pd
-import app.apollo as ap
 
 from pprint import pprint
 from flask import Blueprint, render_template, url_for
@@ -9,6 +8,7 @@ from flask import Blueprint, render_template, url_for
 from app import db
 from app.connection import Connection
 from app.helper import portify
+from . import Worth
 
 apollo = Blueprint('apollo', __name__)
 
@@ -40,7 +40,7 @@ def worth(table='USD'):
 	args = [data, keys, None, d['dividend'], d['raw_price'], d['rate']]
 	kwargs = {'currency_id': currency_id, 'mapping': d['stock']}
 
-	mp = ap.Worth(args, kwargs)
+	mp = Worth(args, kwargs)
 	worth = mp.calc_worth()
 	data = mp.convert_worth(worth)
 

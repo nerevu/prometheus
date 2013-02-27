@@ -1,8 +1,8 @@
 from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
-from app.hermes.models import EventType, Commodity, CommodityType, Exchange
-from app.hermes.models import DataSource
-from app.cronus.models import Transaction
+
+from app import db
+from app.connection import Connection
 
 
 # For use with Connection
@@ -50,7 +50,7 @@ def get_init_values():
 		[[('Brokerage')], [('Roth IRA')]],  # account_type
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
-		[[('buy')], [('sell')]],  # trxn_type
+		[[('Buy')], [('Sell')]],  # trxn_type
 		[(1, 1, 8, 303, '1/1/12', True)]]  # transaction
 
 	return values
@@ -128,12 +128,12 @@ def init_form(form):
 
 # For forms
 def get_choices(a_class, value_field, *args, **kwargs):
-	order = '%s.%s' % (a_class.__table__, args[0])
+	order = getattr(a_class, args[0])
 
 	try:
-		filter = '%s.%s' % (a_class.__name__, kwargs['column'])
+		filter = getattr(a_class, kwargs['column'])
 		value = kwargs['value']
-		result = a_class.query.filter(eval(filter).in_(value)).order_by(order).all()
+		result = a_class.query.filter(filter.in_(value)).order_by(order).all()
 	except KeyError:
 		result = a_class.query.order_by(order).all()
 
@@ -149,11 +149,19 @@ def get_choices(a_class, value_field, *args, **kwargs):
 		combo.append(new)
 
 	try:
-		attr = [', '.join(x) for x in zip(combo[0], combo[1])]
+		selection = [', '.join(x) for x in zip(combo[0], combo[1])]
 	except IndexError:
-		attr = combo[0]
+		selection = combo[0]
 
-	return zip(values, attr)
+	return zip(values, selection)
+
+
+def get_x_choices(value, select):
+	class_a, class_b = value[0], select[0]
+	field_a, field_b = value[1], select[1]
+	result = db.session.query(class_a, class_b).join(class_b).all()
+	keys = [(0, field_a), (1, field_b)]
+	return Connection().values(result, keys)
 
 
 def get_validators(a_class, value_field):

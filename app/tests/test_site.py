@@ -104,6 +104,13 @@ class TestWeb:
 
 		print('TestWeb Class Teardown\n')
 
+	def test_api(self):
+		for table in tables:
+			self.setUp()
+			r = client.get('/api/%s' % table)
+			self.tearDown()
+			yield check_equal, table, r.status_code, 200
+
 	def test_home(self):
 		r = client.get('/')
 		nt.assert_equal(r.status_code, 200)
@@ -114,10 +121,3 @@ class TestWeb:
 			r = client.get('/%s/' % page)
 			self.tearDown()
 			yield check_equal, page, r.status_code, 200
-
-	def test_api(self):
-		for table in tables:
-			self.setUp()
-			r = client.get('/api/%s' % table)
-			self.tearDown()
-			yield check_equal, table, r.status_code, 200
