@@ -700,7 +700,7 @@ class Portfolio(DataObject):
 		div_df = DataObject(dividends[0], keys=dividends[1])
 
 		self.transactions = self
-		self.mapping = DataObject(mapping[0], keys=mapping[1], index='id')
+		self.mapping = DataObject(mapping[0], keys=mapping[1], index=['id'])
 		self.prices = DataObject(prices[0], keys=prices[1])
 		self.rates = DataObject(rates[0], keys=rates[1])
 		self.dividends = DataObject(div_df.join(self.prices, how='outer'))
