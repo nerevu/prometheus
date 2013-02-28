@@ -60,10 +60,10 @@ class Content(object):
 
 
 class Config(Content):
+	app = Content.heroku_app
 	stage = os.environ.get('STAGE', False)
 	end = '-stage' if stage else None
 	heroku = os.environ.get('DATABASE_URL', False)
-	app = Content.heroku_app
 
 	DEBUG = False
 	ADMINS = frozenset(['reubano@gmail.com'])
