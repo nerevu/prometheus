@@ -60,12 +60,18 @@ class Content(object):
 
 
 class Config(Content):
+	app = Content.heroku_app
+	stage = os.environ.get('STAGE', False)
+	end = '-stage' if stage else None
+	heroku = os.environ.get('DATABASE_URL', False)
+
 	DEBUG = False
 	ADMINS = frozenset(['reubano@gmail.com'])
 	TESTING = False
 	HOST = '127.0.0.1'
 	PORT = int(os.environ.get('PORT', 5000))
-# 	SERVER_NAME = '%s.herokuapp.com' % Content.heroku_app
+	heroku_server = '%s%s.herokuapp.com' % (app, end)
+	SERVER_NAME = heroku_server if heroku else None
 	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
 	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
 	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')

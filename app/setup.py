@@ -17,7 +17,7 @@ config = {
 	'download_url':
 		'https://github.com/reubano/prometheus/downloads/prometheus*.tgz',
 	'author_email': 'reubano@gmail.com',
-	'version': '0.13.0',
+	'version': '0.13.1',
 	'install_requires': requirements.split('\n'),
 	'classifiers': ['Development Status :: 4 - Beta',
 		'License :: OSI Approved :: The MIT License (MIT)',
