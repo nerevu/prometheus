@@ -13,11 +13,8 @@ SQLAlchemy==0.7.9
 WTForms==1.0.2
 Werkzeug==0.8.3
 gevent==0.13.8
-git-remote-helpers==0.1.0
 greenlet==0.4.0
 gunicorn==0.17.2
-libxml2-python==2.7.8
-mercurial==2.3.1
 nose==1.2.1
 numpy==1.6.2
 pandas==0.10.0
@@ -29,5 +26,4 @@ requests==0.14.2
 rq==0.3.6
 six==1.1.0
 times==0.6.1
-wsgiref==0.1.2
 yolk==0.4.3
