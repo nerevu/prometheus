@@ -70,7 +70,7 @@ class Config(Content):
 	TESTING = False
 	HOST = '127.0.0.1'
 	PORT = int(os.environ.get('PORT', 5000))
-	heroku_server = '%s%s.herokuapp.com:%' % (app, end, PORT)
+	heroku_server = '%s%s.herokuapp.com:%s' % (app, end, PORT)
 	SERVER_NAME = heroku_server if heroku else None
 	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
 	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
