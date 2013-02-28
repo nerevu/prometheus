@@ -109,8 +109,9 @@ class CSV(DataSource):
 
 	def load(self):
 		values = [[tuple(v) for v in self.values[1:]]]
+		tables = ['transaction']
 		keys = [tuple(self.values[0])]
-		return self.process(values, ['transaction'], keys)
+		return self.process(values, tables, keys)
 
 
 class GnuCash(DataSource):
