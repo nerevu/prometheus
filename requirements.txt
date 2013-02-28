@@ -15,6 +15,7 @@ Werkzeug==0.8.3
 gevent==0.13.8
 greenlet==0.4.0
 gunicorn==0.17.2
+nose==1.2.1
 numpy==1.6.2
 pandas==0.10.0
 psycopg2==2.4.6

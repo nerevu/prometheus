@@ -61,6 +61,26 @@ def resetdb():
 
 
 @manager.command
+def testapi():
+	"""Removes all content from database and to test the API"""
+
+	with app.app_context():
+		resetdb()
+		site = portify(url_for('api', _external=True))
+		conn = Connection(site)
+
+		values = [[[('Yahoo')], [('Google')], [('XE')]]]
+		tables = ['data_source']
+		keys = [[('name')]]
+		content = conn.process(values, tables, keys)
+		print 'Attempting to post %s to %s at %s' % (
+			content[0]['data'], tables[0], site)
+
+		conn.post(content)
+		print 'Content posted via API!'
+
+
+@manager.command
 def initdb():
 	"""Removes all content from database and initializes it
 		with default values
