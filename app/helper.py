@@ -32,17 +32,17 @@ def get_init_values():
 			('GBP', 'Pound Sterling', 5, 3, 4),
 			('TZS', 'Tanzanian Shilling', 5, 3, 4),
 			('Multiple', 'Multiple', 6, 3, 4),
-			('APL', 'Apple', 1, 1, 1),
+			('AAPL', 'Apple', 1, 1, 1),
 			('Text', 'Text', 6, 3, 4)],  # commodity
 		[
 			[('Dividend')], [('Special Dividend')], [('Stock Split')],
 			[('Name Change')], [('Ticker Change')]],  # event_type
 		[],  # event
 		[
-			(2, 1, 1.2, '1/1/12'),
-			(3, 1, 1.8, '1/1/12'),
-			(4, 1, 1.0 / 1580.0, '1/1/12'),
-			(6, 1, 300, '1/1/12')],  # price
+			(2, 1, 1.2, '1/2/13'),
+			(3, 1, 1.8, '1/2/13'),
+			(4, 1, 1.0 / 1580.0, '1/2/13'),
+			(6, 1, 455.49, '1/2/13')],  # price
 		[(1, 'Reuben', 'Cummings', 'reubano@gmail.com')],  # person
 		[
 			('Scottrade', 'https://trading.scottrade.com/'),
@@ -51,7 +51,7 @@ def get_init_values():
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
 		[[('Buy')], [('Sell')]],  # trxn_type
-		[(1, 1, 8, 303, '1/1/12', True)]]  # transaction
+		[(1, 1, 2, 455, '1/2/13', True)]]  # transaction
 
 	return values
 
