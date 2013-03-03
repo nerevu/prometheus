@@ -5,7 +5,6 @@ from pprint import pprint
 from datetime import datetime as dt, date as d
 
 from app import db
-from app.hermes.models import Commodity
 
 from savalidation import ValidationMixin
 from flask.ext.sqlalchemy import SQLAlchemy
