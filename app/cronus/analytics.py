@@ -94,19 +94,19 @@ class Metrics(Portfolio):
 
 		df['tot_shares'] = df['div_shares'] + df['shares']
 
-		return DataObject({'shares': df['tot_shares']})
+		return DataObject({'shares': df.tot_shares})
 
 	@property
 	def basis(self):
 		df = self.transactions
 		index = df.non_date_index
 		df['basis'] = df['shares'] * df['price'] + df['trade_commission']
-		return DataObject({'basis': df['basis'].groupby(level=index).sum()})
+		return DataObject({'basis': df.basis.groupby(level=index).sum()})
 
 	@property
 	def share_basis(self):
 		df = self.transactions
 		index = df.non_date_index
-		right = DataObject({'shares': df['shares'].groupby(level=index).sum()})
+		right = DataObject({'shares': df.shares.groupby(level=index).sum()})
 		merged = self.basis.merge_frame(right, reindex=True)
-		return DataObject({'share_basis': merged['basis'] / merged['shares']})
+		return DataObject({'share_basis': merged.basis / merged.shares})

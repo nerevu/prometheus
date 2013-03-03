@@ -39,8 +39,7 @@ class Worth(Metrics):
 
 		# TODO: sum by dates, not datetimes
 		df = df.groupby(level=df.index.names).sum()
-		df_dict = {'shares': df.shares, 'value': df.value}
-		return DataObject(df_dict)
+		return DataObject({'shares': df.shares, 'value': df.value})
 
 	def calc_worth(self, how='stock', mode='uniform', convert=False):
 		"""
