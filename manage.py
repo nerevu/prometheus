@@ -113,5 +113,45 @@ def popdb():
 		conn.post(content)
 		print 'Database populated'
 
+
+@manager.command
+def clearprices():
+	"""Clear prices table from database
+	"""
+	pass
+
+
+@manager.command
+def popprices():
+	"""Add price quotes from yahoo
+	"""
+	from pandas.io.data import DataReader
+
+	with app.app_context():
+		site = portify(url_for('api', _external=True))
+		conn = Connection(site)
+		table, filter = conn.securities
+		objects = conn.get(table, filter)
+		symbols = []
+		[[symbols.append(c['symbol']) for c in o['commodities']] for o in objects]
+
+		table, filter = conn.commodities(symbols)
+		objects = conn.get(table, filter)
+		starts = [max(c['date'] for c in o['commodity_prices']) for o in objects]
+		set = zip(symbols, starts)
+
+		for s in set:
+			print s
+# 			if s[1] < today():
+# 				data = DataReader(s[0], "yahoo", s[1])
+# 				raw = data.Close.to_dict().items()
+# 				values = [[(get_id(s[0]), 1, r[1], r[0]) for r in raw]]
+# 				tables = [s[0]]
+# 				keys = [('commodity_id', 'currency_id', 'close', 'date')]
+# 				content = conn.process(values, tables, keys)
+# 				conn.post(content)
+#
+# 		print 'Prices table populated'
+
 if __name__ == '__main__':
 	manager.run()

@@ -275,6 +275,15 @@ class Connection(object):
 
 		return returned
 
+	@property
+	def securities(self):
+		filter = {'filters': [{'name': 'group_id', 'op': 'eq', 'val': 1}]}
+		return 'commodity_type', filter
+
+	def commodities(self, symbols):
+		filter = {'filters': [{'name': 'symbol', 'op': 'in', 'val': symbols}]}
+		return 'commodity', filter
+
 	def values(self, result, keys):
 		"""Extracts desired values from a query result
 
