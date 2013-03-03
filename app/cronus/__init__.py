@@ -728,7 +728,7 @@ class Portfolio(DataObject):
 		"""
 		return Portfolio()
 
-	def join_shares(self, other, common=None):
+	def join_shares(self, other, common=None, shares=None):
 		"""Joins shares to other
 
 		Parameters
@@ -736,6 +736,8 @@ class Portfolio(DataObject):
 		other : DataObject
 		common : sequence of strings, optional
 			Columns/indices that are shared by both shares and other
+		shares : DataObject, optional
+			replacement for self.shares
 
 		Examples
 		--------
@@ -750,12 +752,18 @@ class Portfolio(DataObject):
 		{'price': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
 'shares': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
+		try:
+			empty = True if shares.empty else False
+		except AttributeError:
+			empty = False if shares else True
+
+		shares = self.shares if empty else shares
 		common = (common or ['date', 'commodity_id'])
 		cols = set([c for c in other]).difference(common)
 		y = it.chain(['date_x'], cols) if cols else ['date_x']
 		x = ['date_y', 'shares']
-		merged = other.merge_frame(self.shares, 'commodity_id')
-		index = other.merge_index([self.shares])
+		merged = other.merge_frame(shares, 'commodity_id')
+		index = other.merge_index([shares])
 		df = merged.join_merged(index, x, y)
 
 		if len(df) > 1:
