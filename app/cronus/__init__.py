@@ -962,20 +962,13 @@ class Metrics(Portfolio):
 		return self.convert_prices(self.prices, self.rates)
 
 	@property
-	def native_share_prices(self):
-		return self.join_shares(self.native_prices)
-
-	@property
-	def share_prices(self):
-		return self.join_shares(self.dividends)
-
-	@property
-	def reinvestments(self):
-		df = self.share_prices
+	def shares_w_reinv(self):
+		df = self.join_shares(self.dividends)
 
 		if not df.empty:
-			# remove 'currency_id' from index
-			df.reset_index(level='currency_id', inplace=True)
+			new_index = ['owner_id', 'account_id', 'commodity_id', 'date']
+			df.reset_index(inplace=True)
+			df.set_index(new_index, inplace=True)
 			index = df.non_date_index
 
 			# fill blank dividends with 0
@@ -985,12 +978,12 @@ class Metrics(Portfolio):
 			df['dividend_received'] = df['value'] * df['shares']
 			df['purchases'] = df['dividend_received'] / df['close']
 			df['div_shares'] = df['purchases'].groupby(level=index).cumsum()
-			reinvestments = df['div_shares']
 		else:
-			reinvestments = DataObject()
+			df['div_shares'] = 0
 
-		# need to return union of reinvestments with transactions
-		return reinvestments
+		df['tot_shares'] = df['div_shares'] + df['shares']
+
+		return DataObject({'shares': df['tot_shares']})
 
 	@property
 	def basis(self):

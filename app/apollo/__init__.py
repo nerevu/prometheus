@@ -32,9 +32,7 @@ class Worth(Metrics):
 
 	@property
 	def share_value(self):
-		df = self.native_share_prices
-
-		# calculate value
+		df = self.join_shares(self.native_prices, shares=self.shares_w_reinv)
 		df['value'] = df.native_price * df.shares
 		df_dict = {'shares': df.shares, 'value': df.value}
 		return DataObject(df_dict)
