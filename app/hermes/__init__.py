@@ -12,7 +12,7 @@ from pandas.io.data import DataReader
 from app.connection import Connection
 
 
-class MyClass(Connection):
+class Historical(Connection):
 	def __init__(self, *args, **kwargs):
 		"""
 		Class constructor.
@@ -23,7 +23,7 @@ class MyClass(Connection):
 		kwargs : dict of keyword arguments, optional
 		"""
 
-		super(MyClass, self).__init__(*args, **kwargs)
+		super(Historical, self).__init__(*args, **kwargs)
 
 	@property
 	def symbols(self):

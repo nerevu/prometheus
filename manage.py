@@ -129,11 +129,11 @@ def popprices(start=None, end=None):
 	import itertools as it
 	from datetime import datetime as dt, date as d, timedelta
 	from dateutil.parser import parse
-	from app.hermes import MyClass
+	from app.hermes import Historical
 
 	with app.app_context():
 		site = portify(url_for('api', _external=True))
-		portf = MyClass(site)
+		portf = Historical(site)
 		last_dates = portf.latest_price_date()
 		end_date = parse(end) if end else d.today()
 
@@ -152,7 +152,7 @@ def popprices(start=None, end=None):
 
 				if values:
 					conn = Connection(site)
-					tables = [s[0]]
+					tables = ['price']
 					keys = [('commodity_id', 'currency_id', 'close', 'date')]
 					content = conn.process([values], tables, keys)
 					print content
