@@ -32,17 +32,17 @@ def get_init_values():
 			('GBP', 'Pound Sterling', 5, 3, 4),
 			('TZS', 'Tanzanian Shilling', 5, 3, 4),
 			('Multiple', 'Multiple', 6, 3, 4),
-			('APL', 'Apple', 1, 1, 1),
+			('AAPL', 'Apple', 1, 1, 1),
 			('Text', 'Text', 6, 3, 4)],  # commodity
 		[
 			[('Dividend')], [('Special Dividend')], [('Stock Split')],
 			[('Name Change')], [('Ticker Change')]],  # event_type
 		[],  # event
 		[
-			(2, 1, 1.2, '1/1/12'),
-			(3, 1, 1.8, '1/1/12'),
-			(4, 1, 1.0 / 1580.0, '1/1/12'),
-			(6, 1, 300, '1/1/12')],  # price
+			(2, 1, 1.2, '1/2/13'),
+			(3, 1, 1.8, '1/2/13'),
+			(4, 1, 1.0 / 1580.0, '1/2/13'),
+			(6, 1, 455.49, '1/2/13')],  # price
 		[(1, 'Reuben', 'Cummings', 'reubano@gmail.com')],  # person
 		[
 			('Scottrade', 'https://trading.scottrade.com/'),
@@ -51,7 +51,7 @@ def get_init_values():
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
 		[[('Buy')], [('Sell')]],  # trxn_type
-		[(1, 1, 8, 303, '1/1/12', True)]]  # transaction
+		[(1, 1, 2, 455, '1/2/13', True)]]  # transaction
 
 	return values
 
@@ -67,11 +67,19 @@ def get_pop_values():
 			('WMT', 'Wal-Mart', 1, 1, 1),
 			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
 		[],  # event_type
-		[(1, 6, 1, 10, '2/1/12'), (1, 8, 1, 12, '2/1/12')],  # event
+		[(1, 6, 1, 10, '2/1/13'), (1, 8, 1, 10, '2/1/13')],  # event
 		[
-			(8, 1, 150, '1/1/12'),
-			(9, 1, 90, '1/1/12'),
-			(10, 1, 120, '1/1/12')],  # price
+			(6, 1, 453.62, '2/1/13'),
+			(6, 1, 441, '3/1/13'),
+			(8, 1, 203.07, '1/2/13'),
+			(8, 1, 205.18, '2/1/13'),
+			(8, 1, 201, '3/1/13'),
+			(9, 1, 69.95, '1/2/13'),
+			(9, 1, 70.49, '2/1/13'),
+			(9, 1, 71, '3/1/13'),
+			(10, 1, 98.39, '1/2/13'),
+			(10, 1, 99.49, '2/1/13'),
+			(10, 1, 93, '3/1/13')],  # price
 		[],  # person
 		[],  # company
 		[],  # account_type
@@ -79,10 +87,10 @@ def get_pop_values():
 		[(8, 1), (9, 1), (10, 1)],  # holding
 		[],  # trxn_type
 		[
-			(2, 1, 10, 148, '1/1/12', True),
-			(3, 1, 12, 85, '1/1/12', True),
-			(1, 1, 8, 320, '2/1/12', True),
-			(4, 1, 14, 125, '2/1/12', True)]]  # transaction
+			(2, 1, 10, 148, '1/2/13', True),
+			(3, 1, 12, 85, '1/2/13', True),
+			(1, 1, 2, 456, '1/2/13', True),
+			(4, 1, 14, 125, '1/2/13', True)]]  # transaction
 
 	return values
 

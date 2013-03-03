@@ -402,6 +402,8 @@ class DataObject(pd.DataFrame):
 	def concat_frames(self, y, index=None, delete_x=None, delete_y=None):
 		"""
 		Concatenate a DataObject onto a DataFrame/DataObject
+		Works like pandas.concat but can operate object with indices and
+		with overlapping and/or non-overlapping rows
 
 		Parameters
 		----------
@@ -715,7 +717,7 @@ class Portfolio(DataObject):
 		bad = ['price', 'type_id', 'trade_commission']
 		index = set(self.index.names).difference(['type_id'])
 		index = list(index) if len(index) > 1 else index[0]
-		df = self.reset_index(level='type_id')
+		df = self.sorted.reset_index(level='type_id')
 		keys = set([n for n in df]).intersection(bad)
 		[df.pop(key) for key in keys]
 		return DataObject(df.groupby(level=index).cumsum())
@@ -728,7 +730,7 @@ class Portfolio(DataObject):
 		"""
 		return Portfolio()
 
-	def join_shares(self, other, common=None):
+	def join_shares(self, other, common=None, shares=None):
 		"""Joins shares to other
 
 		Parameters
@@ -736,6 +738,8 @@ class Portfolio(DataObject):
 		other : DataObject
 		common : sequence of strings, optional
 			Columns/indices that are shared by both shares and other
+		shares : DataObject, optional
+			replacement for self.shares
 
 		Examples
 		--------
@@ -750,12 +754,18 @@ class Portfolio(DataObject):
 		{'price': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 34.0}, \
 'shares': {(1, 1, 1.0, <Timestamp: 2013-01-01 00:00:00>): 0}}
 		"""
+		try:
+			empty = True if shares.empty else False
+		except AttributeError:
+			empty = False if shares else True
+
+		shares = self.shares if empty else shares
 		common = (common or ['date', 'commodity_id'])
 		cols = set([c for c in other]).difference(common)
 		y = it.chain(['date_x'], cols) if cols else ['date_x']
 		x = ['date_y', 'shares']
-		merged = other.merge_frame(self.shares, 'commodity_id')
-		index = other.merge_index([self.shares])
+		merged = other.merge_frame(shares, 'commodity_id')
+		index = other.merge_index([shares])
 		df = merged.join_merged(index, x, y)
 
 		if len(df) > 1:
@@ -847,8 +857,12 @@ class Portfolio(DataObject):
 		-------
 		converted : DataObject
 		"""
+		try:
+			empty = True if prices.empty else False
+		except AttributeError:
+			empty = False if prices.any() else True
 
-		if prices.any():
+		if not empty:
 			# first rename rates column and index
 
 			if not hasattr(rates, 'empty'):
@@ -864,8 +878,8 @@ class Portfolio(DataObject):
 			rates.set_index(['currency_id', 'date'], inplace=True)
 
 			# now join prices and rates
-			prices.reset_index(level='commodity_id', inplace=True)
-			converted = prices.join(rates, how='left')
+			new_prices = prices.reset_index(level='commodity_id')
+			converted = new_prices.join(rates, how='left')
 			converted = converted.groupby(level='currency_id').fillna(
 				method='pad')
 		else:
@@ -948,20 +962,13 @@ class Metrics(Portfolio):
 		return self.convert_prices(self.prices, self.rates)
 
 	@property
-	def native_share_prices(self):
-		return self.join_shares(self.native_prices)
-
-	@property
-	def share_prices(self):
-		return self.join_shares(self.dividends)
-
-	@property
-	def reinvestments(self):
-		df = self.share_prices
+	def shares_w_reinv(self):
+		df = self.join_shares(self.dividends)
 
 		if not df.empty:
-			# remove 'currency_id' from index
-			df.reset_index(level='currency_id', inplace=True)
+			new_index = ['owner_id', 'account_id', 'commodity_id', 'date']
+			df.reset_index(inplace=True)
+			df.set_index(new_index, inplace=True)
 			index = df.non_date_index
 
 			# fill blank dividends with 0
@@ -971,12 +978,12 @@ class Metrics(Portfolio):
 			df['dividend_received'] = df['value'] * df['shares']
 			df['purchases'] = df['dividend_received'] / df['close']
 			df['div_shares'] = df['purchases'].groupby(level=index).cumsum()
-			reinvestments = df['div_shares']
 		else:
-			reinvestments = DataObject()
+			df['div_shares'] = 0
 
-		# need to return union of reinvestments with transactions
-		return reinvestments
+		df['tot_shares'] = df['div_shares'] + df['shares']
+
+		return DataObject({'shares': df['tot_shares']})
 
 	@property
 	def basis(self):

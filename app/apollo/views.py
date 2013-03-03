@@ -51,9 +51,9 @@ def worth(table='USD'):
 
 	heading = 'View your net worth'
 	subheading = (
-		'View the net worth of all ETF, Mutual Fund, and Stock '
-		'holdings. Prices are taken from the Prices tab and a purchase of 100'
-		' shares is assumed for each date a price is given.')
+		'View the net worth of all ETF, Mutual Fund, and Stock holdings.'
+		'Transactions are summed from the Events and Transactions tabs, and '
+		'prices are taken from the Prices tab.')
 
 	category = 'Commodity'
 	data_label = 'Value in %s' % table
