@@ -98,6 +98,15 @@ class Metrics(Portfolio):
 
 	@property
 	def basis(self):
-# 		self.transactions
-# 		self.reinvestments
-		pass
+		df = self.transactions
+		index = df.non_date_index
+		df['basis'] = df['shares'] * df['price'] + df['trade_commission']
+		return DataObject({'basis': df['basis'].groupby(level=index).sum()})
+
+	@property
+	def share_basis(self):
+		df = self.transactions
+		index = df.non_date_index
+		right = DataObject({'shares': df['shares'].groupby(level=index).sum()})
+		merged = self.basis.merge_frame(right, reindex=True)
+		return DataObject({'share_basis': merged['basis'] / merged['shares']})
