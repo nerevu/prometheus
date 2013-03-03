@@ -872,8 +872,8 @@ class Portfolio(DataObject):
 			rates.set_index(['currency_id', 'date'], inplace=True)
 
 			# now join prices and rates
-			prices.reset_index(level='commodity_id', inplace=True)
-			converted = prices.join(rates, how='left')
+			new_prices = prices.reset_index(level='commodity_id')
+			converted = new_prices.join(rates, how='left')
 			converted = converted.groupby(level='currency_id').fillna(
 				method='pad')
 		else:
