@@ -35,9 +35,10 @@ def worth(table='USD'):
 	values = [conn.values(z[0], z[1]) for z in zip(results, keys)]
 	data = zip(values, keys)
 	d = dict(zip(tables, data))
-	data, keys = d['raw_transaction'][0], d['raw_transaction'][1]
-	keys = [k[1] for k in keys]
-	args = [data, keys, None, d['dividend'], d['raw_price'], d['rate']]
+
+	arg1, arg2 = tuple(d['raw_transaction'])
+	cols = [k[1] for k in arg2]
+	args = [arg1, cols, None, d['dividend'], d['raw_price'], d['rate']]
 	kwargs = {'currency_id': currency_id, 'mapping': d['stock']}
 
 	mp = Worth(*args, **kwargs)
