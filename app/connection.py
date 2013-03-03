@@ -7,7 +7,7 @@
 """
 
 from pprint import pprint
-from json import dumps as dmp
+from json import dumps as dmp, loads
 from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
@@ -339,9 +339,11 @@ class Connection(object):
 		content_values = zip(tables, table_data)
 		return [dict(zip(content_keys, values)) for values in content_values]
 
-	def get(self, table):
-		r = g('%s%s' % (self.site, table))
-		return r.text
+	def get(self, table, query=None):
+		base = '%s%s' % (self.site, table)
+		url = '%s?q=%s' % (base, dmp(query)) if query else base
+		r = g(url, headers=self.HDR)
+		return loads(r.text)['objects']
 
 	def post(self, content):
 		for piece in content:
