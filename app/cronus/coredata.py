@@ -454,8 +454,7 @@ class DataObject(pd.DataFrame):
 
 		if 'date' in df.index.names:
 			real_index = list(it.chain(index, ['date']))
-			df.reset_index(inplace=True)
-			df.set_index(real_index, inplace=True)
+			df = df.unindexed.set_index(real_index)
 
 		if not (toffill or tobfill or tointerpolate):
 			toffill = list(df)
