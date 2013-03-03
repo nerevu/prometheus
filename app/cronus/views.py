@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 from app import Add, RQ
 from app.connection import Connection
 from app.helper import get_kwargs, portify, init_form
-from . import CSV
+from .sources import CSV
 from .forms import TransactionForm, TrxnUploadForm
 from .models import Transaction
 

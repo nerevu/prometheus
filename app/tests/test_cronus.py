@@ -13,7 +13,7 @@ from . import APIHelper, get_globals, check_equal, loads, err, conn
 from pprint import pprint
 from app import create_app, db
 from app.helper import get_init_values
-from app.cronus import CSV
+from app.cronus.sources import CSV
 
 
 def setup_module():

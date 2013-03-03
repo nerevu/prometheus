@@ -7,7 +7,8 @@
 	libraries
 """
 
-from app.cronus import Metrics, DataObject
+from app.cronus.analytics import Metrics
+from app.cronus.coredata import DataObject
 
 
 class Worth(Metrics):
