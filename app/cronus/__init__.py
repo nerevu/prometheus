@@ -402,6 +402,8 @@ class DataObject(pd.DataFrame):
 	def concat_frames(self, y, index=None, delete_x=None, delete_y=None):
 		"""
 		Concatenate a DataObject onto a DataFrame/DataObject
+		Works like pandas.concat but can operate object with indices and
+		with overlapping and/or non-overlapping rows
 
 		Parameters
 		----------
