@@ -19,7 +19,7 @@ class Worth(Metrics):
 	----------
 	"""
 
-	def __init__(self, args=None, kwargs=None):
+	def __init__(self, *args, **kwargs):
 		"""
 		Class constructor.
 
@@ -29,7 +29,7 @@ class Worth(Metrics):
 		kwargs : dict of keyword arguments, optional
 		"""
 
-		super(Worth, self).__init__(args, kwargs)
+		super(Worth, self).__init__(*args, **kwargs)
 
 	@property
 	def share_value(self):

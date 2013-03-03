@@ -56,7 +56,7 @@ class Metrics(Portfolio):
 
 	"""
 
-	def __init__(self, args=None, kwargs=None):
+	def __init__(self, *args, **kwargs):
 		"""
 		Class constructor.
 

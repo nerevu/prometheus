@@ -40,7 +40,7 @@ def worth(table='USD'):
 	args = [data, keys, None, d['dividend'], d['raw_price'], d['rate']]
 	kwargs = {'currency_id': currency_id, 'mapping': d['stock']}
 
-	mp = Worth(args, kwargs)
+	mp = Worth(*args, **kwargs)
 	worth = mp.calc_worth()
 	data = mp.convert_worth(worth)
 
