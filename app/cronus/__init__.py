@@ -857,8 +857,12 @@ class Portfolio(DataObject):
 		-------
 		converted : DataObject
 		"""
+		try:
+			empty = True if prices.empty else False
+		except AttributeError:
+			empty = False if prices.any() else True
 
-		if prices.any():
+		if not empty:
 			# first rename rates column and index
 
 			if not hasattr(rates, 'empty'):
