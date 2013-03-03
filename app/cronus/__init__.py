@@ -715,7 +715,7 @@ class Portfolio(DataObject):
 		bad = ['price', 'type_id', 'trade_commission']
 		index = set(self.index.names).difference(['type_id'])
 		index = list(index) if len(index) > 1 else index[0]
-		df = self.reset_index(level='type_id')
+		df = self.sorted.reset_index(level='type_id')
 		keys = set([n for n in df]).intersection(bad)
 		[df.pop(key) for key in keys]
 		return DataObject(df.groupby(level=index).cumsum())
