@@ -121,35 +121,46 @@ def clearprices():
 	pass
 
 
-@manager.command
-def popprices():
-	"""Add price quotes from yahoo
+@manager.option('-s', '--start', help='Start date')
+@manager.option('-e', '--end', help='End date')
+def popprices(start=None, end=None):
+	"""Add price quotes
 	"""
-	from pandas.io.data import DataReader
+	import itertools as it
+	from datetime import datetime as dt, date as d, timedelta
+	from dateutil.parser import parse
+	from app.hermes import MyClass
 
 	with app.app_context():
 		site = portify(url_for('api', _external=True))
-		conn = Connection(site)
-		table, filter = conn.securities
-		objects = conn.get(table, filter)
-		symbols = []
-		[[symbols.append(c['symbol']) for c in o['commodities']] for o in objects]
+		portf = MyClass(site)
+		last_dates = portf.latest_price_date()
+		end_date = parse(end) if end else d.today()
 
-		table, filter = conn.commodities(symbols)
-		objects = conn.get(table, filter)
-		starts = [max(c['date'] for c in o['commodity_prices']) for o in objects]
-		set = zip(symbols, starts)
+		if start:
+			start_dates = it.repeat(parse(start), len(portf.symbols))
+		else:
+			start_dates = [
+				dt.strptime(ts, "%Y-%m-%dT%H:%M:%S").date() + timedelta(days=1)
+				for ts in last_dates]
+
+		set = zip(portf.symbols, start_dates)
 
 		for s in set:
-			print s
-# 			if s[1] < today():
-# 				data = DataReader(s[0], "yahoo", s[1])
-# 				raw = data.Close.to_dict().items()
-# 				values = [[(get_id(s[0]), 1, r[1], r[0]) for r in raw]]
-# 				tables = [s[0]]
-# 				keys = [('commodity_id', 'currency_id', 'close', 'date')]
-# 				content = conn.process(values, tables, keys)
-# 				conn.post(content)
+			if s[1] < end_date:
+				values = portf.get_prices(s[0], s[1])
+
+				if values:
+					conn = Connection(site)
+					tables = [s[0]]
+					keys = [('commodity_id', 'currency_id', 'close', 'date')]
+					content = conn.process([values], tables, keys)
+					print content
+	# 				conn.post(content)
+				else:
+					print(
+						'No prices found for %s from %s to %s' %
+						(s[0], s[1], end_date))
 #
 # 		print 'Prices table populated'
 
