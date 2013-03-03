@@ -3,7 +3,7 @@
 	app.cronus.sources
 	~~~~~~~~~~~~~~
 
-	Provides libraries for importing portfolio data from multiple sources
+	Provides methods for importing portfolio data from multiple sources
 """
 
 import csv

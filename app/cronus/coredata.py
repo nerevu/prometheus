@@ -3,7 +3,7 @@
 	app.cronus.coredata
 	~~~~~~~~~~~~~~
 
-	Provides libraries for creating and manipulating DataObject and Portfolio
+	Provides methods for creating and manipulating DataObject and Portfolio
 	data
 """
 

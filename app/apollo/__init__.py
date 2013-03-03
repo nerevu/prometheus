@@ -3,8 +3,8 @@
 	app.apollo
 	~~~~~~~~~~~~~~
 
-	Provides application manipulation functions for input into visualization
-	libraries
+	Provides methods to manipulate Portfolio objects for input into
+	visualization libraries
 """
 
 from app.cronus.analytics import Metrics

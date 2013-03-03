@@ -3,7 +3,7 @@
 	app.cronus.analytics
 	~~~~~~~~~~~~~~
 
-	Provides analytical libraries for analyzing Portfolio objects
+	Provides methods for analyzing Portfolio objects
 """
 
 from .coredata import Portfolio, DataObject
