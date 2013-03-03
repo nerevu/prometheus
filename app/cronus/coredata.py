@@ -251,16 +251,19 @@ class DataObject(pd.DataFrame):
 		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
-	def merge_frame(self, y, on, toffill=None):
+	def merge_frame(self, y, on=None, toffill=None, reindex=False):
 		"""
 		Merge a DataObject with another a DataFrame/DataObject
 
 		Parameters
 		----------
 		y : DataObject or DataFrame
-		on : string
-		toffill : sequence of strings
-
+		on : sequence of strings, optional
+			the columns that appear in both DataObjects
+		toffill : sequence of strings, optional
+			the merged columns to fill in missing values
+		reindex : boolean, default False
+			replace index in the merged DataObject
 		Returns
 		-------
 		DataObject
@@ -275,16 +278,18 @@ class DataObject(pd.DataFrame):
 		# reset index so I can merge
 		#
 		# this will auto fill in values for all combinations of
-		# 'owner_id', 'account_id' into into merge DataFrame
+		# 'owner_id' and 'account_id' into merged DataFrame
 		# and 'currency_id' into shares DataFrame
 		# returns two sets of date fields (x and y)
+		on = (on or self.non_date_index)
 		x = self.unindexed
 		y = DataObject(y).unindexed
 		toffill = (toffill or [])
 
 		merged = x.merge(y, on=on, how='outer')
 		[merged[f].fillna(method='ffill', inplace=True) for f in toffill]
-		return DataObject(merged)
+		new = merged.set_index(on) if reindex else merged
+		return DataObject(new)
 
 	def concat_frames(self, y, index=None, delete_x=None, delete_y=None):
 		"""
