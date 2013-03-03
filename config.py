@@ -12,6 +12,7 @@ class Content(object):
 		'http://reubano.github.com', 'home')
 
 	topnav_values = [
+		('price', 'Prices', 'hermes.get', 'price'),
 		('event', 'Events', 'hermes.get', 'event'),
 		('transaction', 'Transactions', 'cronus.transaction', None),
 		('worth', 'Net Worth', 'apollo.worth', 'USD'),
