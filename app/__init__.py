@@ -174,7 +174,7 @@ def create_app(config_mode=None, config_file=None):
 
 class Add(View):
 	def dispatch_request(self, table=None):
-		form, entry, redir = self.get_vars
+		form, entry, redir = self.get_vars()
 		table = (table or self.get_table)
 		name = table.replace('_', ' ')
 
@@ -197,7 +197,7 @@ class Add(View):
 
 class RQ(View):
 	def dispatch_request(self):
-		form, func, args, name, redir = self.get_vars
+		form, func, args, name, redir = self.get_vars()
 
 		if form.validate_on_submit():
 			q = Queue(connection=Redis())
