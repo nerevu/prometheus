@@ -728,13 +728,9 @@ class Portfolio(DataObject):
 	def shares(self):
 		"""Sum of shares for each commodity
 		"""
-		bad = ['price', 'type_id', 'trade_commission']
-		index = set(self.index.names).difference(['type_id'])
-		index = list(index) if len(index) > 1 else index[0]
-		df = self.sorted.reset_index(level='type_id')
-		keys = set([n for n in df]).intersection(bad)
-		[df.pop(key) for key in keys]
-		return DataObject(df.groupby(level=index).cumsum())
+		df = self.transactions.reset_index(level='type_id')
+		index = DataObject(df).non_date_index
+		return DataObject({'shares': df.shares.groupby(level=index).cumsum()})
 
 	@classmethod
 	def from_prices(cls):
