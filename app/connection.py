@@ -313,8 +313,9 @@ class Connection(object):
 
 		return [tuple(value) for value in values]
 
-	def id_from_value(self, symbol):
-		ids = dict(self.values(*self.raw_commodity))
+	def id_from_symbol(self, symbol):
+		values = self.values(*self.raw_commodity)
+		ids = dict(zip([v[1] for v in values], [v[0] for v in values]))
 		return ids.get(symbol, None)
 
 	def process(self, post_values, tables=None, keys=None):
