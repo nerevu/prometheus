@@ -358,7 +358,7 @@ class Connection(object):
 					data=dmp(d, cls=CustomEncoder), headers=self.HDR)
 
 				if r.status_code != 201:
-					raise AttributeError(
+					print (
 						'Response: %s. Request %s with content %s sent to %s'
 						% (r.status_code, r.request.data, r._content, r.url))
 
