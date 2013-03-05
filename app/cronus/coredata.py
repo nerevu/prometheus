@@ -197,7 +197,7 @@ class DataObject(pd.DataFrame):
 		if (index and 'date' in real_index):
 			df.set_index(['date'], inplace=True, append=True)
 
-		return DataObject(df)
+		return DataObject(df).sorted
 
 	def df_reindex(self, index):
 		"""
@@ -453,7 +453,7 @@ class DataObject(pd.DataFrame):
 		>>> missing
 		False
 		"""
-		df = self.reindexed.sorted
+		df = self.reindexed
 		index = self.non_date_index
 		index = index if len(index) > 1 else index[0]
 		missing = False
@@ -713,7 +713,7 @@ class Portfolio(DataObject):
 
 		# combine *_x and *_y values
 		df_x, df_y = df.split_frame('date')
-		return df_x.concat_frames(df_y, index, x[1:], y[1:]).sorted
+		return df_x.concat_frames(df_y, index, x[1:], y[1:])
 
 	def convert_prices(self, prices, rates, native=1):
 		"""
