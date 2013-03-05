@@ -41,7 +41,7 @@ class Worth(Metrics):
 		df_dict = {'shares': df.shares, 'value': df.value}
 		return DataObject(df_dict)
 
-	def calc_worth(self, how='stock', mode='latest', convert=False):
+	def calc_worth(self, how='stock', mode='uniform', convert=False):
 		"""
 		Calculate portfolio worth for a specific date
 
