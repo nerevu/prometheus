@@ -563,10 +563,13 @@ class DataObject(pd.DataFrame):
 		>>> missing
 		False
 		"""
-		df = self.copy()
+		df = self.reindexed.sorted
 		index = self.non_date_index
 		index = index if len(index) > 1 else index[0]
 		missing = False
+		toffill = (toffill or [])
+		tobfill = (tobfill or [])
+		tointerpolate = (tointerpolate or [])
 
 		if 'date' in df.index.names:
 			real_index = list(it.chain(index, ['date']))
@@ -574,7 +577,7 @@ class DataObject(pd.DataFrame):
 			df.set_index(real_index, inplace=True)
 
 		if not (toffill or tobfill or tointerpolate):
-			toffill = [f for f in df]
+			toffill = list(df)
 
 		# fill in missing values
 		for g in df.groupby(level=index).groups:
@@ -713,7 +716,7 @@ class Portfolio(DataObject):
 
 		div_df = DataObject(dividends[0], keys=dividends[1])
 
-		self.transactions = self
+		self.transactions = self.sorted
 		self.mapping = DataObject(mapping[0], keys=mapping[1], index=['id'])
 		self.prices = DataObject(prices[0], keys=prices[1])
 		self.rates = DataObject(rates[0], keys=rates[1])
@@ -970,7 +973,7 @@ class Metrics(Portfolio):
 
 	@property
 	def native_prices(self):
-		return self.convert_prices(self.prices, self.rates)
+		return self.convert_prices(self.prices, self.rates).sorted
 
 	@property
 	def shares_w_reinv(self):
@@ -979,7 +982,7 @@ class Metrics(Portfolio):
 		if not df.empty:
 			new_index = ['owner_id', 'account_id', 'commodity_id', 'date']
 			df.reset_index(inplace=True)
-			df.set_index(new_index, inplace=True)
+			df = DataObject(df.set_index(new_index).sort())
 			index = df.non_date_index
 
 			# fill blank dividends with 0
