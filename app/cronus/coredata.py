@@ -186,6 +186,10 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def reindexed(self):
+		"""
+		Put date index last
+		"""
+
 		real_index = self.index.names
 		index = self.non_date_index
 		df = self.unindexed.set_index(index) if index[0] else self
