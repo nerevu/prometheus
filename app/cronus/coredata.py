@@ -762,14 +762,13 @@ class Portfolio(DataObject):
 			empty = False if prices.any() else True
 
 		if not empty:
-			# first rename rates column and index
-
 			if not hasattr(rates, 'empty'):
 				rates = pd.DataFrame({'rate': rates})
 
 			if not hasattr(prices, 'empty'):
 				prices = pd.DataFrame({'price': prices})
 
+			# first rename rates column and set index
 			rates.reset_index(inplace=True)
 			rates.rename(
 				columns={'commodity_id': 'currency_id', 'close': 'rate'},
@@ -786,12 +785,21 @@ class Portfolio(DataObject):
 			converted['rate'] = 0
 
 		# fill in native currency rates with value of 1
+		converted['native'] = False
 		if native in converted.groupby(level='currency_id').groups.keys():
 			converted.rate[native].fillna(1, inplace=True)
+			converted.native[native] = True
+
+		# filling missing rates
+		converted = DataObject(converted)
+		converted['rated'] = converted.rate.fillna(0).apply(
+			lambda x: True if x else False)
+
+		# remove dupes
+		index = ['commodity_id', 'date', 'native', 'rated']
+		compacted = converted.df_reindex(index).groupby(
+			level=['commodity_id', 'date']).last()
 
 		# calculate share closing prices in native currency
-		converted = DataObject(converted.reset_index())
-		converted.set_index(['commodity_id', 'date'], inplace=True)
-		converted['native_price'] = converted.close * converted.rate
-		del converted['currency_id'], converted['close'], converted['rate']
-		return converted
+		converted = converted.df_reindex(['commodity_id', 'date'])
+		return DataObject({'native_price': converted.close * converted.rate})
