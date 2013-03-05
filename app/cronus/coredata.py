@@ -192,12 +192,19 @@ class DataObject(pd.DataFrame):
 
 		real_index = self.index.names
 		index = self.non_date_index
-		df = self.unindexed.set_index(index) if index[0] else self
+		df = self.df_reindex(index) if index[0] else self
 
 		if (index and 'date' in real_index):
 			df.set_index(['date'], inplace=True, append=True)
 
 		return DataObject(df)
+
+	def df_reindex(self, index):
+		"""
+		Set index to index
+		"""
+
+		return DataObject(self.reset_index().set_index(index)).sorted
 
 	def merge_index(self, dfs):
 		"""
@@ -250,7 +257,7 @@ class DataObject(pd.DataFrame):
 		>>> df2.to_dict()
 		{'b': {6: 'APL'}}
 		"""
-		df = self.unindexed.set_index(index)
+		df = self.df_reindex(index)
 		g = [DataObject(g[1]) for g in df.groupby(level=0)]
 		return tuple(g)
 
@@ -339,8 +346,7 @@ class DataObject(pd.DataFrame):
 
 		# Concatenate and set index
 		df = DataObject(pd.concat([x, y]))
-		df = df.unindexed.set_index(index) if index else df
-		return df
+		return df.df_reindex(index) if index else df.sorted
 
 	def join_merged(self, index=None, delete_x=None, delete_y=None):
 		"""
@@ -457,7 +463,7 @@ class DataObject(pd.DataFrame):
 
 		if 'date' in df.index.names:
 			real_index = list(it.chain(index, ['date']))
-			df = df.unindexed.set_index(real_index)
+			df = df.df_reindex(real_index)
 
 		if not (toffill or tobfill or tointerpolate):
 			toffill = list(df)
