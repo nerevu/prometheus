@@ -110,3 +110,45 @@ class Metrics(Portfolio):
 		right = DataObject({'shares': df.shares.groupby(level=index).sum()})
 		merged = self.basis.merge_frame(right, reindex=True)
 		return DataObject({'share_basis': merged.basis / merged.shares})
+
+	@property
+	def advancement(self):
+		"""
+		unrealized gains from lows
+		"""
+		pass
+
+	@property
+	def retracement(self):
+		"""
+		unrealized losses from highs (drawdowns)
+		"""
+		pass
+
+	@property
+	def irr(self):
+		"""
+		internal rate of return
+		"""
+		pass
+
+	@property
+	def sharpe(self):
+		"""
+		sharpe ratio
+		"""
+		pass
+
+	@property
+	def var(self):
+		"""
+		value at risk
+		"""
+		pass
+
+	@property
+	def sortino(self):
+		"""
+		sortino ratio
+		"""
+		pass
