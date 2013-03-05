@@ -182,8 +182,7 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def unindexed(self):
-		df = self.reset_index() if self.index.names[0] else self
-		return df
+		return self.reset_index() if self.index.names[0] else self
 
 	@property
 	def reindexed(self):
