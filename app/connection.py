@@ -326,8 +326,8 @@ class Connection(object):
 		return ids.get(symbol, None)
 
 	def process(self, post_values, tables=None, keys=None):
-		keys = (keys or self.KEYS or [])
 		tables = (tables or self.TABLES)
+		keys = (keys or self.KEYS or [])
 		combo = zip(keys, post_values)
 
 		try:
