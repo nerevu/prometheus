@@ -309,6 +309,17 @@ class DataObject(pd.DataFrame):
 		df = self.reset_index() if self.index.names[0] else self
 		return df
 
+	@property
+	def reindexed(self):
+		real_index = self.index.names
+		index = self.non_date_index
+		df = self.unindexed.set_index(index) if index[0] else self
+
+		if (index and 'date' in real_index):
+			df.set_index(['date'], inplace=True, append=True)
+
+		return DataObject(df)
+
 	def merge_index(self, dfs):
 		"""
 		Merge current index with another
