@@ -70,7 +70,7 @@ class Metrics(Portfolio):
 
 	@property
 	def native_prices(self):
-		return self.convert_prices(self.prices, self.rates).sorted
+		return self.convert_prices(self.prices, self.rates, self.currency_id)
 
 	@property
 	def shares_w_reinv(self):
