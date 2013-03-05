@@ -12,7 +12,6 @@ from .models import Transaction
 cronus = Blueprint('cronus', __name__)
 table = 'transaction'
 redir = '.transaction'
-table_as_class = table.title().replace('_', '')
 
 
 @cronus.route('/transaction/', methods=['GET', 'POST'])
@@ -35,12 +34,14 @@ class Upload(RQ):
 
 
 class AddCronus(Add):
-	def get_vars(self):
+	def get_vars(self, table):
+		table_as_class = table.title().replace('_', '')
 		form = init_form(eval('%sForm' % table_as_class))
 		entry = eval('%s()' % table_as_class)
 		return form, entry, redir
 
-	def get_table(self):
+	@property
+	def table(self):
 		return table
 
 	def bookmark_table(self, table):
