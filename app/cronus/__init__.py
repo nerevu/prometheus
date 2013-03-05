@@ -783,7 +783,7 @@ class Portfolio(DataObject):
 		df = merged.join_merged(index, x, y)
 
 		if len(df) > 1:
-			df, self.missing = df.fill_missing(['shares'], ['shares'], cols, True)
+			df, self.missing = df.fill_missing(['shares'], None, cols, True)
 
 		return df
 
