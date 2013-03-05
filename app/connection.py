@@ -7,13 +7,20 @@
 """
 
 from pprint import pprint
-from json import dumps as dmp, loads
+from json import dumps as dmp, loads, JSONEncoder
 from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
 from app import db
 from app.hermes.models import Event, EventType, Price, Commodity, CommodityType
 from app.cronus.models import Transaction, Holding, Account, TrxnType
+
+
+class CustomEncoder(JSONEncoder):
+	def default(self, obj):
+		if set(['quantize', 'year']).intersection(dir(obj)):
+			return str(obj)
+		return JSONEncoder.default(self, obj)
 
 
 class Connection(object):
@@ -319,22 +326,8 @@ class Connection(object):
 		return ids.get(symbol, None)
 
 	def process(self, post_values, tables=None, keys=None):
-		def fix_dates(v):
-			if hasattr(v, 'year'):
-				v = str(v)
-			else:
-				try:
-					v = map(fix_dates, v) if len(v[0]) > 1 else v
-				except TypeError:
-					pass
-				except IndexError:
-					pass
-
-			return v
-
 		keys = (keys or self.KEYS or [])
 		tables = (tables or self.TABLES)
-		post_values = map(fix_dates, post_values)
 		combo = zip(keys, post_values)
 
 		try:
@@ -360,7 +353,9 @@ class Connection(object):
 			table = piece['table']
 
 			for d in piece['data']:
-				r = p('%s%s' % (self.site, table), data=dmp(d), headers=self.HDR)
+				r = p(
+					'%s%s' % (self.site, table),
+					data=dmp(d, cls=CustomEncoder), headers=self.HDR)
 
 				if r.status_code != 201:
 					raise AttributeError(
