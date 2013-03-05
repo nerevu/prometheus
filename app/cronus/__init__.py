@@ -685,7 +685,7 @@ class Portfolio(DataObject):
 
 		INT = np.int
 		FLT = np.float32
-		DTIME = np.datetime64
+		DTIME = object
 
 		index = (
 			index or [
