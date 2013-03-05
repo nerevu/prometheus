@@ -291,8 +291,9 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def sorted(self):
-		if (len(self) > 1 and len(self.index.names) > 1):
-			for level in reversed(self.index.names):
+		index = self.index.names
+		if (len(self) > 1 and len(index) > 1):
+			for level in reversed(index):
 				df = self.sortlevel(level=level)
 
 			df = DataObject(df)
@@ -308,6 +309,17 @@ class DataObject(pd.DataFrame):
 	def unindexed(self):
 		df = self.reset_index() if self.index.names[0] else self
 		return df
+
+	@property
+	def reindexed(self):
+		real_index = self.index.names
+		index = self.non_date_index
+		df = self.unindexed.set_index(index) if index[0] else self
+
+		if (index and 'date' in real_index):
+			df.set_index(['date'], inplace=True, append=True)
+
+		return DataObject(df)
 
 	def merge_index(self, dfs):
 		"""
@@ -552,10 +564,13 @@ class DataObject(pd.DataFrame):
 		>>> missing
 		False
 		"""
-		df = self.copy()
+		df = self.reindexed.sorted
 		index = self.non_date_index
 		index = index if len(index) > 1 else index[0]
 		missing = False
+		toffill = (toffill or [])
+		tobfill = (tobfill or [])
+		tointerpolate = (tointerpolate or [])
 
 		if 'date' in df.index.names:
 			real_index = list(it.chain(index, ['date']))
@@ -563,7 +578,7 @@ class DataObject(pd.DataFrame):
 			df.set_index(real_index, inplace=True)
 
 		if not (toffill or tobfill or tointerpolate):
-			toffill = [f for f in df]
+			toffill = list(df)
 
 		# fill in missing values
 		for g in df.groupby(level=index).groups:
@@ -671,7 +686,7 @@ class Portfolio(DataObject):
 
 		INT = np.int
 		FLT = np.float32
-		DTIME = np.datetime64
+		DTIME = object
 
 		index = (
 			index or [
@@ -702,7 +717,7 @@ class Portfolio(DataObject):
 
 		div_df = DataObject(dividends[0], keys=dividends[1])
 
-		self.transactions = self
+		self.transactions = self.sorted
 		self.mapping = DataObject(mapping[0], keys=mapping[1], index=['id'])
 		self.prices = DataObject(prices[0], keys=prices[1])
 		self.rates = DataObject(rates[0], keys=rates[1])
@@ -714,13 +729,9 @@ class Portfolio(DataObject):
 	def shares(self):
 		"""Sum of shares for each commodity
 		"""
-		bad = ['price', 'type_id', 'trade_commission']
-		index = set(self.index.names).difference(['type_id'])
-		index = list(index) if len(index) > 1 else index[0]
-		df = self.sorted.reset_index(level='type_id')
-		keys = set([n for n in df]).intersection(bad)
-		[df.pop(key) for key in keys]
-		return DataObject(df.groupby(level=index).cumsum())
+		df = self.transactions.reset_index(level='type_id')
+		index = DataObject(df).non_date_index
+		return DataObject({'shares': df.shares.groupby(level=index).cumsum()})
 
 	@classmethod
 	def from_prices(cls):
@@ -769,7 +780,7 @@ class Portfolio(DataObject):
 		df = merged.join_merged(index, x, y)
 
 		if len(df) > 1:
-			df, self.missing = df.fill_missing(['shares'], ['shares'], cols, True)
+			df, self.missing = df.fill_missing(['shares'], None, cols, True)
 
 		return df
 
@@ -959,7 +970,7 @@ class Metrics(Portfolio):
 
 	@property
 	def native_prices(self):
-		return self.convert_prices(self.prices, self.rates)
+		return self.convert_prices(self.prices, self.rates).sorted
 
 	@property
 	def shares_w_reinv(self):
@@ -968,7 +979,7 @@ class Metrics(Portfolio):
 		if not df.empty:
 			new_index = ['owner_id', 'account_id', 'commodity_id', 'date']
 			df.reset_index(inplace=True)
-			df.set_index(new_index, inplace=True)
+			df = DataObject(df.set_index(new_index).sort())
 			index = df.non_date_index
 
 			# fill blank dividends with 0

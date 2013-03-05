@@ -32,12 +32,16 @@ class Worth(Metrics):
 
 	@property
 	def share_value(self):
+		# adds transaction price to prices df if needed
 		df = self.join_shares(self.native_prices, shares=self.shares_w_reinv)
 		df['value'] = df.native_price * df.shares
+
+		# TODO: sum by dates, not datetimes
+		df = df.groupby(level=df.index.names).sum()
 		df_dict = {'shares': df.shares, 'value': df.value}
 		return DataObject(df_dict)
 
-	def calc_worth(self, how='stock', mode='latest', convert=False):
+	def calc_worth(self, how='stock', mode='uniform', convert=False):
 		"""
 		Calculate portfolio worth for a specific date
 
@@ -71,8 +75,8 @@ class Worth(Metrics):
 		# TODO: account for multiple owners and/or accounts
 		df = self.share_value
 		old_index = df.non_date_index
-		dfs = [df for df in df.sorted.split_frame('date')]
-		date_list = [(df.index[0], len(df)) for df in dfs]
+		dfs = [f for f in df.sorted.split_frame('date')]
+		date_list = [(f.index[0], len(f)) for f in dfs]
 		by_date = dict(date_list)
 		max_entries = max(by_date.values())
 		items = by_date.items()

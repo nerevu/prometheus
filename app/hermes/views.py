@@ -29,7 +29,7 @@ def get(table):
 
 
 class AddHermes(Add):
-	def get_vars(self):
+	def get_vars(self, table):
 		table_as_class = table.title().replace('_', '')
 		form = init_form(eval('%sForm' % table_as_class))
 		entry = eval('%s()' % table_as_class)

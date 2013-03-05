@@ -19,7 +19,7 @@ from os import path as p, listdir
 from savalidation import ValidationError
 from redis import Redis
 from rq import Queue
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, flash, redirect, url_for
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 from flask.views import View
@@ -174,8 +174,8 @@ def create_app(config_mode=None, config_file=None):
 
 class Add(View):
 	def dispatch_request(self, table=None):
-		form, entry, redir = self.get_vars
-		table = (table or self.get_table)
+		table = (table or self.table)
+		form, entry, redir = self.get_vars(table)
 		name = table.replace('_', ' ')
 
 		if form.validate_on_submit():
@@ -197,7 +197,7 @@ class Add(View):
 
 class RQ(View):
 	def dispatch_request(self):
-		form, func, args, name, redir = self.get_vars
+		form, func, args, name, redir = self.get_vars()
 
 		if form.validate_on_submit():
 			q = Queue(connection=Redis())
