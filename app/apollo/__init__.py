@@ -75,8 +75,8 @@ class Worth(Metrics):
 		# TODO: account for multiple owners and/or accounts
 		df = self.share_value
 		old_index = df.non_date_index
-		dfs = [df for df in df.sorted.split_frame('date')]
-		date_list = [(df.index[0], len(df)) for df in dfs]
+		dfs = [f for f in df.sorted.split_frame('date')]
+		date_list = [(f.index[0], len(f)) for f in dfs]
 		by_date = dict(date_list)
 		max_entries = max(by_date.values())
 		items = by_date.items()
