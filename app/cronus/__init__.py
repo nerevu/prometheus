@@ -291,8 +291,9 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def sorted(self):
-		if (len(self) > 1 and len(self.index.names) > 1):
-			for level in reversed(self.index.names):
+		index = self.index.names
+		if (len(self) > 1 and len(index) > 1):
+			for level in reversed(index):
 				df = self.sortlevel(level=level)
 
 			df = DataObject(df)
