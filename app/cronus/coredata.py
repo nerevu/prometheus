@@ -166,19 +166,19 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def sorted(self):
-		index = self.index.names
-		if (len(self) > 1 and len(index) > 1):
-			for level in reversed(index):
-				df = self.sortlevel(level=level)
+# 		index = self.index.names
+# 		if (len(self) > 1 and len(index) > 1):
+# 			for level in reversed(index):
+# 				df = self.sortlevel(level=level)
+#
+# 			df = DataObject(df)
+#
+# 		elif len(self) > 1:
+# 			df = DataObject(self.sort_index())
+# 		else:
+# 			df = self
 
-			df = DataObject(df)
-
-		elif len(self) > 1:
-			df = DataObject(self.sort_index())
-		else:
-			df = self
-
-		return df
+		return DataObject(self.sort())
 
 	@property
 	def unindexed(self):
