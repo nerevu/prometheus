@@ -32,8 +32,12 @@ class Worth(Metrics):
 
 	@property
 	def share_value(self):
+		# adds transaction price to prices df if needed
 		df = self.join_shares(self.native_prices, shares=self.shares_w_reinv)
 		df['value'] = df.native_price * df.shares
+
+		# TODO: sum by dates, not datetimes
+		df = df.groupby(level=df.index.names).sum()
 		df_dict = {'shares': df.shares, 'value': df.value}
 		return DataObject(df_dict)
 
