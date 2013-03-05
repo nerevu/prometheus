@@ -135,34 +135,34 @@ def popprices(start=None, end=None):
 		site = portify(url_for('api', _external=True))
 		portf = Historical(site)
 		last_dates = portf.latest_price_date()
-		end_date = parse(end) if end else d.today()
+		end_date = parse(end).date() if end else d.today()
 
 		if start:
-			start_dates = it.repeat(parse(start), len(portf.symbols))
+			start_dates = it.repeat(parse(start).date(), len(portf.symbols))
 		else:
 			start_dates = [
 				dt.strptime(ts, "%Y-%m-%dT%H:%M:%S").date() + timedelta(days=1)
 				for ts in last_dates]
 
 		set = zip(portf.symbols, start_dates)
+		tables = ['price']
+		keys = [('commodity_id', 'currency_id', 'close', 'date')]
 
 		for s in set:
 			if s[1] < end_date:
-				values = portf.get_prices(s[0], s[1])
+				values = [portf.get_prices(s[0], s[1], end_date)]
 
 				if values:
 					conn = Connection(site)
-					tables = ['price']
-					keys = [('commodity_id', 'currency_id', 'close', 'date')]
-					content = conn.process([values], tables, keys)
-					print content
-	# 				conn.post(content)
+					content = conn.process(values, tables, keys)
+# 					print content
+					conn.post(content)
 				else:
 					print(
 						'No prices found for %s from %s to %s' %
 						(s[0], s[1], end_date))
-#
-# 		print 'Prices table populated'
+
+		print 'Prices table populated'
 
 if __name__ == '__main__':
 	manager.run()
