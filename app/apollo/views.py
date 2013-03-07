@@ -18,7 +18,7 @@ apollo = Blueprint('apollo', __name__)
 def worth(table='USD'):
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site)
-	currency_id = conn.id_from_symbol(table)
+	currency_id = conn.ids_from_symbols(table)
 
 	if not currency_id and table != 'USD':
 		table = 'USD (%s rates not available)' % table

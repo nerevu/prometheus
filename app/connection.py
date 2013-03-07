@@ -320,10 +320,16 @@ class Connection(object):
 
 		return [tuple(value) for value in values]
 
-	def id_from_symbol(self, symbol):
+	def ids_from_symbols(self, symbols):
 		values = self.values(*self.raw_commodity)
 		ids = dict(zip([v[1] for v in values], [v[0] for v in values]))
-		return ids.get(symbol, None)
+
+		if hasattr(symbols, 'isalnum'):
+			ids = ids.get(symbols, None)
+		else:
+			ids = [ids.get(s, None) for s in symbols]
+
+		return ids
 
 	def process(self, post_values, tables=None, keys=None):
 		tables = (tables or self.TABLES)
