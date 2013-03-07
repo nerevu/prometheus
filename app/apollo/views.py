@@ -52,7 +52,7 @@ def worth(table='USD'):
 
 	heading = 'View your net worth'
 	subheading = (
-		'View the net worth of all ETF, Mutual Fund, and Stock holdings.'
+		'View the net worth of all ETF, Mutual Fund, and Stock holdings. '
 		'Transactions are summed from the Events and Transactions tabs, and '
 		'prices are taken from the Prices tab.')
 
