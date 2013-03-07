@@ -20,6 +20,8 @@ class CustomEncoder(JSONEncoder):
 	def default(self, obj):
 		if set(['quantize', 'year']).intersection(dir(obj)):
 			return str(obj)
+		elif hasattr(obj, 'next'):
+			return list(obj)
 		return JSONEncoder.default(self, obj)
 
 
@@ -350,7 +352,7 @@ class Connection(object):
 
 	def get(self, table, query=None):
 		base = '%s%s' % (self.site, table)
-		url = '%s?q=%s' % (base, dmp(query)) if query else base
+		url = '%s?q=%s' % (base, dmp(query, cls=CustomEncoder)) if query else base
 		r = g(url, headers=self.HDR)
 		return loads(r.text)['objects']
 
