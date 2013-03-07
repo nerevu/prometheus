@@ -18,7 +18,7 @@ apollo = Blueprint('apollo', __name__)
 def worth(table='USD'):
 	site = portify(url_for('api', _external=True))
 	conn = Connection(site)
-	currency_id = conn.id_from_value(table)
+	currency_id = conn.ids_from_symbols(table)
 
 	if not currency_id and table != 'USD':
 		table = 'USD (%s rates not available)' % table
@@ -35,12 +35,13 @@ def worth(table='USD'):
 	values = [conn.values(z[0], z[1]) for z in zip(results, keys)]
 	data = zip(values, keys)
 	d = dict(zip(tables, data))
-	data, keys = d['raw_transaction'][0], d['raw_transaction'][1]
-	keys = [k[1] for k in keys]
-	args = [data, keys, None, d['dividend'], d['raw_price'], d['rate']]
+
+	arg1, arg2 = tuple(d['raw_transaction'])
+	cols = [k[1] for k in arg2]
+	args = [arg1, cols, None, d['dividend'], d['raw_price'], d['rate']]
 	kwargs = {'currency_id': currency_id, 'mapping': d['stock']}
 
-	mp = Worth(args, kwargs)
+	mp = Worth(*args, **kwargs)
 	worth = mp.calc_worth()
 	data = mp.convert_worth(worth)
 
@@ -51,7 +52,7 @@ def worth(table='USD'):
 
 	heading = 'View your net worth'
 	subheading = (
-		'View the net worth of all ETF, Mutual Fund, and Stock holdings.'
+		'View the net worth of all ETF, Mutual Fund, and Stock holdings. '
 		'Transactions are summed from the Events and Transactions tabs, and '
 		'prices are taken from the Prices tab.')
 

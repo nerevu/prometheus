@@ -3,11 +3,12 @@
 	app.apollo
 	~~~~~~~~~~~~~~
 
-	Provides application manipulation functions for input into visualization
-	libraries
+	Provides methods to manipulate Portfolio objects for input into
+	visualization libraries
 """
 
-from app.cronus import Metrics, DataObject
+from app.cronus.analytics import Metrics
+from app.cronus.coredata import DataObject
 
 
 class Worth(Metrics):
@@ -18,7 +19,7 @@ class Worth(Metrics):
 	----------
 	"""
 
-	def __init__(self, args=None, kwargs=None):
+	def __init__(self, *args, **kwargs):
 		"""
 		Class constructor.
 
@@ -28,7 +29,7 @@ class Worth(Metrics):
 		kwargs : dict of keyword arguments, optional
 		"""
 
-		super(Worth, self).__init__(args, kwargs)
+		super(Worth, self).__init__(*args, **kwargs)
 
 	@property
 	def share_value(self):
@@ -38,8 +39,7 @@ class Worth(Metrics):
 
 		# TODO: sum by dates, not datetimes
 		df = df.groupby(level=df.index.names).sum()
-		df_dict = {'shares': df.shares, 'value': df.value}
-		return DataObject(df_dict)
+		return DataObject({'shares': df.shares, 'value': df.value})
 
 	def calc_worth(self, how='stock', mode='uniform', convert=False):
 		"""

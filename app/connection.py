@@ -7,13 +7,22 @@
 """
 
 from pprint import pprint
-from json import dumps as dmp
+from json import dumps as dmp, loads, JSONEncoder
 from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
 from app import db
 from app.hermes.models import Event, EventType, Price, Commodity, CommodityType
 from app.cronus.models import Transaction, Holding, Account, TrxnType
+
+
+class CustomEncoder(JSONEncoder):
+	def default(self, obj):
+		if set(['quantize', 'year']).intersection(dir(obj)):
+			return str(obj)
+		elif hasattr(obj, 'next'):
+			return list(obj)
+		return JSONEncoder.default(self, obj)
 
 
 class Connection(object):
@@ -275,6 +284,14 @@ class Connection(object):
 
 		return returned
 
+	def commodity_list(self, group=1):
+		filter = {'filters': [{'name': 'group_id', 'op': 'eq', 'val': group}]}
+		return self.get('commodity_type', filter)
+
+	def commodity_info(self, symbols):
+		filter = {'filters': [{'name': 'symbol', 'op': 'in', 'val': symbols}]}
+		return self.get('commodity', filter)
+
 	def values(self, result, keys):
 		"""Extracts desired values from a query result
 
@@ -304,54 +321,49 @@ class Connection(object):
 
 		return [tuple(value) for value in values]
 
-	def id_from_value(self, symbol):
-		ids = dict(self.values(*self.raw_commodity))
-		return ids.get(symbol, None)
+	def ids_from_symbols(self, symbols):
+		values = self.values(*self.raw_commodity)
+		ids = dict(zip([v[1] for v in values], [v[0] for v in values]))
+
+		if hasattr(symbols, 'isalnum'):
+			ids = ids.get(symbols, None)
+		else:
+			ids = [ids.get(s, None) for s in symbols]
+
+		return ids
 
 	def process(self, post_values, tables=None, keys=None):
-		def fix_dates(v):
-			if hasattr(v, 'year'):
-				v = str(v)
-			else:
-				try:
-					v = map(fix_dates, v) if len(v[0]) > 1 else v
-				except TypeError:
-					pass
-				except IndexError:
-					pass
-
-			return v
-
-		keys = (keys or self.KEYS or [])
 		tables = (tables or self.TABLES)
-		post_values = map(fix_dates, post_values)
+		keys = (keys or self.KEYS or [])
+		tables = [tables] if hasattr(tables, 'isalnum') else tables
 		combo = zip(keys, post_values)
 
-		try:
-			tables = [tables] if tables.isalnum() else tables
-			table_data = [[dict(combo)]]
-		except AttributeError:
-			table_data = [
-				[dict(zip(list[0], values)) for values in list[1]]
-				for list in combo]
+		table_data = [
+			[dict(zip(list[0], values)) for values in list[1]]
+			for list in combo]
 
 		content_keys = ('table', 'data')
 		content_values = zip(tables, table_data)
 		return [dict(zip(content_keys, values)) for values in content_values]
 
-	def get(self, table):
-		r = g('%s%s' % (self.site, table))
-		return r.text
+	def get(self, table, query=None):
+		base = '%s%s' % (self.site, table)
+		url = '%s?q=%s' % (base, dmp(query, cls=CustomEncoder)) if query else base
+		r = g(url, headers=self.HDR)
+		return loads(r.text)['objects']
 
 	def post(self, content):
 		for piece in content:
 			table = piece['table']
+			r = None
 
 			for d in piece['data']:
-				r = p('%s%s' % (self.site, table), data=dmp(d), headers=self.HDR)
+				r = p(
+					'%s%s' % (self.site, table),
+					data=dmp(d, cls=CustomEncoder), headers=self.HDR)
 
 				if r.status_code != 201:
-					raise AttributeError(
+					print (
 						'Response: %s. Request %s with content %s sent to %s'
 						% (r.status_code, r.request.data, r._content, r.url))
 

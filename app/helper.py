@@ -30,7 +30,7 @@ def get_init_values():
 			('USD', 'US Dollar', 5, 3, 4),
 			('EUR', 'Euro', 5, 3, 4),
 			('GBP', 'Pound Sterling', 5, 3, 4),
-			('TZS', 'Tanzanian Shilling', 5, 3, 4),
+			('CAD', 'Canadian Dollar', 5, 3, 4),
 			('Multiple', 'Multiple', 6, 3, 4),
 			('AAPL', 'Apple', 1, 1, 1),
 			('Text', 'Text', 6, 3, 4)],  # commodity
@@ -38,11 +38,7 @@ def get_init_values():
 			[('Dividend')], [('Special Dividend')], [('Stock Split')],
 			[('Name Change')], [('Ticker Change')]],  # event_type
 		[],  # event
-		[
-			(2, 1, 1.2, '1/2/13'),
-			(3, 1, 1.8, '1/2/13'),
-			(4, 1, 1.0 / 1580.0, '1/2/13'),
-			(6, 1, 455.49, '1/2/13')],  # price
+		[],  # price
 		[(1, 'Reuben', 'Cummings', 'reubano@gmail.com')],  # person
 		[
 			('Scottrade', 'https://trading.scottrade.com/'),
@@ -67,19 +63,8 @@ def get_pop_values():
 			('WMT', 'Wal-Mart', 1, 1, 1),
 			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
 		[],  # event_type
-		[(1, 6, 1, 10, '2/1/13'), (1, 8, 1, 10, '2/1/13')],  # event
-		[
-			(6, 1, 453.62, '2/1/13'),
-			(6, 1, 441, '3/1/13'),
-			(8, 1, 203.07, '1/2/13'),
-			(8, 1, 205.18, '2/1/13'),
-			(8, 1, 201, '3/1/13'),
-			(9, 1, 69.95, '1/2/13'),
-			(9, 1, 70.49, '2/1/13'),
-			(9, 1, 71, '3/1/13'),
-			(10, 1, 98.39, '1/2/13'),
-			(10, 1, 99.49, '2/1/13'),
-			(10, 1, 93, '3/1/13')],  # price
+		[],  # event
+		[],  # price
 		[],  # person
 		[],  # company
 		[],  # account_type
