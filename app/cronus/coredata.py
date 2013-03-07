@@ -203,8 +203,7 @@ class DataObject(pd.DataFrame):
 		"""
 		Set index to index
 		"""
-
-		return DataObject(self.reset_index().set_index(index)).sorted
+		return self.unindexed.set_index(index) if index else self
 
 	def merge_index(self, dfs):
 		"""
