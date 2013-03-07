@@ -30,7 +30,7 @@ def get_init_values():
 			('USD', 'US Dollar', 5, 3, 4),
 			('EUR', 'Euro', 5, 3, 4),
 			('GBP', 'Pound Sterling', 5, 3, 4),
-			('TZS', 'Tanzanian Shilling', 5, 3, 4),
+			('CAD', 'Canadian Dollar', 5, 3, 4),
 			('Multiple', 'Multiple', 6, 3, 4),
 			('AAPL', 'Apple', 1, 1, 1),
 			('Text', 'Text', 6, 3, 4)],  # commodity
