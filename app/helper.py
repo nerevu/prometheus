@@ -63,7 +63,7 @@ def get_pop_values():
 			('WMT', 'Wal-Mart', 1, 1, 1),
 			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
 		[],  # event_type
-		[(1, 6, 1, 10, '2/1/13'), (1, 8, 1, 10, '2/1/13')],  # event
+		[],  # event
 		[],  # price
 		[],  # person
 		[],  # company

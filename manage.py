@@ -18,6 +18,19 @@ manager.add_option(
 manager.add_option('-f', '--cfgfile', dest='config_file', type=p.abspath)
 
 
+def post_all(conn):
+		symbols = list(it.chain(conn.currencies, conn.securities))
+		prices = conn.get_prices(symbols)
+		dividends = conn.get_prices(conn.securities, extra='divs')
+		splits = conn.get_prices(conn.securities, extra='splits')
+
+		values = list(it.chain(prices, dividends, splits))
+		tables = ['price', 'event', 'event']
+		keys = list(it.chain(conn.price_keys, conn.event_keys, conn.event_keys))
+
+		conn.post(conn.process(values, tables, keys))
+
+
 @manager.command
 def checkstage():
 	"""Checks staged with git pre-commit hook"""
@@ -95,10 +108,7 @@ def initdb():
 
 		values = get_init_values()
 		conn.post(conn.process(values))
-
-		symbols = list(it.chain(conn.currencies, conn.securities))
-		prices = conn.get_prices(symbols)
-		conn.post(conn.process(prices, conn.price_tables, conn.price_keys))
+		post_all(conn)
 		print 'Database initialized'
 
 
@@ -115,16 +125,15 @@ def popdb():
 
 		values = get_pop_values()
 		conn.post(conn.process(values))
-
-		prices = conn.get_prices(['WMT', 'CAT', 'IBM'])
-		conn.post(conn.process(prices, conn.price_tables, conn.price_keys))
+		post_all(conn)
 		print 'Database populated'
 
 
-@manager.option('-s', '--start', help='Start date')
+@manager.option('-s', '--sym', help='Symbols')
+@manager.option('-t', '--start', help='Start date')
 @manager.option('-e', '--end', help='End date')
-@manager.option('-S', '--sym', help='Symbols')
-def popprices(start=None, end=None, sym=None):
+@manager.option('-x', '--extra', help='Add [d]ividends or [s]plits')
+def popprices(sym=None, start=None, end=None, extra=None):
 	"""Add price quotes
 	"""
 
@@ -132,9 +141,14 @@ def popprices(start=None, end=None, sym=None):
 		site = portify(url_for('api', _external=True))
 		conn = Historical(site)
 		sym = sym.split(',') if sym else None
-		prices = conn.get_prices(sym, start, end)
+		divs = True if (extra and extra.startswith('d')) else False
+		splits = True if (extra and extra.startswith('s')) else False
 
-		conn.post(conn.process(prices, conn.price_tables, conn.price_keys))
+		values = conn.get_prices(sym, start, end, extra)
+		table = 'event' if (divs or splits) else 'price'
+		keys = conn.event_keys if (divs or splits) else conn.price_keys
+
+		conn.post(conn.process(values, table, keys))
 		print 'Prices table populated'
 
 if __name__ == '__main__':
