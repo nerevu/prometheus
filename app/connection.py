@@ -336,15 +336,12 @@ class Connection(object):
 	def process(self, post_values, tables=None, keys=None):
 		tables = (tables or self.TABLES)
 		keys = (keys or self.KEYS or [])
+		tables = [tables] if hasattr(tables, 'isalnum') else tables
 		combo = zip(keys, post_values)
 
-		try:
-			tables = [tables] if tables.isalnum() else tables
-			table_data = [[dict(combo)]]
-		except AttributeError:
-			table_data = [
-				[dict(zip(list[0], values)) for values in list[1]]
-				for list in combo]
+		table_data = [
+			[dict(zip(list[0], values)) for values in list[1]]
+			for list in combo]
 
 		content_keys = ('table', 'data')
 		content_values = zip(tables, table_data)
@@ -359,6 +356,7 @@ class Connection(object):
 	def post(self, content):
 		for piece in content:
 			table = piece['table']
+			r = None
 
 			for d in piece['data']:
 				r = p(
