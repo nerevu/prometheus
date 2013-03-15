@@ -11,10 +11,6 @@ from json import dumps as dmp, loads, JSONEncoder
 from requests import get as g, post as p
 from sqlalchemy.orm import aliased
 
-from app import db
-from app.hermes.models import Event, EventType, Price, Commodity, CommodityType
-from app.cronus.models import Transaction, Holding, Account, TrxnType
-
 
 class CustomEncoder(JSONEncoder):
 	def default(self, obj):
@@ -44,30 +40,6 @@ class Connection(object):
 	raw_transaction : tuple
 	"""
 	HDR = {'content-type': 'application/json'}
-	TABLES = [
-		'exchange', 'data_source', 'commodity_group', 'commodity_type',
-		'commodity', 'event_type', 'event', 'price', 'person', 'company',
-		'account_type', 'account', 'holding', 'trxn_type', 'transaction']
-
-	KEYS = [
-		# '[(' is needed so dict doesn't iterate over each character
-		('symbol', 'name'),  # exchange
-		[('name')],  # data_source
-		[('name')],  # commodity_group
-		('name', 'group_id'),  # commodity_type
-		('symbol', 'name', 'type_id', 'data_source_id', 'exchange_id'),  # commodity
-		[('name')],  # event_type
-		('type_id', 'commodity_id', 'currency_id', 'value', 'date'),  # event
-		('commodity_id', 'currency_id', 'close', 'date'),  # price
-		('currency_id', 'first_name', 'last_name', 'email'),  # person
-		('name', 'website'),  # company
-		[('name')],  # account_type
-		('type_id', 'company_id', 'currency_id', 'owner_id', 'name'),  # account
-		('commodity_id', 'account_id'),  # holding
-		[('name')],  # trxn_type
-		(
-			'holding_id', 'type_id', 'shares', 'price', 'date',
-			'commissionable')] 	# transaction
 
 	def __init__(
 			self, site='http://localhost:5000/api/', native=1, display=False):
@@ -91,217 +63,186 @@ class Connection(object):
 		self.site = site
 		self.native = native
 		self.display = display
+		self.limit = 1000
+
+	@property
+	def keys(self):
+		return {
+			'exchange': ('symbol', 'name'),
+			'data_source': [('name')],
+			'commodity_group': [('name')],
+			'commodity_type': ('name', 'group_id'),
+			'commodity': (
+				'symbol', 'name', 'type_id', 'data_source_id', 'exchange_id'),
+			'event_type': [('name')],
+			'event': (
+				'type_id', 'commodity_id', 'currency_id', 'value', 'date'),
+			'price': ('commodity_id', 'currency_id', 'close', 'date'),
+			'person': ('currency_id', 'first_name', 'last_name', 'email'),
+			'company': ('name', 'website'),
+			'account_type': [('name')],
+			'account': (
+				'type_id', 'company_id', 'currency_id', 'owner_id', 'name'),
+			'holding': ('commodity_id', 'account_id'),
+			'trxn_type': [('name')],
+			'transaction': (
+				'holding_id', 'type_id', 'shares', 'date', 'price',
+				'commissionable')}
+
+	@property
+	def tables(self):
+		return [
+			'exchange', 'data_source', 'commodity_group', 'commodity_type',
+			'commodity', 'event_type', 'event', 'price', 'person', 'company',
+			'account_type', 'account', 'holding', 'trxn_type', 'transaction']
+
+	@property
+	def table_headers(self):
+		return {
+			'event': ['Symbol', 'Name', 'Unit', 'Value', 'Date'],
+			'event_type': ['Type Name'],
+			'price': ['Stock', 'Currency', 'Date', 'Price'],
+			'commodity': ['Symbol', 'Name', 'Type'],
+			'transaction': [
+				'Holding', 'Type', 'Shares', 'Share Price', 'Date',
+				'Commission']}
 
 	@property
 	def event(self):
-		form_fields = [
-			'commodity_id', 'type_id', 'currency_id', 'value', 'date']
+		res, event = [], {}
+		for o in self.get('event'):
+			event.update({'com_symbol': o['commodity']['symbol']})
+			event.update({'name': o['type']['name']})
+			event.update({'cur_symbol': o['currency']['symbol']})
+			event.update({'value': o['value']})
+			event.update({'date': o['date']})
+			res.append(event)
 
-		table_headers = ['Symbol', 'Name', 'Unit', 'Value', 'Date']
-		Currency = aliased(Commodity)
-
-		query = (
-			db.session.query(Event, EventType, Commodity, Currency)
-			.join(EventType).join(Event.commodity)
-			.join(Currency, Event.currency).order_by(Event.date))
-
-		keys = [
-			(2, 'symbol'), (1, 'name'), (3, 'symbol'), (0, 'value'),
-			(0, 'date')]
-
-		if self.display:
-			returned = form_fields, table_headers, query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
+		return res
+#		keys = ['symbol', 'name', 'symbol', 'value', 'date']
 
 	@property
 	def event_type(self):
-		form_fields = ['name']
-		table_headers = ['Type Name']
-		query = db.session.query(EventType).order_by(EventType.name)
-		keys = ['name']
-
-		if self.display:
-			returned = form_fields, table_headers, query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
+		symbols = []
+		objects = self.get('event_type')
+		return [symbols.append(o['name']) for o in objects]
+# 		keys = ['name']
 
 	@property
 	def price(self):
-		form_fields = ['commodity_id', 'currency_id', 'close', 'date']
-		table_headers = ['Stock', 'Currency', 'Date', 'Price']
-		Currency = aliased(Commodity)
-		query = (
-			db.session.query(Price, Commodity, Currency)
-			.join(Price.commodity).join(Currency, Price.currency)
-			.order_by(Price.date))
-		keys = [(1, 'symbol'), (2, 'symbol'), (0, 'date'), (0, 'close')]
+		res = []
 
-		if self.display:
-			returned = form_fields, table_headers, query.all(), keys
-		else:
-			returned = query.all(), keys
+		for o in self.get('price'):
+			res.append({
+				'com_symbol': o['commodity']['symbol'],
+				'cur_symbol': o['currency']['symbol'],
+				'date': o['date'],
+				'close': o['close'],
+				'currency_id': o['currency_id'],
+				'commodity_id': o['commodity_id']})
 
-		return returned
+		return res
+# 		keys = ['symbol', 'symbol', 'date', 'close']
+
+	@property
+	def rates(self):
+		res = []
+		[res.extend(p) for p in self.list_prices([5])]
+		return res
+# 		keys = ['commodity_id', 'date', 'close']
+
+	@property
+	def security_prices(self):
+		res = []
+		[res.extend(p) for p in self.list_prices([1, 3, 4])]
+		return res
+# 		keys = ['currency_id', 'commodity_id', 'date', 'close']
 
 	@property
 	def commodity(self):
-		form_fields = [
-			'symbol', 'name', 'type_id', 'data_source_id', 'exchange_id']
-		table_headers = ['Symbol', 'Name', 'Type']
-		query = (
-			db.session.query(Commodity, CommodityType).join(CommodityType)
-			.order_by(Commodity.name))
-		keys = [(0, 'symbol'), (0, 'name'), (1, 'name')]
+		res = []
 
-		if self.display:
-			returned = form_fields, table_headers, query.all(), keys
-		else:
-			returned = query.all(), keys
+		for o in self.get('commodity_type'):
+			[c.update({'type_name': o['name']}) for c in o['commodities']]
+			res.extend(o['commodities'])
 
-		return returned
+		return res
+# 		keys = ['symbol', 'name', 'name']
+
+	@property
+	def security_data(self):
+		res = []
+		[res.extend(o['commodities']) for o in self.list_commodities()]
+		return res
+# 		keys = ['id', 'symbol']
 
 	@property
 	def transaction(self):
-		form_fields = [
-			'holding_id', 'type_id', 'shares', 'price', 'date', 'commissionable']
+		res = []
 
-		table_headers = [
-			'Holding', 'Type', 'Shares', 'Share Price', 'Date', 'Commission']
+		for o in self.get('holding'):
+			for trxn in o['transactions']:
+				trxn.update({'symbol': o['commodity']['symbol']})
+				trxn.update({'owner_id': o['account']['owner_id']})
+				trxn.update({'account_id': o['account_id']})
+				trxn.update({'commodity_id': o['commodity_id']})
+				trxn.update({'trade_commission': o['account']['trade_commission']})
+				res.append(trxn)
 
-		query = (
-			db.session.query(Transaction, Holding, Account, TrxnType, Commodity)
-			.join(Transaction.holding).join(Account, Holding.account)
-			.join(TrxnType, Transaction.type).join(Commodity, Holding.commodity))
+		return res
+# 		keys = [
+# 			'symbol', 'type_id', 'shares', 'price', 'date', 'trade_commission']
 
-		keys = [
-			(4, 'symbol'), (3, 'name'), (0, 'shares'), (0, 'price'),
-			(0, 'date'), (2, 'trade_commission')]
-
-		if self.display:
-			returned = form_fields, table_headers, query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
-
-	@property
-	def stock(self):
-		query = (
-			db.session.query(Commodity).filter(
-				Commodity.type_id.in_([1, 3, 4])))
-
-		keys = ['id', 'symbol']
-
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
+# 		keys = [
+# 			'owner_id', 'account_id', 'commodity_id', 'type_id', 'date',
+# 			'shares', 'price', 'trade_commission']
 
 	@property
 	def dividend(self):
-		query = (
-			db.session.query(Event).order_by(Event.commodity_id)
-			.filter(Event.type_id.in_([1])))
+		query = {'filters': [{'name': 'id', 'op': 'eq', 'val': 1}]}
+		return self.get('event_type', query)[0]['events']
+# 		keys = ['currency_id', 'commodity_id', 'date', 'value']
+# 		return [tuple(r[k] for k in keys) for r in result]
 
-		keys = ['currency_id', 'commodity_id', 'date', 'value']
+	def list_commodities(self, group=1):
+		query = {'filters': [{'name': 'group_id', 'op': 'eq', 'val': group}]}
+		return self.get('commodity_type', query)
 
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
+	def list_prices(self, type_ids):
+		query = {
+			'filters': [
+				{'name': 'type_id', 'op': 'in', 'val': type_ids},
+				{
+					'name': 'commodity_prices__currency_id', 'op': 'any',
+					'val': self.native}]}
 
-		return returned
+		objects = self.get('commodity', query)
+		return [o['commodity_prices'] for o in objects]
 
-	@property
-	def rate(self):
-		Currency = aliased(Commodity)
-		query = (
-			db.session.query(Price, Commodity, Currency).join(Price.commodity)
-			.join(Currency, Price.currency).order_by(Price.commodity)
-			.filter(Commodity.type_id.in_([5])).filter(
-				Currency.id.in_([self.native])))
+	def get_commodity_info(self, symbols):
+		query = {'filters': [{'name': 'symbol', 'op': 'in', 'val': symbols}]}
+		return self.get('commodity', query)
 
-		keys = [(0, 'commodity_id'), (0, 'date'), (0, 'close')]
+	def commodity_ids(self, symbols):
+		# TODO: return 'N/A' if symbol doesn't exist
+		multi = True
 
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
+		if hasattr(symbols, 'isalnum'):
+			symbols = [symbols]
+			multi = False
 
-		return returned
+		objects = self.get_commodity_info(symbols)
+		list = [(o['symbol'], o['id']) for o in objects]
+		ids = [dict(list).get(s) for s in symbols]
+		ids = ids if multi else ids[0]
+		return ids
 
-	@property
-	def raw_commodity(self):
-		query = db.session.query(Commodity)
-		keys = ['id', 'symbol']
-
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
-
-	@property
-	def raw_price(self):
-		query = (
-			db.session.query(Price, Commodity).join(Price.commodity)
-			.order_by(Price.commodity)
-			.filter(Commodity.type_id.in_([1, 3, 4])))
-
-		keys = [
-			(0, 'currency_id'), (0, 'commodity_id'), (0, 'date'), (0, 'close')]
-
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
-
-	@property
-	def raw_transaction(self):
-		query = (
-			db.session.query(Transaction, Holding, Account)
-			.join(Transaction.holding).join(Account, Holding.account))
-
-		keys = [
-			(2, 'owner_id'), (1, 'account_id'), (1, 'commodity_id'),
-			(0, 'type_id'), (0, 'date'), (0, 'shares'), (0, 'price'),
-			(2, 'trade_commission')]
-
-		if self.display:
-			returned = [], [], query.all(), keys
-		else:
-			returned = query.all(), keys
-
-		return returned
-
-	def commodity_list(self, group=1):
-		filter = {'filters': [{'name': 'group_id', 'op': 'eq', 'val': group}]}
-		return self.get('commodity_type', filter)
-
-	def commodity_info(self, symbols):
-		filter = {'filters': [{'name': 'symbol', 'op': 'in', 'val': symbols}]}
-		return self.get('commodity', filter)
-
-	def values(self, result, keys):
+	def values(self, result):
 		"""Extracts desired values from a query result
 
 		Parameters
 		----------
-		result : sequence of classes or sequence of sequences of classes
-			e.g. sqlalchemy.query.all()
-
-		keys : sequence of attributes or sequence of (int, attribute)
-			attributes should be contained in the classes from `result`
+		result : sequence of dicts
 
 		Returns
 		-------
@@ -310,32 +251,16 @@ class Connection(object):
 		Examples
 		--------
 		# >>> conn = Connection('http://localhost:5000/api/')
-		# >>> conn.values(conn.raw_commodity)
+		# >>> conn.values(conn.transaction)
 		# [(6, u'APL')]
 		"""
 
-		try:
-			values = [[getattr(r[k[0]], k[1]) for k in keys] for r in result]
-		except TypeError:
-			values = [[getattr(r, k) for k in keys] for r in result]
+		return [tuple(r.values) for r in result]
 
-		return [tuple(value) for value in values]
-
-	def ids_from_symbols(self, symbols):
-		values = self.values(*self.raw_commodity)
-		ids = dict(zip([v[1] for v in values], [v[0] for v in values]))
-
-		if hasattr(symbols, 'isalnum'):
-			ids = ids.get(symbols, None)
-		else:
-			ids = [ids.get(s, None) for s in symbols]
-
-		return ids
-
-	def process(self, post_values, tables=None, keys=None):
-		tables = (tables or self.TABLES)
-		keys = (keys or self.KEYS or [])
+	def process(self, post_values, tables=None):
+		tables = (tables or self.tables)
 		tables = [tables] if hasattr(tables, 'isalnum') else tables
+		keys = [self.keys[t] for t in tables]
 		combo = zip(keys, post_values)
 
 		table_data = [
@@ -347,8 +272,11 @@ class Connection(object):
 		return [dict(zip(content_keys, values)) for values in content_values]
 
 	def get(self, table, query=None):
-		base = '%s%s' % (self.site, table)
-		url = '%s?q=%s' % (base, dmp(query, cls=CustomEncoder)) if query else base
+		url = '%s%s?results_per_page=%s' % (self.site, table, self.limit)
+
+		if query:
+			url = '%s&q=%s' % (url, dmp(query, cls=CustomEncoder))
+
 		r = g(url, headers=self.HDR)
 		return loads(r.text)['objects']
 

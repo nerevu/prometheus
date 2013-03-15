@@ -1,3 +1,4 @@
+from datetime import datetime as dt, date as d, timedelta
 from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
 
@@ -47,35 +48,18 @@ def get_init_values():
 		[(1, 1, 1, 1, 'Scottrade'), (2, 2, 1, 1, 'Vanguard IRA')],  # account
 		[(6, 1)],  # holding
 		[[('Buy')], [('Sell')]],  # trxn_type
-		[(1, 1, 2, 455, '1/2/13', True)]]  # transaction
+		[]]  # transaction
 
 	return values
 
 
 def get_pop_values():
 	values = [
-		[],  # exchange
-		[],  # data_source
-		[],  # commodity_group
-		[],  # commodity_type
 		[
 			('IBM', 'International Business Machines', 1, 1, 1),
 			('WMT', 'Wal-Mart', 1, 1, 1),
 			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
-		[],  # event_type
-		[],  # event
-		[],  # price
-		[],  # person
-		[],  # company
-		[],  # account_type
-		[],  # account
-		[(8, 1), (9, 1), (10, 1)],  # holding
-		[],  # trxn_type
-		[
-			(2, 1, 10, 148, '1/2/13', True),
-			(3, 1, 12, 85, '1/2/13', True),
-			(1, 1, 2, 456, '1/2/13', True),
-			(4, 1, 14, 125, '1/2/13', True)]]  # transaction
+		[(8, 1), (9, 1), (10, 1)]]  # holding
 
 	return values
 

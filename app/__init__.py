@@ -151,7 +151,8 @@ def create_app(config_mode=None, config_file=None):
 		'methods': app.config['API_METHODS'],
 		'validation_exceptions': API_EXCEPTIONS,
 		'allow_functions': app.config['API_ALLOW_FUNCTIONS'],
-		'allow_patch_many': app.config['API_ALLOW_PATCH_MANY']}
+		'allow_patch_many': app.config['API_ALLOW_PATCH_MANY'],
+		'max_results_per_page': app.config['API_MAX_RESULTS_PER_PAGE']}
 
 	# provides a nested list of class names grouped by model in the form [[],[]]
 	# [[], ['Event', 'Type']]

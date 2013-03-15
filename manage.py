@@ -4,6 +4,7 @@ import itertools as it
 
 from subprocess import call
 from pprint import pprint
+from datetime import datetime as dt, date as d, timedelta
 
 from flask import current_app as app, url_for
 from flask.ext.script import Manager
@@ -20,15 +21,14 @@ manager.add_option('-f', '--cfgfile', dest='config_file', type=p.abspath)
 
 def post_all(conn):
 		symbols = list(it.chain(conn.currencies, conn.securities))
-		prices = conn.get_prices(symbols)
-		dividends = conn.get_prices(conn.securities, extra='divs')
-		splits = conn.get_prices(conn.securities, extra='splits')
+		prices = conn.get_price_list(symbols)
+		dividends = conn.get_price_list(conn.securities, extra='divs')
+		splits = conn.get_price_list(conn.securities, extra='splits')
 
 		values = list(it.chain(prices, dividends, splits))
 		tables = ['price', 'event', 'event']
-		keys = list(it.chain(conn.price_keys, conn.event_keys, conn.event_keys))
 
-		conn.post(conn.process(values, tables, keys))
+		conn.post(conn.process(values, tables))
 
 
 @manager.command
@@ -86,8 +86,7 @@ def testapi():
 
 		values = [[[('Yahoo')], [('Google')], [('XE')]]]
 		tables = 'data_source'
-		keys = [[('name')]]
-		content = conn.process(values, tables, keys)
+		content = conn.process(values, tables)
 		print 'Attempting to post %s to %s at %s' % (
 			content[0]['data'], tables[0], site)
 
@@ -100,6 +99,7 @@ def initdb():
 	"""Removes all content from database and initializes it
 		with default values
 	"""
+	date = d.today() - timedelta(days=45)
 
 	with app.app_context():
 		resetdb()
@@ -109,6 +109,9 @@ def initdb():
 		values = get_init_values()
 		conn.post(conn.process(values))
 		post_all(conn)
+
+		price = conn.get_first_price(conn.securities, date)
+		conn.post(conn.process(price, 'transaction'))
 		print 'Database initialized'
 
 
@@ -117,6 +120,7 @@ def popdb():
 	"""Removes all content from database and populates it
 		with sample data
 	"""
+	date = d.today() - timedelta(days=30)
 
 	with app.app_context():
 		initdb()
@@ -124,8 +128,11 @@ def popdb():
 		conn = Historical(site)
 
 		values = get_pop_values()
-		conn.post(conn.process(values))
+		conn.post(conn.process(values, ['commodity', 'holding']))
 		post_all(conn)
+
+		price = conn.get_first_price(conn.securities, date)
+		conn.post(conn.process(price, 'transaction'))
 		print 'Database populated'
 
 
@@ -144,11 +151,10 @@ def popprices(sym=None, start=None, end=None, extra=None):
 		divs = True if (extra and extra.startswith('d')) else False
 		splits = True if (extra and extra.startswith('s')) else False
 
-		values = conn.get_prices(sym, start, end, extra)
+		values = conn.get_price_list(sym, start, end, extra)
 		table = 'event' if (divs or splits) else 'price'
-		keys = conn.event_keys if (divs or splits) else conn.price_keys
 
-		conn.post(conn.process(values, table, keys))
+		conn.post(conn.process(values, table))
 		print 'Prices table populated'
 
 if __name__ == '__main__':

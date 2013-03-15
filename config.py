@@ -93,6 +93,7 @@ class Config(Content):
 	API_METHODS = ['GET', 'POST', 'DELETE', 'PATCH', 'PUT']
 	API_ALLOW_FUNCTIONS = True
 	API_ALLOW_PATCH_MANY = True
+	API_MAX_RESULTS_PER_PAGE = 1000
 
 
 class Production(Config):
