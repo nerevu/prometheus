@@ -1,11 +1,11 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
-from flask.ext.wtf import AnyOf, BooleanField
+from flask.ext.wtf import BooleanField
 from wtforms.ext.dateutil.fields import DateField
 from app.helper import get_choices, get_x_choices, get_validators
-from app.hermes.models import Commodity
-from .models import Holding, TrxnType
+from app.connection import Connection
 
 univals = [Required()]
+conn = Connection()
 
 
 class TransactionForm(Form):
@@ -25,13 +25,12 @@ class TransactionForm(Form):
 	@classmethod
 	def new(self):
 		form = self()
-		a_class = Holding
-		b_class = Commodity
-		form.holding_id.choices = get_x_choices(
-			(a_class, 'id'), (b_class, 'symbol'))
-		form.holding_id.validators = get_validators(a_class, 'id')
-		form.type_id.choices = get_choices(TrxnType, 'id', 'name')
-		form.type_id.validators = get_validators(a_class, 'id')
+		tables = ['holding', 'commodity']
+		fields = ['id', 'symbol']
+		form.holding_id.choices = get_x_choices(tables, fields, conn)
+		form.holding_id.validators = get_validators('holding', 'id', conn)
+		form.type_id.choices = get_choices('trxn_type', 'id', conn, 'name')
+		form.type_id.validators = get_validators('holding', 'id', conn)
 		return form
 
 

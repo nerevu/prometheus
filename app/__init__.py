@@ -16,23 +16,13 @@ from functools import partial, update_wrapper
 from importlib import import_module
 from itertools import imap, repeat
 from os import path as p, listdir
-from savalidation import ValidationError
-from redis import Redis
-from rq import Queue
 from flask import Flask, render_template, g, flash, redirect, url_for
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 from flask.views import View
-from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.bootstrap import Bootstrap
-from flask.ext.restless import APIManager
 from flask.ext.markdown import Markdown
 
-API_EXCEPTIONS = [
-	ValidationError, ValueError, AttributeError, TypeError, IntegrityError,
-	OperationalError]
-
-db = SQLAlchemy()
 __DIR__ = p.dirname(__file__)
 
 
@@ -82,7 +72,6 @@ def _template(kwargs):
 def create_app(config_mode=None, config_file=None):
 	# Create webapp instance
 	app = Flask(__name__)
-	db.init_app(app)
 	Bootstrap(app)
 	Markdown(app)
 
@@ -144,32 +133,6 @@ def create_app(config_mode=None, config_file=None):
 		func = _get_view_func(page, mkd_folder)
 		app.add_url_rule('/%s/' % page['id'], view_func=func)
 
-	# Create the Flask-Restless API manager.
-	mgr = APIManager(app, flask_sqlalchemy_db=db)
-
-	kwargs = {
-		'methods': app.config['API_METHODS'],
-		'validation_exceptions': API_EXCEPTIONS,
-		'allow_functions': app.config['API_ALLOW_FUNCTIONS'],
-		'allow_patch_many': app.config['API_ALLOW_PATCH_MANY'],
-		'max_results_per_page': app.config['API_MAX_RESULTS_PER_PAGE']}
-
-	# provides a nested list of class names grouped by model in the form [[],[]]
-	# [[], ['Event', 'Type']]
-	nested_classes = map(_get_app_classes, models)
-
-	# provides a list of tuples (module, [list of class names])
-	# in the form [(<module>,[]),(<module>,[])]
-	# [(<module 'app.hermes.models' from '/path/to/models.pyc'>,
-	# 	['Event', 'Type'])]
-	sets = zip(models, nested_classes)
-
-	# provides a nested iterator of classes in the expanded form of <class>
-	# <class 'app.hermes.models.Event'>
-	nested_tables = [imap(getattr, repeat(x[0]), x[1]) for x in sets]
-
-	# Create API endpoints (available at /api/<tablename>)
-	[[mgr.create_api(x, **kwargs) for x in tables] for tables in nested_tables]
 	return app
 
 
@@ -181,9 +144,12 @@ class Add(View):
 
 		if form.validate_on_submit():
 			self.bookmark_table(table)
+			conn = Connection()
 			form.populate_obj(entry)
-			db.session.add(entry)
-			db.session.commit()
+			keys = set(form._fields.keys()).difference(['csrf_token'])
+			values = [getattr(form, k).data for k in keys]
+			content = conn.process(values, table, keys)
+			conn.post(content)
 
 			flash(
 				'Awesome! You just posted a new %s.' % name,
@@ -191,33 +157,13 @@ class Add(View):
 
 		else:
 			[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
-				for k, v in self.form.errors.iteritems()]
+				for k, v in form.errors.iteritems()]
 
 		return redirect(url_for(redir, table=table))
 
 
-class RQ(View):
-	def dispatch_request(self):
-		form, func, args, name, redir = self.get_vars()
-
-		if form.validate_on_submit():
-			q = Queue(connection=Redis())
-			job = q.enqueue_call(func=func, args=args)
-
-			flash(
-				'Awesome! Your %s upload has just been %s.' %
-				(name, job.status), 'alert alert-success')
-
-		else:
-			[flash('%s: %s.' % (k.title(), v[0]), 'alert alert-error')
-				for k, v in form.errors.iteritems()]
-
-		return redirect(url_for(redir))
-
 # dynamically import app models and views
 modules = _get_modules(__DIR__)
-model_names = ['app.%s.models' % x for x in modules]
 view_names = ['app.%s.views' % x for x in modules]
-models = [import_module(x) for x in model_names]
 views = [import_module(x) for x in view_names]
 blueprints = map(getattr, views, modules)

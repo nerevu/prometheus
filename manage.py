@@ -8,10 +8,10 @@ from datetime import datetime as dt, date as d, timedelta
 
 from flask import current_app as app, url_for
 from flask.ext.script import Manager
-from app import create_app, db
+from app import create_app
 from app.connection import Connection
 from app.hermes import Historical
-from app.helper import get_init_values, get_pop_values, portify
+from app.helper import get_init_values, get_pop_values, app_site
 
 manager = Manager(create_app)
 manager.add_option(
@@ -43,55 +43,32 @@ def checkstage():
 @manager.command
 def runtests():
 	"""Checks staged with git pre-commit hook"""
-
 	cmd = 'nosetests -xv'
 	return call(cmd, shell=True)
-
-
-@manager.command
-def createdb():
-	"""Creates database if it doesn't already exist"""
-
-	with app.app_context():
-		db.create_all()
-		print 'Database created'
 
 
 @manager.command
 def cleardb():
 	"""Removes all content from database"""
 
-	with app.app_context():
-		db.drop_all()
-		print 'Database cleared'
-
-
-@manager.command
-def resetdb():
-	"""Removes all content from database and creates new tables"""
-
-	with app.app_context():
-		cleardb()
-		createdb()
+	print 'Database cleared'
 
 
 @manager.command
 def testapi():
 	"""Removes all content from database and to test the API"""
+	cleardb()
+	site = app_site()
+	conn = Connection(site)
 
-	with app.app_context():
-		resetdb()
-		site = portify(url_for('api', _external=True))
-		conn = Connection(site)
+	values = [[('Yahoo')], [('Google')], [('XE')]]
+	table = 'data_source'
+	content = conn.process(values, table)
+	print 'Attempting to post %s to %s at %s' % (
+		content[0]['data'], table, site)
 
-		values = [[[('Yahoo')], [('Google')], [('XE')]]]
-		tables = 'data_source'
-		content = conn.process(values, tables)
-		print 'Attempting to post %s to %s at %s' % (
-			content[0]['data'], tables[0], site)
-
-		conn.post(content)
-		print 'Content posted via API!'
+	conn.post(content)
+	print 'Content posted via API!'
 
 
 @manager.command
@@ -100,19 +77,16 @@ def initdb():
 		with default values
 	"""
 	date = d.today() - timedelta(days=45)
+	cleardb()
+	conn = Historical(app_site())
 
-	with app.app_context():
-		resetdb()
-		site = portify(url_for('api', _external=True))
-		conn = Historical(site)
+	values = get_init_values()
+	conn.post(conn.process(values))
+	post_all(conn)
 
-		values = get_init_values()
-		conn.post(conn.process(values))
-		post_all(conn)
-
-		price = conn.get_first_price(conn.securities, date)
-		conn.post(conn.process(price, 'transaction'))
-		print 'Database initialized'
+	price = conn.get_first_price(conn.securities, date)
+	conn.post(conn.process(price, 'transaction'))
+	print 'Database initialized'
 
 
 @manager.command
@@ -121,19 +95,16 @@ def popdb():
 		with sample data
 	"""
 	date = d.today() - timedelta(days=30)
+	initdb()
+	conn = Historical(app_site())
 
-	with app.app_context():
-		initdb()
-		site = portify(url_for('api', _external=True))
-		conn = Historical(site)
+	values = get_pop_values()
+	conn.post(conn.process(values, ['commodity', 'holding']))
+	post_all(conn)
 
-		values = get_pop_values()
-		conn.post(conn.process(values, ['commodity', 'holding']))
-		post_all(conn)
-
-		price = conn.get_first_price(conn.securities, date)
-		conn.post(conn.process(price, 'transaction'))
-		print 'Database populated'
+	price = conn.get_first_price(conn.securities, date)
+	conn.post(conn.process(price, 'transaction'))
+	print 'Database populated'
 
 
 @manager.option('-s', '--sym', help='Symbols')
@@ -145,8 +116,7 @@ def popprices(sym=None, start=None, end=None, extra=None):
 	"""
 
 	with app.app_context():
-		site = portify(url_for('api', _external=True))
-		conn = Historical(site)
+		conn = Historical(app_site())
 		sym = sym.split(',') if sym else None
 		divs = True if (extra and extra.startswith('d')) else False
 		splits = True if (extra and extra.startswith('s')) else False

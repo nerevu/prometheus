@@ -10,6 +10,7 @@ from pprint import pprint
 from json import dumps as dmp, loads, JSONEncoder
 from requests import get as g, post as p
 from sqlalchemy.orm import aliased
+from flask import current_app as app
 
 
 class CustomEncoder(JSONEncoder):
@@ -41,8 +42,7 @@ class Connection(object):
 	"""
 	HDR = {'content-type': 'application/json'}
 
-	def __init__(
-			self, site='http://localhost:5000/api/', native=1, display=False):
+	def __init__(self, site='http://localhost:5005', native=1):
 		"""Creates a connection to the database
 
 		Parameters
@@ -57,12 +57,11 @@ class Connection(object):
 
 		Examples
 		--------
-		>>> Connection('http://localhost:5000/api/')  #doctest: +ELLIPSIS
+		>>> Connection()  #doctest: +ELLIPSIS
 		<app.connection.Connection object at 0x...>
 		"""
 		self.site = site
 		self.native = native
-		self.display = display
 		self.limit = 1000
 
 	@property
@@ -236,26 +235,6 @@ class Connection(object):
 		ids = [dict(list).get(s) for s in symbols]
 		ids = ids if multi else ids[0]
 		return ids
-
-	def values(self, result):
-		"""Extracts desired values from a query result
-
-		Parameters
-		----------
-		result : sequence of dicts
-
-		Returns
-		-------
-		df : list of tuples of values
-
-		Examples
-		--------
-		# >>> conn = Connection('http://localhost:5000/api/')
-		# >>> conn.values(conn.transaction)
-		# [(6, u'APL')]
-		"""
-
-		return [tuple(r.values) for r in result]
 
 	def process(self, post_values, tables=None):
 		tables = (tables or self.tables)

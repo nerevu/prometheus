@@ -2,23 +2,15 @@ from datetime import datetime as dt, date as d, timedelta
 from flask import current_app as app
 from flask.ext.wtf import AnyOf, Required
 
-from app import db
-from app.connection import Connection
-
 
 # For use with Connection
-def portify(site):
-	site = site.split('/')
-
-	if site[2] == 'localhost':
-		site[2] = 'localhost:%s' % app.config['PORT']
-
-	return '/'.join(site)
+def app_site():
+	return app.config['API_URL']
 
 
 # For flask-script
 def get_init_values():
-	values = [
+	return [
 		[
 			('NYSE', 'New York Stock Exchange'), ('NASDAQ', 'NASDAQ'),
 			('OTC', 'Over the counter'), ('N/A', 'Currency')],  # exchange
@@ -104,47 +96,30 @@ def init_form(form):
 
 
 # For forms
-def get_choices(a_class, value_field, *args, **kwargs):
-	order = getattr(a_class, args[0])
+def get_choices(table, field, conn, order=None, name=None, val=None):
+	if (name and val):
+		query = {'filters': [{'name': name, 'op': 'in', 'val': val}]}
+	else:
+		query = None
 
-	try:
-		filter = getattr(a_class, kwargs['column'])
-		value = kwargs['value']
-		result = a_class.query.filter(filter.in_(value)).order_by(order).all()
-	except KeyError:
-		result = a_class.query.order_by(order).all()
-
-	values = [getattr(x, value_field) for x in result]
-	combo = []
-
-	for arg in args:
-		try:
-			new = [getattr(getattr(x, arg[0]), arg[1]) for x in result]
-		except Exception:
-			new = [getattr(x, arg) for x in result]
-
-		combo.append(new)
-
-	try:
-		selection = [', '.join(x) for x in zip(combo[0], combo[1])]
-	except IndexError:
-		selection = combo[0]
-
+	result = conn.get(table, query)
+	values = [x.field for x in result]
+	selection = [x.order for x in result]
 	return zip(values, selection)
 
 
-def get_x_choices(value, select):
-	class_a, class_b = value[0], select[0]
-	field_a, field_b = value[1], select[1]
-	result = db.session.query(class_a, class_b).join(class_b).all()
-	keys = [(0, field_a), (1, field_b)]
-	return Connection().values(result, keys)
+def get_x_choices(tables, fields, conn):
+	result = conn.get(tables[0])
+	values = [x.fields[0] for x in result]
+	selection = [x.tables[1].fields[1] for x in result]
+	return zip(values, selection)
 
 
-def get_validators(a_class, value_field):
-	result = a_class.query.all()
-	values = [getattr(x, value_field) for x in result]
+def get_validators(table, field, conn):
+	result = conn.get(table)
+	values = [x.field for x in result]
 	values = sorted(values)
+
 	return [
 		Required(), AnyOf(
 			values, message=u'Invalid value, must be one of:'
