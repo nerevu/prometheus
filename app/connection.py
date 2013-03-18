@@ -108,24 +108,23 @@ class Connection(object):
 
 	@property
 	def event(self):
-		res, event = [], {}
+		res = []
+
 		for o in self.get('event'):
-			event.update({'com_symbol': o['commodity']['symbol']})
-			event.update({'name': o['type']['name']})
-			event.update({'cur_symbol': o['currency']['symbol']})
-			event.update({'value': o['value']})
-			event.update({'date': o['date']})
-			res.append(event)
+			res.append({
+				'com_symbol': o['commodity']['symbol'],
+				'name': o['type']['name'],
+				'cur_symbol': o['currency']['symbol'],
+				'value': o['value'],
+				'date': o['date']})
 
 		return res
-#		keys = ['symbol', 'name', 'symbol', 'value', 'date']
 
 	@property
 	def event_type(self):
 		symbols = []
 		objects = self.get('event_type')
 		return [symbols.append(o['name']) for o in objects]
-# 		keys = ['name']
 
 	@property
 	def price(self):
@@ -141,21 +140,18 @@ class Connection(object):
 				'commodity_id': o['commodity_id']})
 
 		return res
-# 		keys = ['symbol', 'symbol', 'date', 'close']
 
 	@property
 	def rates(self):
 		res = []
 		[res.extend(p) for p in self.list_prices([5])]
 		return res
-# 		keys = ['commodity_id', 'date', 'close']
 
 	@property
 	def security_prices(self):
 		res = []
 		[res.extend(p) for p in self.list_prices([1, 3, 4])]
 		return res
-# 		keys = ['currency_id', 'commodity_id', 'date', 'close']
 
 	@property
 	def commodity(self):
@@ -166,14 +162,12 @@ class Connection(object):
 			res.extend(o['commodities'])
 
 		return res
-# 		keys = ['symbol', 'name', 'name']
 
 	@property
 	def security_data(self):
 		res = []
 		[res.extend(o['commodities']) for o in self.list_commodities()]
 		return res
-# 		keys = ['id', 'symbol']
 
 	@property
 	def transaction(self):
@@ -189,19 +183,11 @@ class Connection(object):
 				res.append(trxn)
 
 		return res
-# 		keys = [
-# 			'symbol', 'type_id', 'shares', 'price', 'date', 'trade_commission']
-
-# 		keys = [
-# 			'owner_id', 'account_id', 'commodity_id', 'type_id', 'date',
-# 			'shares', 'price', 'trade_commission']
 
 	@property
 	def dividend(self):
 		query = {'filters': [{'name': 'id', 'op': 'eq', 'val': 1}]}
 		return self.get('event_type', query)[0]['events']
-# 		keys = ['currency_id', 'commodity_id', 'date', 'value']
-# 		return [tuple(r[k] for k in keys) for r in result]
 
 	def list_commodities(self, group=1):
 		query = {'filters': [{'name': 'group_id', 'op': 'eq', 'val': group}]}

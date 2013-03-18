@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 
 from app import Add
 from app.connection import Connection
-from app.helper import get_kwargs, portify, init_form
+from app.helper import get_kwargs, init_form, app_site
 from .sources import CSV
 from .forms import TransactionForm, TrxnUploadForm
 
@@ -15,7 +15,7 @@ redir = '.transaction'
 
 @cronus.route('/transaction/', methods=['GET', 'POST'])
 def transaction():
-	conn = Connection()
+	conn = Connection(app_site())
 	form = init_form(TransactionForm)
 	kwargs = get_kwargs(table, 'cronus', conn, form, False)
 	return render_template('entry.html', **kwargs)

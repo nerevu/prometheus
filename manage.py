@@ -20,21 +20,20 @@ manager.add_option('-f', '--cfgfile', dest='config_file', type=p.abspath)
 
 
 def post_all(conn):
-		symbols = list(it.chain(conn.currencies, conn.securities))
-		prices = conn.get_price_list(symbols)
-		dividends = conn.get_price_list(conn.securities, extra='divs')
-		splits = conn.get_price_list(conn.securities, extra='splits')
+	symbols = list(it.chain(conn.currencies, conn.securities))
+	prices = conn.get_price_list(symbols)
+	dividends = conn.get_price_list(conn.securities, extra='divs')
+	splits = conn.get_price_list(conn.securities, extra='splits')
 
-		values = list(it.chain(prices, dividends, splits))
-		tables = ['price', 'event', 'event']
+	values = list(it.chain(prices, dividends, splits))
+	tables = ['price', 'event', 'event']
 
-		conn.post(conn.process(values, tables))
+	conn.post(conn.process(values, tables))
 
 
 @manager.command
 def checkstage():
 	"""Checks staged with git pre-commit hook"""
-
 	path = p.join(p.dirname(__file__), 'app', 'tests', 'test.sh')
 	cmd = "sh %s" % path
 	return call(cmd, shell=True)

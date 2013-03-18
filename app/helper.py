@@ -42,18 +42,14 @@ def get_init_values():
 		[[('Buy')], [('Sell')]],  # trxn_type
 		[]]  # transaction
 
-	return values
-
 
 def get_pop_values():
-	values = [
+	return [
 		[
 			('IBM', 'International Business Machines', 1, 1, 1),
 			('WMT', 'Wal-Mart', 1, 1, 1),
 			('CAT', 'Caterpillar', 1, 1, 1)],  # commodity
 		[(8, 1), (9, 1), (10, 1)]]  # holding
-
-	return values
 
 
 # For views
