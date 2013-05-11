@@ -1,1 +1,1 @@
-/Users/reubano/Documents/Projects/prometheus/app/README.rst
+../README.rst
