@@ -11,13 +11,12 @@ import nose.tools as nt
 
 from flask import json
 from app import create_app, db
-from app.connection import Connection
+from requests import get, post, delete, patch
 
 loads = json.loads
 dumps = json.dumps
 err = sys.stderr
 initialized = False
-conn = Connection()
 
 
 def setup_package():
@@ -26,8 +25,10 @@ def setup_package():
 	global app
 	global client
 	global jsonx
+	global base
 
 	app = create_app(config_mode='Test')
+	base = app.config['API_URL']
 	client = app.test_client()
 	jsonx = app.test_request_context()
 	jsonx.push()
@@ -60,49 +61,42 @@ def get_globals():
 
 
 class APIHelper:
-	endpoint = '/api'
-	json = 'application/json'
+	hdr = {'content-type': 'application/json'}
 
 	def get_data(self, table, id=None, query=None):
 		# returns status_code 200
 		if id:
-			url = '%s/%s/%s' % (self.endpoint, table, id)
+			url = base + table + '/' + id
 		else:
-			url = '%s/%s' % (self.endpoint, table)
+			url = base + table
 
 		if query:
-			r = client.get(url, content_type=self.json, q=query)
-		else:
-			r = client.get(url, content_type=self.json)
+			url = '%s&q=%s' % (url, dumps(query))
 
-		return r
+		return get(url, headers=self.HDR)
 
 	def delete_data(self, table, id):
 		# returns status_code 204
-		url = '%s/%s/%s' % (self.endpoint, table, id)
-		r = client.delete(url, content_type=self.json)
-		return r
+		url = base + table + '/' + id
+		return delete(url, headers=self.hdr)
 
 	def post_data(self, data, table):
 		# returns status_code 201
-		url = '%s/%s' % (self.endpoint, table)
-		r = client.post(url, data=dumps(data), content_type=self.json)
+		url = base + table
+		r = post(url, data=dumps(data), headers=self.hdr)
 		return r
 
 	def patch_data(self, data, table, id=None, query=None):
 		# returns status_code 200 or 201
 		if id:
-			url = '%s/%s/%s' % (self.endpoint, table, id)
+			url = base + table + '/' + id
 		else:
-			url = '%s/%s' % (self.endpoint, table)
+			url = base + table
 
 		if query:
-			r = client.patch(
-				url, data=dumps(data), content_type=self.json, q=query)
-		else:
-			r = client.patch(url, data=dumps(data), content_type=self.json)
+			url = '%s&q=%s' % (url, dumps(query))
 
-		return r
+		return patch(url, data=dumps(data), headers=self.hdr)
 
 	def get_num_results(self, table):
 		r = self.get_data(table)

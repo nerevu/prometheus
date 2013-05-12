@@ -8,10 +8,10 @@
 
 import nose.tools as nt
 
-from . import APIHelper, get_globals, check_equal, loads, dumps, err, conn
+from . import APIHelper, get_globals, check_equal, err, conn
 from pprint import pprint
-from app import create_app, db
-from app.helper import get_init_values
+from app import create_app
+from app.helper import get_init_values, clear_db
 
 
 def setup_module():
@@ -40,7 +40,6 @@ class TestAPI(APIHelper):
 	def setUp(self):
 		"""database initialization"""
 		assert not self.cls_initialized
-		db.create_all()
 
 		for piece in content:
 			table = piece['table']
@@ -54,7 +53,7 @@ class TestAPI(APIHelper):
 	def tearDown(self):
 		"""database removal"""
 		assert self.cls_initialized
-		db.drop_all()
+		clear_dbl()
 		self.cls_initialized = False
 
 		print('TestAPI Class Teardown\n')
@@ -91,7 +90,6 @@ class TestWeb:
 	def setUp(self):
 		"""Initialize database with data"""
 		assert not self.cls_initialized
-		db.create_all()
 		self.cls_initialized = True
 
 		print('\nTestWeb Class Setup\n')
@@ -99,17 +97,10 @@ class TestWeb:
 	def tearDown(self):
 		"""Remove data from database"""
 		assert self.cls_initialized
-		db.drop_all()
+		clear_db()
 		self.cls_initialized = False
 
 		print('TestWeb Class Teardown\n')
-
-	def test_api(self):
-		for table in tables:
-			self.setUp()
-			r = client.get('/api/%s' % table)
-			self.tearDown()
-			yield check_equal, table, r.status_code, 200
 
 	def test_home(self):
 		r = client.get('/')
