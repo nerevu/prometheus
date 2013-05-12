@@ -29,7 +29,7 @@ config = {
 	'packages': find_packages(),
 	'zip_safe': False,
 	'license': 'MIT',
-    'platforms': ['MacOS X', 'Windows', 'Linux'],
+	'platforms': ['MacOS X', 'Windows', 'Linux'],
 	'include_package_data': True,
 }
 
