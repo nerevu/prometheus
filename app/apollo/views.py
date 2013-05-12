@@ -4,26 +4,19 @@ import numpy as np
 import pandas as pd
 
 from pprint import pprint
-from json import dumps, loads
-from redis import Redis
-from rq import Queue
-from rq.job import Job
+from json import loads
 from collections import deque
 from flask import Blueprint, render_template, url_for, jsonify, request
 
 from app.connection import Connection
-from app.helper import portify
 from . import Worth
 
 apollo = Blueprint('apollo', __name__)
-rconn = Redis()
 
 
 @apollo.route('/get_ids/')
 def get_ids():
-	site = portify(url_for('api', _external=True))
-	conn = Connection(site)
-	q = Queue(connection=rconn)
+	conn = Connection()
 	tables = [
 		'transaction', 'dividend', 'security_prices', 'price', 'security_data']
 	jobs = [q.enqueue_call(func=getattr, args=(conn, item)) for item in tables]
@@ -31,21 +24,6 @@ def get_ids():
 	jobs.append(q.enqueue_call(func=conn.commodity_ids, args=(table,)))
 	result = [job.id for job in jobs]
 	return jsonify(result=','.join(result))
-
-
-# @apollo.route('/poll/')
-# def poll():
-# 	job_ids = request.args.get('job_ids').split(',')
-# 	jobs = [Job.fetch(j, connection=rconn) for j in job_ids]
-# 	return jsonify(result=all(job.is_finished for job in jobs))
-
-
-@apollo.route('/get_res/')
-def get_res():
-	job_ids = request.args.get('job_ids').split(',')
-	jobs = [Job.fetch(j, connection=rconn) for j in job_ids]
-	result = [job.result for job in jobs]
-	return jsonify(result=dumps(result))
 
 
 @apollo.route('/worth_data/')
@@ -78,4 +56,3 @@ def worth(table='USD'):
 		'data_label': data_label}
 
 	return render_template('barchart.html', **kwargs)
-# 	return render_template('index.html', **kwargs)
