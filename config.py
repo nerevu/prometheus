@@ -4,11 +4,12 @@ from datetime import date as d
 
 _basedir = p.dirname(__file__)
 
-# change these values
 __APP_NAME__ = 'Prometheus'
 __YOUR_NAME__ = 'Reuben Cummings'
 __YOUR_EMAIL__ = 'reubano@gmail.com'
 __YOUR_WEBSITE__ = 'http://reubano.github.com'
+# __API_BASE__ = 'http://prometheus-api.herokuapp.com/'
+__API_BASE__ = 'http://localhost:5005/'
 
 
 # configuration
@@ -78,14 +79,11 @@ class Config(Content):
 	HOST = '127.0.0.1'
 	heroku_server = '%s%s.herokuapp.com' % (Content.app, end)
 
-	# change this if you host your own api
-	api_base = 'http://prometheus-api.herokuapp.com'
-
 	if heroku:
 		SERVER_NAME = heroku_server
 
 	api_prefix = ''
-	API_URL = api_base + '/' + api_prefix if api_prefix else api_base
+	API_URL = __API_BASE__ + api_prefix + '/' if api_prefix else __API_BASE__
 	SECRET_KEY = os.environ.get('SECRET_KEY', 'secret_key')
 	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'secret_key')
 	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', 'secret_key')

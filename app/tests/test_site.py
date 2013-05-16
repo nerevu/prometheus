@@ -26,7 +26,6 @@ def setup_module():
 	print('Site Module Setup\n')
 
 
-
 class TestWeb:
 	"""Unit tests for the website"""
 	def __init__(self):

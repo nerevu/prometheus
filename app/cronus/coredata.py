@@ -109,13 +109,18 @@ class DataObject(pd.DataFrame):
 		elif stype.startswith('ser'):
 			default_df = pd.DataFrame({data.name: data})
 		elif (stype.startswith('d') or stype.startswith('seq')):
-			default_df = pd.DataFrame(data, columns=keys) if keys else pd.DataFrame(data)
+			if keys:
+				default_df = pd.DataFrame(data, columns=keys)
+			else:
+				default_df = pd.DataFrame(data)
 
 		keys = (keys or list(default_df))
 		has_index = default_df.index.names[0]
 
 		if not (index or has_index):
-			index = [k for k in keys if str(k).endswith('_id') or str(k).startswith('date')]
+			index = [
+				k for k in keys if (
+					str(k).endswith('_id') or str(k).startswith('date'))]
 
 		if index and not keys:
 			keys = index
@@ -549,22 +554,22 @@ class DataObject(pd.DataFrame):
 			toffill = list(df)
 
 		# fill in missing values
- 		for g in df.groupby(level=index).groups:
- 			for ff in toffill:
- 				df.ix[g][ff] = df.ix[g][ff].fillna(method='ffill')
+		for g in df.groupby(level=index).groups:
+			for ff in toffill:
+				df.ix[g][ff] = df.ix[g][ff].fillna(method='ffill')
 
- 			for bf in tobfill:
- 				df.ix[g][bf] = df.ix[g][bf].fillna(method='bfill')
+			for bf in tobfill:
+				df.ix[g][bf] = df.ix[g][bf].fillna(method='bfill')
 
- 			for int in tointerpolate:
- 				# fill in blanks with time interpolated values
- 				if df.ix[g][int].abs().sum() >= 0:
- 					df.ix[g][int] = df.ix[g][int].interpolate(method='time')
- 				else:
- 					missing = True
+			for int in tointerpolate:
+				# fill in blanks with time interpolated values
+				if df.ix[g][int].abs().sum() >= 0:
+					df.ix[g][int] = df.ix[g][int].interpolate(method='time')
+				else:
+					missing = True
 
- 		df = df.drop_duplicates() if dedupe else df
- 		return DataObject(df), missing
+		df = df.drop_duplicates() if dedupe else df
+		return DataObject(df), missing
 
 
 class Portfolio(DataObject):
@@ -575,9 +580,9 @@ class Portfolio(DataObject):
 	----------
 	transactions : DataObject
 		transactions.dtypes =
-			shares        float64
-			price         float64
-			commission    float64
+			shares		  float64
+			price		  float64
+			commission	  float64
 
 		transactions.index.names = [
 			'owner_id',
