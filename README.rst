@@ -1,7 +1,7 @@
 prometheus
 ===========
 
-`!`Build Status <https://secure.travis-ci.org/reubano/prometheus.png>`_ <http://travis-ci.org/reubano/prometheus>`_
+.. image:: https://secure.travis-ci.org/reubano/prometheus.png
 
 .. image:: http://github.com/reubano/prometheus/raw/master/screenshot.png
 
@@ -82,7 +82,7 @@ Now view the app at `<http://localhost:5000>`
 Scripts
 -------
 
-Prometheus comes with a build in script manager `manage.py`. Use it to start the
+Prometheus comes with a built in script manager ``manage.py``. Use it to start the
 server, run tests, and initialize the database.
 
 Usage
@@ -179,7 +179,7 @@ projects without worrying about any adverse interactions.
 	cd prometheus
 	sudo pip install virtualenv virtualenvwrapper
 
-Add the following to your `~/.profile`
+Add the following to your ``~/.profile``
 
 ::
 
@@ -200,7 +200,7 @@ Create your new virtualenv
 API configuration
 ^^^^^^^^^^^^^^^^^
 
-By default, this project uses the API hosted at <http://prometheus-api.herokuapp.com>.
+By default, this project uses the API hosted at http://prometheus-api.herokuapp.com.
 If you would like to host your own API do the following:
 
 Clone the repo
@@ -222,29 +222,31 @@ Run server (pick a different port than the main app)
 
 	./manage.py runserver -p 5005
 
-Now your api is up and running at `<http://localhost:5005>`
-Set the `api_base` in `config.py` to url of your new api
+Now that your api is up and running at http://localhost:5005, set the
+``api_base`` variable in ``config.py`` to the url of your new api.
 
 Production Server
 ^^^^^^^^^^^^^^^^^
 
 Getting Gevent up and running is a bit tricky so follow these instructions carefully.
 
-To use `gevent`, you first need to install `libevent`.
+To use ``gevent``, you first need to install ``libevent``.
 
 *Linux*
 
 	apt-get install libevent-dev
 
-*Mac OS X via `homebrew <http://mxcl.github.com/homebrew/>`_*
+*Mac OS X via* `homebrew <http://mxcl.github.com/homebrew/>`_
 
 	brew install libevent
 
-*Mac OS X via `macports <http://www.macports.com/>`_*
+*Mac OS X via* `macports <http://www.macports.com/>`_
 
 	sudo port install libevent
 
-*Mac OS X via `DMG available on Rudix <http://rudix.org/packages-jkl.html#libevent>`_*
+*Mac OS X via DMG*
+
+	`download on Rudix <http://rudix.org/packages-jkl.html#libevent>`_
 
 Now that libevent is handy, install the remaining requirements
 
@@ -273,7 +275,7 @@ You can also specify what port you'd prefer to use
 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^
 
-Prometheus will reference the following environment variables in `config.py`
+Prometheus will reference the following environment variables in ``config.py``
 if they are set on your system.
 
 ::
@@ -303,8 +305,8 @@ Install heroku and create your app
 	sudo gem install heroku
 	heroku create -s cedar app_name
 
-Now before pushing to Heroku, remove `pandas` (there is a bug where heroku won't
-install `pandas` unless `numpy` is present)
+Now before pushing to Heroku, remove ``pandas`` (there is a bug where heroku won't
+install ``pandas`` unless ``numpy`` is already installed)
 
 ::
 
@@ -322,13 +324,13 @@ Now, we can view the application in our web browser
 
 	heroku open
 
-And anytime you want to redeploy, it's as simple as `git push heroku master`.
-Once you are done coding, deactivate your virtualenv with `deactivate`.
+And anytime you want to redeploy, it's as simple as ``git push heroku master``.
+Once you are done coding, deactivate your virtualenv with ``deactivate``.
 
 Directory Structure
 -------------------
 
-	tree . | sed 's/+----/├──/' | sed '/.pyc/d'
+	tree . | sed 's/+----/├──/' | sed '/.pyc/d' | sed '/.DS_Store/d'
 
 ::
 
@@ -336,13 +338,13 @@ Directory Structure
          ├──Procfile                        (heroku process)
          ├──README.rst
          ├──app
-         |   ├──__init__.py
+         |   ├──__init__.py                 (main app module)
          |   ├──apollo                      (visualization engine)
-         |   |    ├──__init__.py
+         |   |    ├──__init__.py			(main apollo module)
          |   |    ├──views.py
-         |   ├──connection.py               (api interface)
+         |   ├──connection.py               (api interface module)
          |   ├──cronus                      (portfolio analytics engine)
-         |   |    ├──__init__.py
+         |   |    ├──__init__.py			(blank - see sub modules)
          |   |    ├──analytics.py
          |   |    ├──coredata.py
          |   |    ├──forms.py
@@ -351,7 +353,7 @@ Directory Structure
          |   ├──favicon.ico
          |   ├──helper.py                   (manage/views/forms helper)
          |   ├──hermes                      (price/event data aggregator)
-         |   |    ├──__init__.py
+         |   |    ├──__init__.py            (main hermes module)
          |   |    ├──forms.py
          |   |    ├──views.py
          |   ├──LICENSE
@@ -375,14 +377,14 @@ Directory Structure
          |   |    ├──page.html
          |   |    ├──topnav.html
          |   ├──tests
-         |   ├──__init__.py
-         |   ├──standard.rc                 (pylint config)
-         |   ├──test.sh                     (git pre-commit hook)
-         |   ├──test_cronus.py
-         |   ├──test_hermes.py
-         |   ├──test_site.py
-         |   ├──trnx.csv
-         ├──config.py                       (config module)
+         |        ├──__init__.py            (main tests module)
+         |        ├──standard.rc            (pylint config)
+         |        ├──test.sh                (git pre-commit hook)
+         |        ├──test_cronus.py
+         |        ├──test_hermes.py
+         |        ├──test_site.py
+         |        ├──trnx.csv
+         ├──config.py                       (app config)
          ├──manage.py                       (flask-script)
          ├──requirements.txt
          ├──runtime.txt                     (python version)
@@ -393,8 +395,8 @@ Contributing
 
 1. Fork
 2. Code (if you are having problems committing because of git pre-commit
-   hook errors, just run `./manage.py checkstage` to see what the issues are.)
-3. Test `./manage.py runtests`
+   hook errors, just run ``./manage.py checkstage`` to see what the issues are.)
+3. Test ``./manage.py runtests``
 4. Do a pull request
 
 Contributors
