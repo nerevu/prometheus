@@ -34,12 +34,6 @@ def _get_modules(dir):
 	return modules
 
 
-def _get_app_classes(module):
-	classes = getmembers(module, isclass)
-	app_classes = filter(lambda x: str(x[1]).startswith("<class 'app"), classes)
-	return ['%s' % x[0] for x in app_classes]
-
-
 def _get_view_func(page, mkd_folder):
 	path = p.join(__DIR__, mkd_folder, page['file'])
 	text = open(path).read()
