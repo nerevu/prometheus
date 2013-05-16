@@ -1,11 +1,15 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from flask.ext.wtf import BooleanField
+from flask import current_app as app
 from wtforms.ext.dateutil.fields import DateField
-from app.helper import get_choices, get_x_choices, get_validators, app_site
-from app.connection import Connection
+from app.helper import HelpForm, app_site
 
 univals = [Required()]
-# conn = Connection(app_site())
+
+
+def help():
+	with app.app_context():
+		return HelpForm(app_site())
 
 
 class TransactionForm(Form):
@@ -25,12 +29,13 @@ class TransactionForm(Form):
 	@classmethod
 	def new(self):
 		form = self()
+		helper = help()
 		tables = ['holding', 'commodity']
 		fields = ['id', 'symbol']
-		form.holding_id.choices = get_x_choices(tables, fields)
-		form.holding_id.validators = get_validators('holding', 'id')
-		form.type_id.choices = get_choices('trxn_type', 'id', 'name')
-		form.type_id.validators = get_validators('holding', 'id')
+		form.holding_id.choices = helper.get_x_choices(tables, fields)
+		form.holding_id.validators = helper.get_validators('holding', 'id')
+		form.type_id.choices = helper.get_choices('trxn_type', 'id', 'name')
+		form.type_id.validators = helper.get_validators('holding', 'id')
 		return form
 
 
