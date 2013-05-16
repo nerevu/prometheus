@@ -5,13 +5,17 @@ subheading: Learn about the philosophy behind Prometheus and how it was created
 
 ## What is Prometheus?
 
-### Inspiration
+### Motivation
 
-The inspiration for Prometheus came from the lack of adequate tools for managing investment portfolios. Currently available applications fail for various reasons:
+Prometheus resulted from the lack of adequate tools for managing investment portfolios. Currently available applications fail for various reasons:
 
 * lack support for managing investments ([Mint](www.mint.com))
 * present a conflict of interest through management fees or ties to brokerage firms ([Betterment](http://www.betterment.com/), [Wealthfront](http://www.wealthfront.com/))
 * limited in the number of asset classes they provide exposure to ([MarketRiders](http://www.marketriders.com/), [FutureAdvisor](https://www.futureadvisor.com/))
+
+### Inspiration
+
+Prometheus is modeled after the command line programs [beancounter](http://eddelbuettel.com/dirk/code/beancounter.html) and [smtm](http://dirk.eddelbuettel.com/code/smtm.html)
 
 ### Features
 

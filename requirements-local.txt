@@ -8,9 +8,6 @@ Jinja2==2.6
 Markdown==2.2.1
 WTForms==1.0.2
 Werkzeug==0.8.3
-gevent==0.13.8
-greenlet==0.4.0
-gunicorn==0.17.2
 nose==1.2.1
 numpy==1.7.0
 pandas==0.10.1

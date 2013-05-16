@@ -9,7 +9,6 @@
 from pprint import pprint
 from json import dumps as dmp, loads, JSONEncoder
 from requests import get as g, post as p
-from sqlalchemy.orm import aliased
 from flask import current_app as app
 
 
