@@ -15,7 +15,7 @@ Prometheus resulted from the lack of adequate tools for managing investment port
 
 ### Inspiration
 
-Prometheus is modeled after the command line programs [beancounter](http://eddelbuettel.com/dirk/code/beancounter.html) and [smtm](http://dirk.eddelbuettel.com/code/smtm.html)
+Prometheus is modeled after Dirk Eddelbuettel's [beancounter](http://eddelbuettel.com/dirk/code/beancounter.html) and [smtm](http://dirk.eddelbuettel.com/code/smtm.html)
 
 ### Features
 
