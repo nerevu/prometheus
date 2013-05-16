@@ -1,9 +1,10 @@
-prometheus
-===========
+prometheus |build|
+==================
 
-.. image:: https://secure.travis-ci.org/reubano/prometheus.png
+.. |build| image:: https://secure.travis-ci.org/reubano/prometheus.png
 
-.. image:: http://github.com/reubano/prometheus/raw/master/screenshot.png
+.. image:: https://raw.github.com/reubano/prometheus/master/screenshot.png
+   :width: 500pt
 
 Introduction
 ------------
@@ -77,7 +78,7 @@ Run server
 
 	./manage.py runserver
 
-Now view the app at `<http://localhost:5000>`
+Now view the app at http://localhost:5000
 
 Scripts
 -------
@@ -135,7 +136,7 @@ Commands
 Command options
 ^^^^^^^^^^^^^^^
 
-Type `./manage.py <command> -h` to view any command's options
+Type ``./manage.py <command> -h`` to view any command's options
 
 	./manage.py manage runserver -h
 
@@ -340,11 +341,11 @@ Directory Structure
          ├──app
          |   ├──__init__.py                 (main app module)
          |   ├──apollo                      (visualization engine)
-         |   |    ├──__init__.py			(main apollo module)
+         |   |    ├──__init__.py            (main apollo module)
          |   |    ├──views.py
          |   ├──connection.py               (api interface module)
          |   ├──cronus                      (portfolio analytics engine)
-         |   |    ├──__init__.py			(blank - see sub modules)
+         |   |    ├──__init__.py            (blank - see sub modules)
          |   |    ├──analytics.py
          |   |    ├──coredata.py
          |   |    ├──forms.py
@@ -394,27 +395,35 @@ Contributing
 ------------
 
 1. Fork
-2. Code (if you are having problems committing because of git pre-commit
+2. Clone
+3. Code (if you are having problems committing because of git pre-commit
    hook errors, just run ``./manage.py checkstage`` to see what the issues are.)
-3. Test ``./manage.py runtests``
-4. Do a pull request
+4. Use tabs **not** spaces
+5. Test ``./manage.py runtests``
+6. Submit a pull request
 
 Contributors
 ------------
 
+	git shortlog -sn
+
 ::
 
-	git shortlog -s -n
 	commits: 405
 	  404  Reuben Cummings
- 	  1    Luke Cyca
+ 	    1  Luke Cyca
+
+Inspiration
+-----------
+
+Prometheus is modeled after Dirk Eddelbuettel's `beancounter <http://eddelbuettel.com/dirk/code/beancounter.html>`_ and `smtm <http://dirk.eddelbuettel.com/code/smtm.html>`_.
 
 About Flask
 -----------
 `Flask <http://flask.pocoo.org>`_ is a BSD-licensed microframework for Python based on
 `Werkzeug <http://werkzeug.pocoo.org/>`_, `Jinja2 <http://jinja.pocoo.org>`_ and good intentions.
 
-LICENSE
+License
 -------
 
-prometheus is distributed under the `BSD License <http://opensource.org/licenses/bsd-3-license.php>`_, the same as `Flask <http://flask.pocoo.org>`_ on which this program depends.
+Prometheus is distributed under the `BSD License <http://opensource.org/licenses/bsd-3-license.php>`_, the same as `Flask <http://flask.pocoo.org>`_ on which this program depends.
