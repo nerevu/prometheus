@@ -41,7 +41,7 @@ def checkstage():
 
 @manager.command
 def runtests():
-	"""Checks staged with git pre-commit hook"""
+	"""Run nose tests"""
 	cmd = 'nosetests -xv'
 	return call(cmd, shell=True)
 
@@ -55,19 +55,14 @@ def cleardb():
 
 @manager.command
 def testapi():
-	"""Removes all content from database and to test the API"""
-	cleardb()
+	"""Test to see if API is working"""
 	site = app_site()
 	conn = Connection(site)
-
-	values = [[('Yahoo')], [('Google')], [('XE')]]
 	table = 'data_source'
-	content = conn.process(values, table)
-	print 'Attempting to post %s to %s at %s' % (
-		content[0]['data'], table, site)
 
-	conn.post(content)
-	print 'Content posted via API!'
+	print 'Attempting to get data from %s' % table
+	conn.get(table)
+	print 'Content retreived via API!'
 
 
 @manager.command
@@ -90,7 +85,7 @@ def initdb():
 
 @manager.command
 def popdb():
-	"""Removes all content from database and populates it
+	"""Removes all content from database initializes it, and populates it
 		with sample data
 	"""
 	date = d.today() - timedelta(days=30)
@@ -111,7 +106,7 @@ def popdb():
 @manager.option('-e', '--end', help='End date')
 @manager.option('-x', '--extra', help='Add [d]ividends or [s]plits')
 def popprices(sym=None, start=None, end=None, extra=None):
-	"""Add price quotes
+	"""Add prices for all securities in the database
 	"""
 
 	with app.app_context():
