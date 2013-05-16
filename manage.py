@@ -6,7 +6,7 @@ from subprocess import call
 from pprint import pprint
 from datetime import datetime as dt, date as d, timedelta
 
-from flask import current_app as app, url_for
+from flask import current_app as app
 from flask.ext.script import Manager
 from app import create_app
 from app.connection import Connection
