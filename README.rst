@@ -312,8 +312,10 @@ install ``pandas`` unless ``numpy`` is already installed)
 ::
 
 	pip freeze -l | sed '/pandas/d' > requirements.txt
+	git commit -am "Remove pandas as requirement"
 	git push heroku master
 	pip freeze -l > requirements.txt
+	git commit -am "Add pandas as requirement"
 	git push heroku master
 	heroku ps:scale web=1
 
@@ -420,6 +422,7 @@ Prometheus is modeled after Dirk Eddelbuettel's `beancounter <http://eddelbuette
 
 About Flask
 -----------
+
 `Flask <http://flask.pocoo.org>`_ is a BSD-licensed microframework for Python based on
 `Werkzeug <http://werkzeug.pocoo.org/>`_, `Jinja2 <http://jinja.pocoo.org>`_ and good intentions.
 

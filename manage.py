@@ -11,7 +11,7 @@ from flask.ext.script import Manager
 from app import create_app
 from app.connection import Connection
 from app.hermes import Historical
-from app.helper import get_init_values, get_pop_values, app_site
+from app.helper import app_site
 
 manager = Manager(create_app)
 manager.add_option(

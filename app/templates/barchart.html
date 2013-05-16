@@ -30,7 +30,7 @@
 				dataType: "json", url: url, data: {job_ids: data.result},
 				success: calcWorth
 			});
-		}, 3500);
+		}, 2500);
 	}
 
 	function calcWorth(data) {
@@ -47,7 +47,6 @@
 	function drawChart(data) {
 		var chart_caption = '{{ chart_caption }}';
 		var rows = [];
-		var row = [];
 
 		if (data.id == 1 && '{{ table }}' != 'USD') {
 			table = 'USD ({{ table }} rates not available)';
@@ -68,7 +67,6 @@
 			rows.push([obj.symbol, parseFloat(obj.worth)]);
 		})
 
-		console.log(rows);
 		data_table.addRows(rows);
 
 		// Instantiate and draw our chart, passing in some options.	 All the

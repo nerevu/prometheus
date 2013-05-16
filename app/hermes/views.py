@@ -4,9 +4,8 @@ from flask import Blueprint, render_template, flash, redirect, url_for
 
 from app import Add
 from app.connection import Connection
-from app.helper import get_kwargs, init_form
+from app.helper import get_kwargs, init_form, app_site
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
-
 
 hermes = Blueprint('hermes', __name__)
 
@@ -20,7 +19,7 @@ def _bookmark(table):
 def get(table):
 	table_as_class = table.title().replace('_', '')
 	form = init_form(eval('%sForm' % table_as_class))
-	conn = Connection()
+	conn = Connection(app_site())
 	kwargs = get_kwargs(table, 'hermes', conn, form)
 	return render_template('entry.html', **kwargs)
 

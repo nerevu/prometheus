@@ -28,7 +28,7 @@ class Content(object):
 		('api', 'API', 'api', None)]
 
 	hero_values = (
-		'%s: a global asset allocation tool', '%s is'
+		'%s: a global asset allocation tool' % __APP_NAME__, '%s is'
 		' a full featured web app that tells you how your stock portfolio has '
 		' performed over time, gives insight into how to optimize your asset '
 		' allocation, and monitors your portfolio for rebalancing or performance'

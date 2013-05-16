@@ -1,6 +1,6 @@
 from flask.ext.wtf import Form, TextField, FloatField, Required, SelectField
 from wtforms.ext.dateutil.fields import DateField
-from app.helper import get_choices, get_validators
+from app.helper import get_choices, get_validators, app_site
 
 univals = [Required()]
 
@@ -22,12 +22,12 @@ class CommodityForm(Form):
 	def new(self):
 		form = self()
 		table = 'commodity_type'
-		form.type_id.choices = get_choices(table, 'id', 'name', conn)
-		form.type_id.validators = get_validators(table, 'id', conn)
+		form.type_id.choices = get_choices(table, 'id', 'name')
+		form.type_id.validators = get_validators(table, 'id')
 		form.data_source_id.choices = get_choices(
-			'data_source', 'id', conn, 'name')
+			'data_source', 'id', 'name')
 		form.data_source_id.validators = get_validators('data_source', 'id')
-		form.exchange_id.choices = get_choices('exchange', 'id', conn, 'symbol')
+		form.exchange_id.choices = get_choices('exchange', 'id', 'symbol')
 		form.exchange_id.validators = get_validators('exchange', 'id')
 		return form
 
@@ -51,13 +51,13 @@ class EventForm(Form):
 	def new(self):
 		form = self()
 		table = 'commodity'
-		kwargs = {'order': 'symbol', 'column': 'type_id', 'value': range(5)}
-		form.commodity_id.choices = get_choices(table, 'id', conn, **kwargs)
+		kwargs = {'order': 'symbol', 'name': 'type_id', 'val': range(5)}
+		form.commodity_id.choices = get_choices(table, 'id', **kwargs)
 		form.commodity_id.validators = get_validators(table, 'id')
-		form.type_id.choices = get_choices('event_type', 'id', conn, 'name')
+		form.type_id.choices = get_choices('event_type', 'id', 'name')
 		form.type_id.validators = get_validators('event_type', 'id')
-		kwargs.update({'value': [5, 6]})
-		form.currency_id.choices = get_choices(table, 'id', conn, **kwargs)
+		kwargs.update({'val': [5, 6]})
+		form.currency_id.choices = get_choices(table, 'id', **kwargs)
 		form.currency_id.validators = get_validators(table, 'id')
 		return form
 
@@ -77,10 +77,10 @@ class PriceForm(Form):
 	def new(self):
 		form = self()
 		table = 'commodity'
-		kwargs = {'order': 'symbol', 'column': 'type_id', 'value': range(5)}
-		form.commodity_id.choices = get_choices(table, 'id', conn, **kwargs)
+		kwargs = {'order': 'symbol', 'name': 'type_id', 'val': range(5)}
+		form.commodity_id.choices = get_choices(table, 'id', **kwargs)
 		form.commodity_id.validators = get_validators(table, 'id')
-		kwargs.update({'value': [5]})
-		form.currency_id.choices = get_choices(table, 'id', conn, **kwargs)
+		kwargs.update({'val': [5]})
+		form.currency_id.choices = get_choices(table, 'id', **kwargs)
 		form.currency_id.validators = get_validators(table, 'id')
 		return form
