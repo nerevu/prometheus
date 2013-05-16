@@ -16,9 +16,10 @@ from dateutil.parser import parse
 from datetime import datetime as dt, date as d
 
 
-def char_range(number, letter='a'):
-	"""Generates the characters from letter to letter + number, inclusive."""
-	for c in xrange(ord(letter), ord(letter) + number):
+def char_range(x, letter='a'):
+	"""Generates the characters from letter to (letter + x letters),
+	inclusive."""
+	for c in xrange(ord(letter), ord(letter) + x):
 		yield chr(c)
 
 
@@ -103,7 +104,7 @@ class DataObject(pd.DataFrame):
 				break
 
 		# if empty:
-		# 	default_df = pd.DataFrame()
+		#	default_df = pd.DataFrame()
 		if stype.startswith('f'):
 			default_df = data
 		elif stype.startswith('ser'):
@@ -165,17 +166,17 @@ class DataObject(pd.DataFrame):
 
 	@property
 	def sorted(self):
-# 		index = self.index.names
-# 		if (len(self) > 1 and len(index) > 1):
-# 			for level in reversed(index):
-# 				df = self.sortlevel(level=level)
+#		index = self.index.names
+#		if (len(self) > 1 and len(index) > 1):
+#			for level in reversed(index):
+#				df = self.sortlevel(level=level)
 #
-# 			df = DataObject(df)
+#			df = DataObject(df)
 #
-# 		elif len(self) > 1:
-# 			df = DataObject(self.sort_index())
-# 		else:
-# 			df = self
+#		elif len(self) > 1:
+#			df = DataObject(self.sort_index())
+#		else:
+#			df = self
 
 		return DataObject(self.sort())
 		# return self.sort()
@@ -540,7 +541,7 @@ class DataObject(pd.DataFrame):
 		"""
 		df = self.reindexed
 		index = self.non_date_index
-# 		index = index if len(index) > 1 else index[0]
+#		index = index if len(index) > 1 else index[0]
 		missing = False
 		toffill = (toffill or [])
 		tobfill = (tobfill or [])
@@ -676,7 +677,7 @@ class Portfolio(DataObject):
 
 	def extend_values(self, df):
 		"""
-		Extend values to obtain the same number of 	observances for each date
+		Extend values to obtain the same number of	observances for each date
 		(currently only works for a set of 2 dates)
 
 		Parameters
