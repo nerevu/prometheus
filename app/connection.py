@@ -56,7 +56,7 @@ class Connection(object):
 
 		Examples
 		--------
-		>>> Connection('http://prometheus-api.herokuapp.com')  #doctest: +ELLIPSIS
+		>>> Connection('http://prometheus-api.herokuapp.com/')  #doctest: +ELLIPSIS
 		<app.connection.Connection object at 0x...>
 		"""
 		self.site = site
