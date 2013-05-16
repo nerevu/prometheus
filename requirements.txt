@@ -15,4 +15,8 @@ nose==1.2.1
 numpy==1.7.0
 pandas==0.10.1
 python-dateutil==2.1
+pytz==2012j
 requests==0.14.2
+six==1.1.0
+times==0.6.1
+yolk==0.4.3
