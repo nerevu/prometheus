@@ -8,6 +8,7 @@ def app_site():
 	return app.config['API_URL']
 
 
+# For views
 def get_plural(word):
 	if word[-1] == 'y':
 		return word[:-1] + 'ies'
