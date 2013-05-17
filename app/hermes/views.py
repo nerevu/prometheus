@@ -1,14 +1,11 @@
 # from __future__ import print_function
 from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
-from sqlalchemy.exc import IntegrityError
 
 from app import Add
 from app.connection import Connection
-from app.helper import get_kwargs, portify, init_form
+from app.helper import HelpForm, app_site, init_form
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
-from .models import Event, EventType, Price, Commodity, CommodityType
-
 
 hermes = Blueprint('hermes', __name__)
 
@@ -20,11 +17,10 @@ def _bookmark(table):
 
 @hermes.route('/<table>/', methods=['GET', 'POST'])
 def get(table):
+	conn = HelpForm(app_site())
 	table_as_class = table.title().replace('_', '')
 	form = init_form(eval('%sForm' % table_as_class))
-	site = portify(url_for('api', _external=True))
-	conn = Connection(site, display=True)
-	kwargs = get_kwargs(str(table), 'hermes', conn, form)
+	kwargs = conn.get_kwargs(table, 'hermes', form)
 	return render_template('entry.html', **kwargs)
 
 
@@ -41,7 +37,7 @@ class AddHermes(Add):
 
 
 @hermes.errorhandler(409)
-@hermes.errorhandler(IntegrityError)
+# @hermes.errorhandler(IntegrityError)
 def duplicate_values(e):
 	flash('Error: %s' % e.orig[0], 'alert alert-error')
 	return redirect(url_for('.get', table=__TABLE__))

@@ -4,12 +4,21 @@ from datetime import date as d
 
 _basedir = p.dirname(__file__)
 
+__APP_NAME__ = 'Prometheus'
+__YOUR_NAME__ = 'Reuben Cummings'
+__YOUR_EMAIL__ = 'reubano@gmail.com'
+__YOUR_WEBSITE__ = 'http://reubano.github.com'
+# __API_BASE__ = 'http://prometheus-api.herokuapp.com/'
+__API_BASE__ = 'http://localhost:5005/'
+
 
 # configuration
 class Content(object):
+	app = __APP_NAME__.lower()
+
 	site_values = (
-		'prometheus', 'Prometheus', 'Reuben Cummings',
-		'http://reubano.github.com', 'home')
+		app, __APP_NAME__, __YOUR_NAME__,
+		__YOUR_WEBSITE__, 'home')
 
 	topnav_values = [
 		('price', 'Prices', 'hermes.get', 'price'),
@@ -20,11 +29,11 @@ class Content(object):
 		('api', 'API', 'api', None)]
 
 	hero_values = (
-		'Prometheus: a global asset allocation tool', 'Prometheus is'
+		'%s: a global asset allocation tool' % __APP_NAME__, '%s is'
 		' a full featured web app that tells you how your stock portfolio has '
 		' performed over time, gives insight into how to optimize your asset '
 		' allocation, and monitors your portfolio for rebalancing or performance'
-		' enhancing opportunities.', 'about')
+		' enhancing opportunities.' % __APP_NAME__, 'about')
 
 	sub_unit_values = [
 		(
@@ -40,7 +49,6 @@ class Content(object):
 			'time with these sleek interactive charts! Instantly see how  '
 			'dividends impact your return.', 'apollo.worth', 'USD')]
 
-	heroku_app = site_values[0]
 	mkd_values = [('about', 'about.md'), ('api', 'api.md')]
 	total_site_values = site_values + (
 		d.today().strftime("%Y"), 12 / len(sub_unit_values))
@@ -61,25 +69,25 @@ class Content(object):
 
 
 class Config(Content):
-	app = Content.heroku_app
 	stage = os.environ.get('STAGE', False)
 	end = '-stage' if stage else ''
-	heroku = os.environ.get('DATABASE_URL', False)
+	heroku = os.environ.get('DATABASE_URL', False)  # change this
 
 	DEBUG = False
-	ADMINS = frozenset(['reubano@gmail.com'])
+	ADMINS = frozenset([__YOUR_EMAIL__])
 	TESTING = False
 	HOST = '127.0.0.1'
-	PORT = int(os.environ.get('PORT', 5000))
-	heroku_server = '%s%s.herokuapp.com' % (app, end)
+	heroku_server = '%s%s.herokuapp.com' % (Content.app, end)
 
 	if heroku:
 		SERVER_NAME = heroku_server
 
-	SECRET_KEY = os.environ.get('SECRET_KEY', 'key')
-	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'key')
-	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '')
-	RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '')
+	api_prefix = ''
+	API_URL = __API_BASE__ + api_prefix + '/' if api_prefix else __API_BASE__
+	SECRET_KEY = os.environ.get('SECRET_KEY', 'secret_key')
+	CSRF_SESSION_KEY = os.environ.get('CSRF_SESSION_KEY', 'secret_key')
+	RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', 'secret_key')
+	RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', 'secret_key')
 	BOOTSTRAP_USE_MINIFIED = True
 	BOOTSTRAP_USE_CDN = False
 	BOOTSTRAP_FONTAWESOME = False
@@ -90,24 +98,17 @@ class Config(Content):
 	CSRF_ENABLED = True
 	RECAPTCHA_USE_SSL = False
 	RECAPTCHA_OPTIONS = {'theme': 'white'}
-	API_METHODS = ['GET', 'POST', 'DELETE', 'PATCH', 'PUT']
-	API_ALLOW_FUNCTIONS = True
-	API_ALLOW_PATCH_MANY = True
 
 
 class Production(Config):
-	defaultdb = 'postgres://reubano@localhost/app'
-	SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', defaultdb)
 	HOST = '0.0.0.0'
 	BOOTSTRAP_USE_CDN = True
 	BOOTSTRAP_FONTAWESOME = True
 
 
 class Development(Config):
-	SQLALCHEMY_DATABASE_URI = 'sqlite:///%s' % p.join(_basedir, 'app.db')
 	DEBUG = True
 
 
 class Test(Config):
-	SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 	TESTING = True

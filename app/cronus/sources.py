@@ -15,7 +15,7 @@ class DataSource(Connection):
 	"""
 	Generic data source.
 	"""
-	def __init__(self, site=None, native=1, display=False):
+	def __init__(self, *args, **kwargs):
 		"""Creates a DataSource
 
 		Parameters
@@ -33,7 +33,7 @@ class DataSource(Connection):
 		>>> DataSource('http://localhost:5000/api/')  # doctest: +ELLIPSIS
 		<app.cronus.sources.DataSource object at 0x...>
 		"""
-		super(DataSource, self).__init__(site, native, display)
+		super(DataSource, self).__init__(*args, **kwargs)
 
 
 class CSV(DataSource):
@@ -46,8 +46,7 @@ class CSV(DataSource):
 		csv contents
 	"""
 	def __init__(
-			self, file=None, site=None, native=1, display=False, delimiter=',',
-			quotechar='"'):
+			self, file=None, site=None, native=1, delimiter=',', quotechar='"'):
 		"""Creates a CSV DataSource
 
 		Parameters
@@ -76,7 +75,7 @@ class CSV(DataSource):
 		self.file = file
 		self.delimiter = delimiter
 		self.quotechar = quotechar
-		super(CSV, self).__init__(site, native, display)
+		super(CSV, self).__init__(site, native)
 
 	@property
 	def values(self):
@@ -109,7 +108,7 @@ class GnuCash(DataSource):
 	Attributes
 	----------
 	"""
-	def __init__(self, file, site, native=1, display=False):
+	def __init__(self, *args, **kwargs):
 		"""Creates a GnuCash DataSource
 
 		Parameters
@@ -130,4 +129,4 @@ class GnuCash(DataSource):
 		>>> CSV('file.gnucash', 'http://localhost:5000/api/') # doctest: +ELLIPSIS
 		<app.cronus.sources.CSV object at 0x...>
 		"""
-		super(GnuCash, self).__init__(site, native, display)
+		super(GnuCash, self).__init__(*args, **kwargs)
