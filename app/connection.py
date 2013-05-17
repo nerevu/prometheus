@@ -41,7 +41,7 @@ class Connection(object):
 	"""
 	HDR = {'content-type': 'application/json'}
 
-	def __init__(self, site='http://localhost:5005', native=1):
+	def __init__(self, site, native=1):
 		"""Creates a connection to the database
 
 		Parameters
@@ -56,7 +56,7 @@ class Connection(object):
 
 		Examples
 		--------
-		>>> Connection()  #doctest: +ELLIPSIS
+		>>> Connection('http://prometheus-api.herokuapp.com/')  #doctest: +ELLIPSIS
 		<app.connection.Connection object at 0x...>
 		"""
 		self.site = site

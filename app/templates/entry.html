@@ -1,16 +1,51 @@
 {% extends "page.html" %}
 {% import "bootstrap_wtf.html" as wtf %}
 {% block main_content %}
+
+<script type="text/javascript">
+	var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		var url = $SCRIPT_ROOT + '/get_id/';
+
+		$.ajax({dataType: "json", url: url, data: {table: '{{ table }}'},
+			success: loadData
+		});
+	});
+
+	function loadData(data) {
+		var url = $SCRIPT_ROOT + '/get_res/';
+
+		window.setTimeout(function() {
+			$.ajax({
+				dataType: "json", url: url, data: {job_ids: data.result},
+				success: displayData
+			});
+		}, 1500);
+	}
+
+	function displayData(data) {
+		var rows = [];
+		$.each(data.result, function(i, obj) {
+			rows.push([obj.symbol, parseFloat(obj.worth)]);
+		})
+
+		$('#entry-table > tbody').html(data.contents);
+	}
+
+</script>
+
 <div class="row-fluid">
 	<div class="span3">
 		{% if form_fields %}
 		<form action="{{ url_for('%s' % post_location, table=post_table) }}" class="form" method="post">
 			<legend>{{ form_caption }}</legend>
-
 			{{ form.hidden_tag() }}
-				{{ wtf.form_errors(form, True) }}
+			{{ wtf.form_errors(form, True) }}
 
-				{% for f in form_fields %}
+			{% for f in form_fields %}
 				{% if form[f].type == 'BooleanField' %}
 					{{ wtf.horizontal_field(form[f]) }}
 				{% else %}
@@ -26,10 +61,10 @@
 	</div>
 	<div class="span7 offset2">
 		{% if rows %}
-		<table class="table table-striped">
+		<table class="table table-striped" id="entry-table">
 			<caption>{{ table_caption }}</caption>
 			<thead><tr>
-				{% for h in table_headers %}<th>{{ h }}</th>{% endfor %}
+				{% for h in headers %}<th>{{ h }}</th>{% endfor %}
 			</tr></thead>
 			<tbody>
 				{% for row in rows %}

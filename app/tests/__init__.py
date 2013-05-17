@@ -10,7 +10,7 @@ import sys
 import nose.tools as nt
 
 from flask import json
-from app import create_app, db
+from app import create_app
 from requests import get, post, delete, patch
 
 loads = json.loads
@@ -58,52 +58,3 @@ def get_globals():
 	global jsonx
 
 	return app, client, jsonx
-
-
-class APIHelper:
-	hdr = {'content-type': 'application/json'}
-
-	def get_data(self, table, id=None, query=None):
-		# returns status_code 200
-		if id:
-			url = base + table + '/' + id
-		else:
-			url = base + table
-
-		if query:
-			url = '%s&q=%s' % (url, dumps(query))
-
-		return get(url, headers=self.HDR)
-
-	def delete_data(self, table, id):
-		# returns status_code 204
-		url = base + table + '/' + id
-		return delete(url, headers=self.hdr)
-
-	def post_data(self, data, table):
-		# returns status_code 201
-		url = base + table
-		r = post(url, data=dumps(data), headers=self.hdr)
-		return r
-
-	def patch_data(self, data, table, id=None, query=None):
-		# returns status_code 200 or 201
-		if id:
-			url = base + table + '/' + id
-		else:
-			url = base + table
-
-		if query:
-			url = '%s&q=%s' % (url, dumps(query))
-
-		return patch(url, data=dumps(data), headers=self.hdr)
-
-	def get_num_results(self, table):
-		r = self.get_data(table)
-		loaded = loads(r.data)
-		return loaded['num_results']
-
-	def get_type(self, table, id=1):
-		r = self.get_data(table, id)
-		loaded = loads(r.data)
-		return loaded['type']['id']
