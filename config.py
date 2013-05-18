@@ -8,8 +8,8 @@ __APP_NAME__ = 'Prometheus'
 __YOUR_NAME__ = 'Reuben Cummings'
 __YOUR_EMAIL__ = 'reubano@gmail.com'
 __YOUR_WEBSITE__ = 'http://reubano.github.com'
-# __API_BASE__ = 'http://prometheus-api.herokuapp.com/'
-__API_BASE__ = 'http://localhost:5005/'
+__API_BASE__ = 'http://prometheus-api.herokuapp.com/'
+# __API_BASE__ = 'http://localhost:5005/'
 
 
 # configuration
