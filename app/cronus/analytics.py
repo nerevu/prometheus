@@ -74,7 +74,7 @@ class Metrics(Portfolio):
 
 	@property
 	def shares_w_reinv(self):
-		df = self.join_shares(self.dividends)
+		df = self.dividends.join_frame(self.shares)
 
 		if not df.empty:
 			new_index = ['owner_id', 'account_id', 'commodity_id', 'date']

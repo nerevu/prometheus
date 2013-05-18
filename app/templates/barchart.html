@@ -1,35 +1,66 @@
 {% extends "page.html" %}
 {% block main_content %}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
 <script type="text/javascript">
-
-  // Load the Visualization API and the ColumnChart package.
-  google.load('visualization', '1', {'packages':['corechart']});
-
-  // Set a callback to run when the Google Visualization API is loaded.
-  google.setOnLoadCallback(drawChart);
-
-  // Callback that creates and populates a data table,
-  // instantiates the chart, passes in the data and draws it.
-  function drawChart() {
-
-	// Create our data table.
-	var data = new google.visualization.DataTable();
-	data.addColumn('string', '{{ category }}');
-	data.addColumn('number', '{{ data_label }}');
-	data.addRows([{%- for description, value in columns %}
-		['{{ description }}', {{ value }}],
-		{%- endfor %}
-	]);
-
-	// Instantiate and draw our chart, passing in some options.	 All the
-	// options go into a single {}; some options' values go into a nested
-	// {}. Some values, such as colors, must be given as strings.
-	var chart = new google.visualization.ColumnChart(
-		document.getElementById('chart_div'));
-
-	chart.draw(data, {legend: 'none', vAxis: {baseline: 0}});}
+	var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
+
+<script type="text/javascript">
+	google.load('visualization', '1', {'packages':['corechart']});
+	google.setOnLoadCallback(calcWorth);
+
+	function makeAlert(data) {
+		alert(data.result);
+	}
+
+	function calcWorth(data) {
+		var url = $SCRIPT_ROOT + '/worth_data/';
+
+		$.ajax({
+			dataType: "json", url: url, data: {table: '{{ table }}'},
+			success: drawChart
+		});
+	}
+
+	// Callback that creates and populates a data table,
+	// instantiates the chart, passes in the data and draws it.
+	function drawChart(data) {
+		var chart_caption = '{{ chart_caption }}';
+		var rows = [];
+
+		if (data.id == 1 && '{{ table }}' != 'USD') {
+			table = 'USD ({{ table }} rates not available)';
+		}
+
+		if (data.missing) {
+			chart_caption = chart_caption + '(some price data is missing)';
+		} else if (data.empty) {
+			chart_caption = 'No transactions found. Please enter some events or prices.';
+		}
+
+		// Create our data table.
+		var data_table = new google.visualization.DataTable();
+		data_table.addColumn('string', '{{ category }}');
+		data_table.addColumn('number', '{{ data_label }}');
+
+		$.each(data.result, function(i, obj) {
+			rows.push([obj.symbol, parseFloat(obj.worth)]);
+		})
+
+		data_table.addRows(rows);
+
+		// Instantiate and draw our chart, passing in some options.	 All the
+		// options go into a single {}; some options' values go into a nested
+		// {}. Some values, such as colors, must be given as strings.
+		var chart = new google.visualization.ColumnChart(
+			document.getElementById('chart_div')
+		);
+
+		chart.draw(data_table, {legend: 'none', vAxis: {baseline: 0}});
+	}
+</script>
+
 <style>#chart_div {min-height: 400px;}</style>
 <div class="row-fluid"><div class="span12">
 	<p class="pagination-centered">{{ chart_caption }}</p>

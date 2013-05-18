@@ -34,7 +34,7 @@ class Worth(Metrics):
 	@property
 	def share_value(self):
 		# adds transaction price to prices df if needed
-		df = self.join_shares(self.native_prices, shares=self.shares_w_reinv)
+		df = self.native_prices.join_frame(self.shares_w_reinv)
 		df['value'] = df.native_price * df.shares
 
 		# TODO: sum by dates, not datetimes
@@ -69,7 +69,7 @@ class Worth(Metrics):
 
 		"""
 		# group transactions by date
-#		max_date = max([i[3] for i in df.index])
+#		max_date = max(i[3] for i in df.index)
 
 		# make sep data frames for each date
 		# TODO: account for multiple owners and/or accounts
@@ -102,7 +102,7 @@ class Worth(Metrics):
 		# select mode
 		switch = {
 			'latest': max(by_date.keys()),
-			'uniform': max([d[0] for d in items if d[1] == max_entries])}
+			'uniform': max(d[0] for d in items if d[1] == max_entries)}
 
 		the_date = switch.get(mode.lower())
 		selected = df.groupby(level='date').get_group(the_date)
@@ -120,14 +120,8 @@ class Worth(Metrics):
 		-------
 		data : sequence of ('symbol', value)
 		"""
-
-		if worth.values() and not self.mapping.empty:
-			symbols = [self.mapping.symbol.get(x, 'N/A') for x in worth.keys()]
-			totals = ['%.2f' % x for x in worth.values()]
-			data = zip(symbols, totals)
-		elif worth:
-			data = worth.items()
-		else:
-			data = [('N/A', 0)]
-
-		return data
+		symbols = [self.mapping.symbol.get(x, 'N/A') for x in worth.keys()]
+		worths = ['%.2f' % x for x in worth.values()]
+		keys = ('symbol', 'worth')
+		zipped = zip(symbols, worths)
+		return [dict(zip(keys, values)) for values in zipped]
