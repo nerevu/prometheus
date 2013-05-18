@@ -6,6 +6,7 @@ from app.helper import HelpForm, app_site
 univals = [Required()]
 
 
+# TODO: fix form date parsing
 def help():
 	with app.app_context():
 		return HelpForm(app_site())
