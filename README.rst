@@ -60,25 +60,25 @@ Production Server
 Quick Start
 -----------
 
-Clone the repo
+*Clone the repo*
 
 ::
 
 	git clone git@github.com:reubano/prometheus.git
 	cd prometheus
 
-Install requirements
+*Install requirements*
 
 ::
 
 	sudo easy_install pip
 	sudo pip install -r requirements-local.txt
 
-Run server
+*Run server*
 
 	./manage.py runserver
 
-Now view the app at http://localhost:5000
+Now *view the app* at ``http://localhost:5000``
 
 Scripts
 -------
@@ -94,15 +94,15 @@ Usage
 Examples
 ^^^^^^^^
 
-*start server*
+*Start server*
 
 	./manage.py runserver
 
-*run nose tests*
+*Run nose tests*
 
 	./manage.py runtests
 
-*initialize the production database*
+*Initialize the production database*
 
 	./manage.py initdb -m Production
 
@@ -161,7 +161,7 @@ Type ``./manage.py <command> -h`` to view any command's options
 Example
 ^^^^^^^
 
-*start production server on port 1000*
+*Start production server on port 1000*
 
 	./manage.py runserver -p 1000 -m Production
 
@@ -171,16 +171,16 @@ Advanced Installation
 Virtual environment setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Ideally, you should install modules for every project into a virtual environment.
-This setup will allow to install different version of the same module into different
-projects without worrying about any adverse interactions.
+Ideally, you should install modules for every project into a `virtual environment <http://blog.sidmitra.com/manage-multiple-projects-better-with-virtuale>`_.
+This setup will allow you to install different versions of the same module into different
+projects without worrying about adverse interactions.
 
 ::
 
 	cd prometheus
 	sudo pip install virtualenv virtualenvwrapper
 
-Add the following to your ``~/.profile``
+*Add the following* to your ``~/.profile``
 
 ::
 
@@ -189,7 +189,7 @@ Add the following to your ``~/.profile``
 	export PIP_RESPECT_VIRTUALENV=true
 	source /usr/local/bin/virtualenvwrapper.sh
 
-Create your new virtualenv
+*Create your new virtualenv*
 
 ::
 
@@ -204,14 +204,14 @@ API configuration
 By default, this project uses the API hosted at http://prometheus-api.herokuapp.com.
 If you would like to host your own API do the following:
 
-Clone the repo
+*Clone the repo*
 
 ::
 
 	git clone git@github.com:reubano/prometheus-api.git
 	cd prometheus-api
 
-Install requirements
+*Install requirements*
 
 ::
 
@@ -219,12 +219,12 @@ Install requirements
 	workon prometheus-api
 	sudo pip install -r requirements-local.txt
 
-Run server (pick a different port than the main app)
+*Run server* (pick a different port than the main app)
 
 	./manage.py runserver -p 5005
 
 Now that your api is up and running at http://localhost:5005, set the
-``api_base`` variable in ``config.py`` to the url of your new api.
+``__API_BASE__`` variable in ``config.py`` to the url of your new api.
 
 Production Server
 ^^^^^^^^^^^^^^^^^
@@ -249,7 +249,7 @@ To use ``gevent``, you first need to install ``libevent``.
 
 	`download on Rudix <http://rudix.org/packages-jkl.html#libevent>`_
 
-Now that libevent is handy, install the remaining requirements
+Now that libevent is handy, *install the remaining requirements*
 
 	sudo pip install -r requirements.txt
 
@@ -260,15 +260,15 @@ Or via the following if you installed libevent from macports
 	sudo CFLAGS="-I /opt/local/include -L /opt/local/lib" pip install gevent
 	sudo pip install -r requirements.txt
 
-Finally, install foreman
+Finally, *install foreman*
 
 	sudo gem install foreman
 
-Now, you can run the application locally
+Now, you can *run the application locally
 
 	foreman start
 
-You can also specify what port you'd prefer to use
+You can also *specify what port you'd prefer to use*
 
 	foreman start -p 5555
 
@@ -287,7 +287,7 @@ if they are set on your system.
 	RECAPTCHA_PRIVATE_KEY
 	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT
 
-To set an environment variable, do the following:
+To set an environment variable, *do the following*:
 
 	echo 'export VARIABLE=value' >> ~/.profile
 
@@ -299,7 +299,7 @@ ahead and do that. You should then be able to `add your SSH key to
 Heroku <http://devcenter.heroku.com/articles/quickstart>`_, and also
 `heroku login` from the commandline.
 
-Install heroku and create your app
+*Install heroku and create your app*
 
 ::
 
@@ -319,11 +319,11 @@ install ``pandas`` unless ``numpy`` is already installed)
 	git push heroku master
 	heroku ps:scale web=1
 
-Finally, we can make sure the application is up and running
+Finally, we can *make sure the application is up and running*
 
 	heroku ps
 
-Now, we can view the application in our web browser
+Now, we can *view the application in our web browser*
 
 	heroku open
 
@@ -366,10 +366,6 @@ Directory Structure
          |   |    ├──api.md
          |   ├──README.rst                  (this file)
          |   ├──setup.py                    (pypi settings)
-         |   ├──static                      (scripts)
-         |   |    ├──extra.js
-         |   |    ├──jquery-1.9.1.min.js
-         |   |    ├──lpoll.js
          |   ├──templates                   (Jinja templates)
          |   |    ├──barchart.html
          |   |    ├──base.html
