@@ -264,7 +264,7 @@ Finally, *install foreman*
 
 	sudo gem install foreman
 
-Now, you can *run the application locally
+Now, you can *run the application locally*
 
 	foreman start
 
