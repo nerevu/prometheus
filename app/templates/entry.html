@@ -2,41 +2,6 @@
 {% import "bootstrap_wtf.html" as wtf %}
 {% block main_content %}
 
-<script type="text/javascript">
-	var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-
-<script type="text/javascript">
-	$(document).ready(function() {
-		var url = $SCRIPT_ROOT + '/get_id/';
-
-		$.ajax({dataType: "json", url: url, data: {table: '{{ table }}'},
-			success: loadData
-		});
-	});
-
-	function loadData(data) {
-		var url = $SCRIPT_ROOT + '/get_res/';
-
-		window.setTimeout(function() {
-			$.ajax({
-				dataType: "json", url: url, data: {job_ids: data.result},
-				success: displayData
-			});
-		}, 1500);
-	}
-
-	function displayData(data) {
-		var rows = [];
-		$.each(data.result, function(i, obj) {
-			rows.push([obj.symbol, parseFloat(obj.worth)]);
-		})
-
-		$('#entry-table > tbody').html(data.contents);
-	}
-
-</script>
-
 <div class="row-fluid">
 	<div class="span3">
 		{% if form_fields %}
@@ -78,4 +43,3 @@
 	</div>
 </div>
 {% endblock main_content %}
-

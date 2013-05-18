@@ -1,34 +1,26 @@
 # from __future__ import print_function
-import time
-import numpy as np
-import pandas as pd
-
 from pprint import pprint
 from json import loads
 from collections import deque
 from flask import Blueprint, render_template, url_for, jsonify, request
-
+from app.helper import app_site
 from app.connection import Connection
 from . import Worth
 
 apollo = Blueprint('apollo', __name__)
 
 
-@apollo.route('/get_ids/')
-def get_ids():
-	conn = Connection()
-	tables = [
-		'transaction', 'dividend', 'security_prices', 'price', 'security_data']
-	jobs = [q.enqueue_call(func=getattr, args=(conn, item)) for item in tables]
-	table = request.args.get('table', 'USD')
-	jobs.append(q.enqueue_call(func=conn.commodity_ids, args=(table,)))
-	result = [job.id for job in jobs]
-	return jsonify(result=','.join(result))
-
-
 @apollo.route('/worth_data/')
 def worth_data():
-	mp = Worth(*loads(request.args.get('args')))
+	conn = Connection(app_site())
+	tables = [
+		'transaction', 'dividend', 'security_prices', 'price', 'security_data']
+	table = request.args.get('table', 'USD')
+	res = [getattr(conn, t) for t in tables]
+	res.append(conn.commodity_ids(table))
+
+	# TODO: Fix 'nan' error with init_db
+	mp = Worth(*res)
 	worth = mp.convert_worth(mp.calc_worth())
 	return jsonify(
 		result=worth, id=mp.currency_id, missing=mp.missing, empty=mp.empty)

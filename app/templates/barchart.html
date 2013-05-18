@@ -8,36 +8,17 @@
 
 <script type="text/javascript">
 	google.load('visualization', '1', {'packages':['corechart']});
-	google.setOnLoadCallback(getIDs);
+	google.setOnLoadCallback(calcWorth);
 
 	function makeAlert(data) {
 		alert(data.result);
-	}
-
-	function getIDs(data) {
-		var url = $SCRIPT_ROOT + '/get_ids/';
-		$.ajax({
-			dataType: "json", url: url, data: {table: '{{ table }}'},
-			success: loadData
-		});
-	}
-
-	function loadData(data) {
-		var url = $SCRIPT_ROOT + '/get_res/';
-
-		window.setTimeout(function() {
-			$.ajax({
-				dataType: "json", url: url, data: {job_ids: data.result},
-				success: calcWorth
-			});
-		}, 2500);
 	}
 
 	function calcWorth(data) {
 		var url = $SCRIPT_ROOT + '/worth_data/';
 
 		$.ajax({
-			dataType: "json", url: url, data: {args: data.result},
+			dataType: "json", url: url, data: {table: '{{ table }}'},
 			success: drawChart
 		});
 	}
