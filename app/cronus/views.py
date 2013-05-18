@@ -16,7 +16,7 @@ redir = '.transaction'
 def transaction():
 	conn = HelpForm(app_site())
 	form = init_form(TransactionForm)
-	kwargs = conn.get_kwargs(table, 'cronus', form, False)
+	kwargs = conn.get_kwargs(table, 'cronus', conn.get('keys'), form, False)
 	return render_template('entry.html', **kwargs)
 
 
@@ -32,9 +32,9 @@ def upload():
 class AddCronus(Add):
 	def get_vars(self, table):
 		table_as_class = table.title().replace('_', '')
+		conn = HelpForm(app_site())
 		form = init_form(eval('%sForm' % table_as_class))
-		entry = eval('%s()' % table_as_class)
-		return form, entry, redir
+		return form, conn, redir
 
 	@property
 	def table(self):

@@ -132,16 +132,15 @@ def create_app(config_mode=None, config_file=None):
 class Add(View):
 	def dispatch_request(self, table=None):
 		table = (table or self.table)
-		form, entry, redir = self.get_vars(table)
+		form, conn, redir = self.get_vars(table)
 		name = table.replace('_', ' ')
 
 		if form.validate_on_submit():
 			self.bookmark_table(table)
-			conn = Connection()
-			form.populate_obj(entry)
-			keys = set(form._fields.keys()).difference(['csrf_token'])
-			values = [getattr(form, k).data for k in keys]
-			content = conn.process(values, table, keys)
+			key_list = list(set(form._fields.keys()).difference(['csrf_token']))
+			values = {table: [tuple(getattr(form, k).data for k in key_list)]}
+			keys = {table: key_list}
+			content = conn.process(values, keys)
 			conn.post(content)
 
 			flash(

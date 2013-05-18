@@ -34,12 +34,13 @@ class HelpForm(Connection):
 
 		super(HelpForm, self).__init__(*args, **kwargs)
 
-	def get_kwargs(self, table, module, form=None, post_table=True):
+	def get_kwargs(self, table, module, keys, form=None, post_table=True):
 		plural_table = get_plural(table).replace('_', ' ')
 		table_title = table.title().replace('_', ' ')
 		plural_table_title = plural_table.title()
-		form_fields = self.keys[table]
+		form_fields = keys[table]
 		headers = self.table_headers[table]
+		rows = [[r[k] for k in self.table_keys[table]] for r in getattr(self, table)]
 		post_table = table if post_table else None
 		form_caption = '%s Entry Form' % table_title
 		heading = 'The %s database' % plural_table
@@ -52,7 +53,7 @@ class HelpForm(Connection):
 			'subheading': subheading, 'form': form, 'form_caption': form_caption,
 			'table_caption': '%s List' % table_title, 'headers': headers,
 			'form_fields': form_fields, 'post_location': '%s.add' % module,
-			'post_table': post_table}
+			'post_table': post_table, 'rows': rows}
 
 	def get_choices(self, table, field, order=None, name=None, val=None):
 		if (name and val):

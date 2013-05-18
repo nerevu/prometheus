@@ -3,7 +3,6 @@ from pprint import pprint
 from flask import Blueprint, render_template, flash, redirect, url_for
 
 from app import Add
-from app.connection import Connection
 from app.helper import HelpForm, app_site, init_form
 from .forms import EventForm, EventTypeForm, PriceForm, CommodityForm
 
@@ -20,7 +19,7 @@ def get(table):
 	conn = HelpForm(app_site())
 	table_as_class = table.title().replace('_', '')
 	form = init_form(eval('%sForm' % table_as_class))
-	kwargs = conn.get_kwargs(table, 'hermes', form)
+	kwargs = conn.get_kwargs(table, 'hermes', conn.get('keys'), form)
 	return render_template('entry.html', **kwargs)
 
 
@@ -28,9 +27,9 @@ class AddHermes(Add):
 	def get_vars(self, table):
 		table_as_class = table.title().replace('_', '')
 		form = init_form(eval('%sForm' % table_as_class))
-		entry = eval('%s()' % table_as_class)
+		conn = HelpForm(app_site())
 		redir = '.get'
-		return form, entry, redir
+		return form, conn, redir
 
 	def bookmark_table(self, table):
 		_bookmark(table)

@@ -165,6 +165,7 @@ class Historical(Connection):
 		date = parse(date) if date else d.today() - timedelta(days=limit)
 		divs = True if (extra and extra.startswith('d')) else False
 		splits = True if (extra and extra.startswith('s')) else False
+		table = 'event' if extra else 'price'
 		res = []
 
 		if forward:
@@ -191,10 +192,10 @@ class Historical(Connection):
 				data.sort(key=lambda x: x[0], reverse=True)
 
 			res.extend([(
-				id, 1, 10, data[0][0],
-				Decimal(data[0][1]).quantize(Decimal('.001')), True)])
+				True, data[0][0], id,
+				Decimal(data[0][1]).quantize(Decimal('.001')), 1, 1)])
 
-		return [list(res)]
+		return {'transaction': res}
 
 	def get_price_list(self, symbols=None, start=None, end=None, extra=None):
 		symbols = (symbols or self.securities)
@@ -204,6 +205,7 @@ class Historical(Connection):
 		ends = list(it.repeat(date, num)) if num > 1 else [date]
 		divs = True if (extra and extra.startswith('d')) else False
 		splits = True if (extra and extra.startswith('s')) else False
+		table = 'event' if extra else 'price'
 		res = []
 
 		if start:
@@ -224,18 +226,19 @@ class Historical(Connection):
 		prices = self.get_prices(symbols, starts, ends, extra)
 
 		for s in zip(ids, prices, symbols, starts, ends):
-			if (s[1] and not (divs or splits)):
+			id, price = s[0], s[1]
+			if (price and not extra):
 				res.extend([(
-					s[0], 1, Decimal(r[1]).quantize(Decimal('.001')), r[0])
-					for r in s[1]])
-			elif (s[1] and divs):
+					Decimal(r[1]).quantize(Decimal('.001')), id, 1, r[0])
+					for r in price])
+			elif (price and divs):
 				res.extend([(
-					1, s[0], 1, Decimal(r[1]).quantize(Decimal('.001')), r[0])
-					for r in s[1]])
-			elif (s[1] and splits):
-				ratio = s[1][0][1].split(':')
+					id, 1, r[0], 1, Decimal(r[1]).quantize(Decimal('.001')))
+					for r in price])
+			elif (price and splits):
+				ratio = price[0][1].split(':')
 				value = Decimal(int(ratio[0]) / int(ratio[1]))
-				res.extend([(3, s[0], 1, value, r[0]) for r in s[1]])
+				res.extend([(id, 1, r[0], 3, value) for r in price])
 			else:
 				if extra:
 					verb = 'splits' if splits else 'dividends'
@@ -246,4 +249,4 @@ class Historical(Connection):
 					'No %s found for %s from %s to %s' % (
 					verb, s[2], s[3], s[4]))
 
-		return [list(res)]
+		return {table: res}

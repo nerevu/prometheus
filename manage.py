@@ -19,18 +19,6 @@ manager.add_option(
 manager.add_option('-f', '--cfgfile', dest='config_file', type=p.abspath)
 
 
-def post_all(conn):
-	symbols = list(it.chain(conn.currencies, conn.securities))
-	prices = conn.get_price_list(symbols)
-	dividends = conn.get_price_list(conn.securities, extra='divs')
-	splits = conn.get_price_list(conn.securities, extra='splits')
-
-	values = list(it.chain(prices, dividends, splits))
-	tables = ['price', 'event', 'event']
-
-	conn.post(conn.process(values, tables))
-
-
 @manager.command
 def checkstage():
 	"""Checks staged with git pre-commit hook"""
@@ -47,66 +35,83 @@ def runtests():
 
 
 @manager.command
-def cleardb():
-	"""Removes all content from database"""
-
-	print 'Database cleared'
+def resetdb():
+	"""Remove all content from database and creates new tables"""
+	conn = Connection(app_site())
+	conn.get('reset')
+	print 'Database reset'
 
 
 @manager.command
 def testapi():
 	"""Test to see if API is working"""
-	site = app_site()
-	conn = Connection(site)
-	table = 'data_source'
+	conn = Connection(app_site())
 
 	print 'Attempting to get data from %s' % table
-	conn.get(table)
+	conn.get('data_source')
 	print 'Content retreived via API!'
+
+
+def post_all(conn, keys):
+	"""Add prices, dividends, and splits for all securities in the database
+	"""
+	iter = []
+	symbols = list(it.chain(conn.currencies, conn.securities))
+	prices = conn.get_price_list(symbols)
+	dividends = conn.get_price_list(conn.securities, extra='divs')
+	splits = conn.get_price_list(conn.securities, extra='splits')
+	iter.append(prices)
+	iter.append(dividends)
+	iter.append(splits)
+	content = [conn.process(v, keys) for v in iter]
+	[conn.post(values) for values in content]
 
 
 @manager.command
 def initdb():
-	"""Removes all content from database and initializes it
+	"""Remove all content from database and initializes it
 		with default values
 	"""
-	date = d.today() - timedelta(days=45)
-	cleardb()
+	resetdb()
 	conn = Historical(app_site())
-
-	values = get_init_values()
-	conn.post(conn.process(values))
-	post_all(conn)
+	date = d.today() - timedelta(days=45)
+	keys = conn.get('keys')
+	content = [conn.process(v, keys) for v in conn.get('init_values')]
+	[conn.post(values) for values in content]
+	post_all(conn, keys)
 
 	price = conn.get_first_price(conn.securities, date)
-	conn.post(conn.process(price, 'transaction'))
+	conn.post(conn.process(price, keys))
 	print 'Database initialized'
 
 
 @manager.command
 def popdb():
-	"""Removes all content from database initializes it, and populates it
+	"""Remove all content from database, initializes it, and populates it
 		with sample data
 	"""
-	date = d.today() - timedelta(days=30)
 	initdb()
 	conn = Historical(app_site())
-
-	values = get_pop_values()
-	conn.post(conn.process(values, ['commodity', 'holding']))
-	post_all(conn)
+	date = d.today() - timedelta(days=30)
+	keys = conn.get('keys')
+	content = [conn.process(v, keys) for v in conn.get('pop_values')]
+	[conn.post(values) for values in content]
+	post_all(conn, keys)
 
 	price = conn.get_first_price(conn.securities, date)
-	conn.post(conn.process(price, 'transaction'))
+	conn.post(conn.process(price, keys))
 	print 'Database populated'
 
 
-@manager.option('-s', '--sym', help='Symbols')
-@manager.option('-t', '--start', help='Start date')
-@manager.option('-e', '--end', help='End date')
-@manager.option('-x', '--extra', help='Add [d]ividends or [s]plits')
+@manager.option(
+	'-s', '--sym', help='Symbols (leave blank to update all securities)')
+@manager.option('-a', '--start', help='Start date, defaults to last month')
+@manager.option('-e', '--end', help='End date, defaults to today')
+@manager.option(
+	'-x', '--extra', help='Fetch [d]ividends or [s]plits in addition to prices')
 def popprices(sym=None, start=None, end=None, extra=None):
-	"""Add prices for all securities in the database
+	"""Add prices (and optionally dividends or splits) to securities
+	in the database
 	"""
 
 	with app.app_context():
@@ -114,7 +119,6 @@ def popprices(sym=None, start=None, end=None, extra=None):
 		sym = sym.split(',') if sym else None
 		divs = True if (extra and extra.startswith('d')) else False
 		splits = True if (extra and extra.startswith('s')) else False
-
 		values = conn.get_price_list(sym, start, end, extra)
 		table = 'event' if (divs or splits) else 'price'
 
