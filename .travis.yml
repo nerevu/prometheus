@@ -18,9 +18,15 @@ env:
     - secure: "0oiH4eRiFpUdnrbMI42NAbu35qowKj8ebQ/J74IVNd0yB1LsEB3edfqs7mT2\nt9CmOlCPHEst7QBcTXeH09xdpcqO2J00p9keL5ipT6nybkF8nQcOj17St2c3\nygQiMi07KUKbQv9vjM/i6ker0D7QQwRkdge8E1RAg4p/VzjW9wo="
 
 after_success:
+  # check for pull request
+  - if [[ "$TRAVIS_PULL_REQUEST" == "true" ]]; then exit 0; fi
+  
   # Install heroku toolbelt and add remote repo	
   - wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
-  - git remote add staging git@heroku.com:prometheus.git
+
+  # check branch for conditional remote add
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then git remote add production git@heroku.com:prometheus.git; fi
+  - if [[ "$TRAVIS_BRANCH" == "features" ]]; then git remote add staging git@heroku.com:prometheus.git; fi
 
   # Turn off warnings about SSH keys:
   - echo "Host heroku.com" >> ~/.ssh/config
@@ -29,5 +35,8 @@ after_success:
   - echo "   UserKnownHostsFile=/dev/null" >> ~/.ssh/config
   - heroku keys:clear
   - yes | heroku keys:add
-  - yes | git push staging $TRAVIS_BRANCH
+
+  # check branch for conditional push
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then yes | git push production master; fi
+  - if [[ "$TRAVIS_BRANCH" == "features" ]]; then yes | git push staging features:master; fi
 
