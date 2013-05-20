@@ -9,7 +9,7 @@ prometheus |build|
 Introduction
 ------------
 
-`prometheus <http://prometheus.herokuapp.com>`_ is a flask powered web app that tells you how your stock portfolio has performed over time, gives insight into how to optimize your asset allocation, and monitors your portfolio for rebalancing or performance enhancing opportunities. It has been tested on the following configuration:
+`Prometheus <http://prometheus.herokuapp.com>`_ is a `Flask <http://flask.pocoo.org>`_ (`About Flask`_) powered web app that tells you how your stock portfolio has performed over time, gives insight into how to optimize your asset allocation, and monitors your portfolio for rebalancing or performance enhancing opportunities. It has been tested on the following configuration:
 
 - MacOS X 10.7.5
 - Python 2.7.4
@@ -17,7 +17,7 @@ Introduction
 Requirements
 ------------
 
-prometheus requires the following in order to run properly:
+Prometheus requires the following in order to run properly:
 
 - `Python >= 2.7 <http://www.python.org/download>`_
 
@@ -122,7 +122,6 @@ Commands
 ::
 
 	  checkstage  Checks staged with git pre-commit hook
-	  cleardb     Removes all content from database
 	  initdb      Removes all content from database and initializes it
 	              with default values
 	  popdb       Removes all content from database initializes it, and
@@ -131,6 +130,7 @@ Commands
 	  runserver   Runs the Flask development server i.e. app.run()
 	  runtests    Run nose tests
 	  shell       Runs a Python shell inside Flask application context.
+	  resetdb     Remove all content from database and creates new tables
 	  testapi     Test to see if API is working
 
 Command options
@@ -165,6 +165,42 @@ Example
 
 	./manage.py runserver -p 1000 -m Production
 
+Configuration
+-------------
+
+Config Variables
+^^^^^^^^^^^^^^^^
+
+The following configurations settings are in ``config.py``:
+
+======================== =================== ===================
+variable                 description         default value
+======================== =================== ===================
+__APP_NAME__             application name    'Prometheus'
+__YOUR_NAME__            your name           'Reuben Cummings'
+__YOUR_EMAIL__           your email address  <user>@gmail.com
+__YOUR_WEBSITE__         your website        'http://<user>.github.com'
+__API_BASE__             api base url        'http://prometheus-api.herokuapp.com/'
+======================== =================== ===================
+
+Environment Variables
+^^^^^^^^^^^^^^^^^^^^^
+
+Prometheus will reference the following environment variables in ``config.py``
+if they are set on your system.
+
+::
+
+	SECRET_KEY
+	CSRF_SESSION_KEY
+	RECAPTCHA_PUBLIC_KEY
+	RECAPTCHA_PRIVATE_KEY
+	GOOGLE_ANALYTICS_ACCOUNT
+
+To set an environment variable, *do the following*:
+
+	echo 'export VARIABLE=value' >> ~/.profile
+
 Advanced Installation
 ---------------------
 
@@ -175,9 +211,6 @@ Ideally, you should install modules for every project into a `virtual environmen
 This setup will allow you to install different versions of the same module into different
 projects without worrying about adverse interactions.
 
-::
-
-	cd prometheus
 	sudo pip install virtualenv virtualenvwrapper
 
 *Add the following* to your ``~/.profile``
@@ -201,7 +234,7 @@ projects without worrying about adverse interactions.
 API configuration
 ^^^^^^^^^^^^^^^^^
 
-By default, this project uses the API hosted at http://prometheus-api.herokuapp.com.
+By default, this project uses the `Heroku hosted <http://prometheus-api.herokuapp.com>`_ `Prometheus-API <https://github.com/reubano/prometheus-api>`_.
 If you would like to host your own API do the following:
 
 *Clone the repo*
@@ -272,25 +305,6 @@ You can also *specify what port you'd prefer to use*
 
 	foreman start -p 5555
 
-
-Environment Variables
-^^^^^^^^^^^^^^^^^^^^^
-
-Prometheus will reference the following environment variables in ``config.py``
-if they are set on your system.
-
-::
-
-	SECRET_KEY
-	CSRF_SESSION_KEY
-	RECAPTCHA_PUBLIC_KEY
-	RECAPTCHA_PRIVATE_KEY
-	BOOTSTRAP_GOOGLE_ANALYTICS_ACCOUNT
-
-To set an environment variable, *do the following*:
-
-	echo 'export VARIABLE=value' >> ~/.profile
-
 Deployment
 ^^^^^^^^^^
 
@@ -306,21 +320,27 @@ Heroku <http://devcenter.heroku.com/articles/quickstart>`_, and also
 	sudo gem install heroku
 	heroku create -s cedar app_name
 
-Now before pushing to Heroku, remove ``pandas`` (there is a bug where heroku won't
-install ``pandas`` unless ``numpy`` is already installed)
+Now before pushing to Heroku, *temporarily remove ``pandas`` from the
+requirements file* (there is a bug where heroku won't install ``pandas`` unless
+``numpy`` is already installed)
 
 ::
 
 	pip freeze -l | sed '/pandas/d' > requirements.txt
 	git commit -am "Remove pandas as requirement"
 	git push heroku master
+
+*Replace ``pandas`` and push to Heroku*
+
 	pip freeze -l > requirements.txt
 	git commit -am "Add pandas as requirement"
 	git push heroku master
+
+*Start the web instance and make sure the application is up and running*
+
+::
+
 	heroku ps:scale web=1
-
-Finally, we can *make sure the application is up and running*
-
 	heroku ps
 
 Now, we can *view the application in our web browser*
@@ -339,7 +359,7 @@ Directory Structure
 
     prometheus
          ├──Procfile                        (heroku process)
-         ├──README.rst
+         ├──README.rst                      (this file)
          ├──app
          |   ├──__init__.py                 (main app module)
          |   ├──apollo                      (visualization engine)
@@ -364,7 +384,7 @@ Directory Structure
          |   ├──markdown                    (static pages - auto parsed into html)
          |   |    ├──about.md
          |   |    ├──api.md
-         |   ├──README.rst                  (this file)
+         |   ├──README.rst                  (symlink for pypi)
          |   ├──setup.py                    (pypi settings)
          |   ├──templates                   (Jinja templates)
          |   |    ├──barchart.html
@@ -385,7 +405,7 @@ Directory Structure
          |        ├──trnx.csv
          ├──config.py                       (app config)
          ├──manage.py                       (flask-script)
-         ├──requirements.txt
+         ├──requirements.txt                (python module requirements)
          ├──runtime.txt                     (python version)
          ├──setup.cfg                       (unit test settings)
 

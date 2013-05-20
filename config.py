@@ -2,12 +2,15 @@ import os
 from os import path as p
 from datetime import date as d
 
+# module vars
 _basedir = p.dirname(__file__)
+_user = os.environ.get('USER', os.environ.get('USERNAME'))
 
+# configurable vars
 __APP_NAME__ = 'Prometheus'
 __YOUR_NAME__ = 'Reuben Cummings'
-__YOUR_EMAIL__ = 'reubano@gmail.com'
-__YOUR_WEBSITE__ = 'http://reubano.github.com'
+__YOUR_EMAIL__ = '%s@gmail.com' % _user
+__YOUR_WEBSITE__ = 'http://%s.github.com' % _user
 __API_BASE__ = 'http://prometheus-api.herokuapp.com/'
 # __API_BASE__ = 'http://localhost:5005/'
 
