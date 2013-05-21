@@ -47,7 +47,7 @@ def testapi():
 	"""Test to see if API is working"""
 	conn = Connection(app_site())
 
-	print 'Attempting to get data from %s' % table
+	print 'Attempting to get data from API...'
 	conn.get('data_source')
 	print 'Content retreived via API!'
 
