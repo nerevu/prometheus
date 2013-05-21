@@ -227,9 +227,12 @@ projects without worrying about adverse interactions.
 ::
 
 	mkvirtualenv --no-site-packages prometheus
-	workon prometheus
 	sudo easy_install pip
 	sudo pip install -r requirements-local.txt
+
+*Patch pandas to enable dividend and split fetching*
+
+	patch -p0 < data.py.patch
 
 API configuration
 ^^^^^^^^^^^^^^^^^
@@ -412,13 +415,29 @@ Directory Structure
 Contributing
 ------------
 
+*First time*
+
 1. Fork
 2. Clone
 3. Code (if you are having problems committing because of git pre-commit
    hook errors, just run ``./manage.py checkstage`` to see what the issues are.)
 4. Use tabs **not** spaces
+5. Add upstream ``git remote add upstream https://github.com/reubano/prometheus.git``
+6. Rebase ``git rebase upstream/master``
+7. Test ``./manage.py runtests``
+8. Push ``git push origin master``
+9. Submit a pull request
+
+*Continuing*
+
+1. Code (if you are having problems committing because of git pre-commit
+   hook errors, just run ``./manage.py checkstage`` to see what the issues are.)
+2. Use tabs **not** spaces
+3. Update upstream ``git fetch upstream``
+4. Rebase ``git rebase upstream/master``
 5. Test ``./manage.py runtests``
-6. Submit a pull request
+6. Push ``git push origin master``
+7. Submit a pull request
 
 Contributors
 ------------
