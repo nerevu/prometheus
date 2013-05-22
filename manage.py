@@ -47,7 +47,7 @@ def testapi():
 	"""Test to see if API is working"""
 	conn = Connection(app_site())
 
-	print 'Attempting to get data from %s' % table
+	print 'Attempting to get data from API...'
 	conn.get('data_source')
 	print 'Content retreived via API!'
 
@@ -116,13 +116,11 @@ def popprices(sym=None, start=None, end=None, extra=None):
 
 	with app.app_context():
 		conn = Historical(app_site())
+		keys = conn.get('keys')
 		sym = sym.split(',') if sym else None
-		divs = True if (extra and extra.startswith('d')) else False
-		splits = True if (extra and extra.startswith('s')) else False
 		values = conn.get_price_list(sym, start, end, extra)
-		table = 'event' if (divs or splits) else 'price'
 
-		conn.post(conn.process(values, table))
+		conn.post(conn.process(values, keys))
 		print 'Prices table populated'
 
 if __name__ == '__main__':
