@@ -217,9 +217,7 @@ class Historical(Connection):
 
 			for ts in last_dates:
 				if ts:
-					starts.append(
-						dt.strptime(ts, "%Y-%m-%dT%H:%M:%S").date()
-						+ timedelta(days=1))
+					starts.append(parse(ts) + timedelta(days=1))
 				else:
 					starts.append(d.today() - timedelta(days=30))
 
