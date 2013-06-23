@@ -234,7 +234,7 @@ projects without worrying about adverse interactions.
 
 	patch -p0 < data.py.patch
 
-API configuration
+API setup
 ^^^^^^^^^^^^^^^^^
 
 By default, this project uses the `Heroku hosted <http://prometheus-api.herokuapp.com>`_ `Prometheus-API <https://github.com/reubano/prometheus-api>`_.
