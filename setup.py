@@ -4,8 +4,8 @@ except ImportError:
 	from distutils.core import setup, find_packages
 
 
-with open('../requirements.txt') as file:
-	requirements = file.read()
+with open('requirements.txt') as file:
+	requirements = file.read().splitlines()
 
 
 config = {
@@ -18,18 +18,24 @@ config = {
 		'https://github.com/reubano/prometheus/downloads/prometheus*.tgz',
 	'author_email': 'reubano@gmail.com',
 	'version': '0.16.0',
-	'install_requires': requirements.split('\n'),
+	'install_requires': requirements,
 	'classifiers': ['Development Status :: 4 - Beta',
 		'License :: OSI Approved :: The MIT License (MIT)',
-		'Environment :: Console',
-		'Intended Audience :: Developers',
+		'Environment :: Web Environment',
+		'Framework :: Flask',
+		'Intended Audience :: Financial and Insurance Industry',
+		'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+		'Topic :: Office/Business :: Financial :: Investment',
+		'Topic :: Scientific/Engineering :: Visualization',
 		'Operating System :: MacOS :: MacOS X',
 		'Operating System :: Microsoft :: Windows',
-		'Operating System :: Microsoft :: POSIX'],
+		'Operating System :: POSIX :: Linux'],
 	'packages': find_packages(),
 	'zip_safe': False,
 	'license': 'MIT',
 	'platforms': ['MacOS X', 'Windows', 'Linux'],
+	'keywords': ('finance stocks asset-allocation portfolio optimization '
+		'rebalancing monitoring'),
 	'include_package_data': True,
 }
 
