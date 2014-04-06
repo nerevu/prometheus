@@ -34,8 +34,7 @@ config = {
 	'zip_safe': False,
 	'license': 'MIT',
 	'platforms': ['MacOS X', 'Windows', 'Linux'],
-	'keywords': ('finance stocks asset-allocation portfolio optimization '
-		'rebalancing monitoring'),
+	'keywords': 'asset-allocation, portfolio',
 	'include_package_data': True,
 }
 
