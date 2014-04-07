@@ -34,7 +34,7 @@ config = {
 	'zip_safe': False,
 	'license': 'MIT',
 	'platforms': ['MacOS X', 'Windows', 'Linux'],
-	'keywords': 'asset-allocation, portfolio',
+	'keywords': 'finance',
 	'include_package_data': True,
 }
 
