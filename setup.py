@@ -34,7 +34,7 @@ config = {
 	'zip_safe': False,
 	'license': 'MIT',
 	'platforms': ['MacOS X', 'Windows', 'Linux'],
-	'keywords': 'finance',
+	'keywords': '',
 	'include_package_data': True,
 }
 
