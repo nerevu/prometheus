@@ -5,15 +5,15 @@ subheading: Learn how to query and update Prometheus using the ReSTful API
 
 ## Endpoints
 
-The Prometheus API has endpoints located at `http://prometheus-api.herokuapp.com/api/<table>`. Currently accesible tables include the following:
+The Prometheus API has endpoints located at `http://prometheus-api.herokuapp.com/<table>`. Currently accesible tables include the following:
 
-* [exchange](http://prometheus-api.herokuapp.com/api/exchange)
-* [data_source](http://prometheus-api.herokuapp.com/api/data_source)
-* [commodity_group](http://prometheus-api.herokuapp.com/api/commodity_group)
-* [commodity_type](http://prometheus-api.herokuapp.com/api/commodity_type)
-* [commodity](http://prometheus-api.herokuapp.com/api/commodity)
-* [event_type](http://prometheus-api.herokuapp.com/api/event_type)
-* [price](http://prometheus-api.herokuapp.com/api/price)
+* [exchange](http://prometheus-api.herokuapp.com/exchange)
+* [data_source](http://prometheus-api.herokuapp.com/data_source)
+* [commodity_group](http://prometheus-api.herokuapp.com/commodity_group)
+* [commodity_type](http://prometheus-api.herokuapp.com/commodity_type)
+* [commodity](http://prometheus-api.herokuapp.com/commodity)
+* [event_type](http://prometheus-api.herokuapp.com/event_type)
+* [price](http://prometheus-api.herokuapp.com/price)
 
 - - -
 
