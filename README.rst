@@ -9,7 +9,7 @@ prometheus |build|
 Introduction
 ------------
 
-`Prometheus <http://prometheus.herokuapp.com>`_ is a `Flask <http://flask.pocoo.org>`_ (`About Flask`_) powered web app that tells you how your stock portfolio has performed over time, gives insight into how to optimize your asset allocation, and monitors your portfolio for rebalancing or performance enhancing opportunities. It has been tested on the following configuration:
+Prometheus is a `Flask <http://flask.pocoo.org>`_ (`About Flask`_) powered web app that tells you how your stock portfolio has performed over time, gives insight into how to optimize your asset allocation, and monitors your portfolio for rebalancing or performance enhancing opportunities. It has been tested on the following configuration:
 
 - MacOS X 10.7.5
 - Python 2.7.4
