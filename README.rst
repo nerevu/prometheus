@@ -1,9 +1,9 @@
-prometheus |build|
+prometheus |travis|
 ==================
 
 .. |build| image:: https://secure.travis-ci.org/reubano/prometheus.png
 
-.. image:: https://raw.github.com/reubano/prometheus/master/screenshot.png
+.. |travis| image:: https://raw.github.com/reubano/prometheus/master/screenshot.png
    :width: 500pt
 
 Introduction
